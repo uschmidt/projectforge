@@ -31,8 +31,10 @@ import org.projectforge.framework.time.DateHelper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
 import org.springframework.boot.web.embedded.tomcat.ConnectorStartFailedException;
 import org.springframework.boot.web.servlet.ServletComponentScan;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 
 import java.io.File;
 import java.util.Arrays;
@@ -44,6 +46,7 @@ import java.util.TimeZone;
         // java.lang.ClassCastException: org.springframework.orm.jpa.EntityManagerHolder cannot be cast to org.springframework.orm.hibernate5.SessionHolder
         exclude = HibernateJpaAutoConfiguration.class
 )
+@EnableOAuth2Sso
 @ServletComponentScan({"org.projectforge.web", "org.projectforge.business.teamcal.servlet"})
 public class ProjectForgeApplication {
   private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProjectForgeApplication.class);
