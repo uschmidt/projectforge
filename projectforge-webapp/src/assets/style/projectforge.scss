@@ -1,12 +1,6 @@
 @import '../fonts/roboto/index.css';
-
-$theme-colors: (
-        "primary": #32912E,
-        "warning": #fff,
-        "danger": #fff,
-);
-
-@import "~bootstrap/scss/bootstrap.scss";
+@import './theming.scss';
+@import '~bootstrap/scss/bootstrap';
 
 html {
   font-size: 62.5%;
@@ -35,11 +29,6 @@ a {
 
 // Custom Styles
 // -------------
-
-div[class*="TopBar_"] {
-  border: none;
-}
-
 nav.bg-light {
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.50);
 
@@ -75,7 +64,7 @@ nav.bg-light {
     }
 
     .nav-link {
-      padding: 3px 6px 0 0px;
+      padding: 3px 6px 0 0;
       font-size: 13px;
     }
   }
@@ -92,8 +81,7 @@ nav.bg-light {
     span,
     a {
       font-size: 13px;
-      padding: 0;
-      padding: 3px 9px 3px 9px;
+      padding: 3px 9px;
       cursor: pointer;
       line-height: 20px;
       border-radius: 3px;
@@ -185,15 +173,6 @@ fieldset {
 
   &.btn-primary {
     max-height: 33px;
-  }
-
-  &.btn-danger, &.btn-warning {
-    color: #a4a4a4;
-    border-color: #E6E6E6;
-  }
-
-  &.btn-warning {
-    color: #DC3545;
   }
 }
 
@@ -323,8 +302,7 @@ div.DayPickerInput input {
   margin-left: 15px;
 
   input {
-    padding: 3px;
-    padding-left: 10px;
+    padding: 3px 3px 3px 10px;
     font-size: 14px;
   }
 }

@@ -1,13 +1,13 @@
+import { faCog } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome/index';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { Button, Col, Container, Popover, PopoverBody, PopoverHeader, Row, } from 'reactstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome/index';
-import { faCog } from '@fortawesome/free-solid-svg-icons';
-import style from '../../../components/design/input/Input.module.scss';
-import ReactSelect from '../../../components/design/ReactSelect';
-import { fetchGet, fetchJsonGet } from '../../../utilities/rest';
+import { Button, Col, Container, Popover, PopoverBody, PopoverHeader, Row } from 'reactstrap';
 import UserSelect from '../../../components/base/page/layout/UserSelect';
 import CheckBox from '../../../components/design/input/CheckBox';
+import style from '../../../components/design/input/Input.module.scss';
+import ReactSelect from '../../../components/design/ReactSelect';
+import { fetchJsonGet } from '../../../utilities/rest';
 import { CalendarContext } from '../../page/calendar/CalendarContext';
 
 /**
@@ -33,32 +33,38 @@ class CalendarFilterSettings extends Component {
 
     handleCheckBoxChange(event) {
         const { onTimesheetUserChange } = this.props;
+        const { saveUpdateResponseInState } = this.context;
         const user = { id: event.target.checked ? 1 : -1 };
         fetchJsonGet('calendar/changeTimesheetUser',
             { userId: user.id },
             (json) => {
                 onTimesheetUserChange(user);
-                //saveUpdateResponseInState(json);
+                saveUpdateResponseInState(json);
             });
     }
 
     handleTimesheetUserChange(user) {
         const { onTimesheetUserChange } = this.props;
+        const { saveUpdateResponseInState } = this.context;
         const userId = user ? user.id : undefined;
         fetchJsonGet('calendar/changeTimesheetUser',
             { userId },
             (json) => {
                 onTimesheetUserChange(user);
-                //saveUpdateResponseInState(json);
+                saveUpdateResponseInState(json);
             });
     }
 
     handleDefaultCalendarChange(value) {
         const { onDefaultCalendarChange } = this.props;
+        const { saveUpdateResponseInState } = this.context;
         const id = value ? value.id : '';
-        fetchGet('calendar/changeDefaultCalendar',
+        fetchJsonGet('calendar/changeDefaultCalendar',
             { id },
-            () => onDefaultCalendarChange(id));
+            (json) => {
+                onDefaultCalendarChange(id);
+                saveUpdateResponseInState(json);
+            });
     }
 
     togglePopover() {
@@ -124,7 +130,8 @@ class CalendarFilterSettings extends Component {
                                             value={timesheetUser}
                                             label={translations['calendar.option.timesheeets']}
                                             translations={translations}
-                                        />) : (
+                                        />
+                                    ) : (
                                         <CheckBox
                                             label={translations['calendar.option.timesheeets']}
                                             id="showTimesheets"
@@ -147,6 +154,8 @@ class CalendarFilterSettings extends Component {
         );
     }
 }
+
+CalendarFilterSettings.contextType = CalendarContext;
 
 CalendarFilterSettings.propTypes = {
     onTimesheetUserChange: PropTypes.func.isRequired,

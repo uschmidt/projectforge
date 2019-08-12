@@ -27,6 +27,7 @@ package org.projectforge.rest.calendar
 
 import org.projectforge.business.calendar.event.model.SeriesModificationMode
 import org.projectforge.business.teamcal.admin.TeamCalDao
+import org.projectforge.business.teamcal.admin.model.TeamCalDO
 import org.projectforge.business.teamcal.event.TeamEventDao
 import org.projectforge.business.teamcal.event.model.TeamEventDO
 import org.projectforge.business.teamcal.externalsubscription.TeamEventExternalSubscriptionCache
@@ -52,18 +53,22 @@ import javax.servlet.http.HttpServletRequest
 @RequestMapping("${Rest.URL}/teamEvent")
 class TeamEventRest() : AbstractDTORest<TeamEventDO, TeamEvent, TeamEventDao>(
         TeamEventDao::class.java,
-        "plugins.teamcal.event.title") {
+        "plugins.teamcal.event.title",
+        cloneSupported = true) {
 
     private val log = org.slf4j.LoggerFactory.getLogger(TeamEventRest::class.java)
+
+    @Autowired
+    private lateinit var calendarFilterServicesRest: CalendarFilterServicesRest
 
     @Autowired
     private lateinit var teamCalDao: TeamCalDao
 
     @Autowired
-    private lateinit var timesheetRest: TimesheetRest
+    private lateinit var teamEventExternalSubscriptionCache: TeamEventExternalSubscriptionCache
 
     @Autowired
-    private lateinit var teamEventExternalSubscriptionCache: TeamEventExternalSubscriptionCache
+    private lateinit var timesheetRest: TimesheetRest
 
     override fun transformForDB(dto: TeamEvent): TeamEventDO {
         val teamEventDO = TeamEventDO()
@@ -82,6 +87,10 @@ class TeamEventRest() : AbstractDTORest<TeamEventDO, TeamEvent, TeamEventDao>(
     }
 
     override fun validate(validationErrors: MutableList<ValidationError>, dto: TeamEvent) {
+        if (dto.calendar == null)
+            validationErrors.add(ValidationError.createFieldRequired(baseDao.doClass, fieldId = "calendar"))
+        if (dto.subject.isNullOrBlank())
+            validationErrors.add(ValidationError.createFieldRequired(baseDao.doClass, fieldId = "subject"))
         if (dto.id != null && dto.hasRecurrence && dto.seriesModificationMode == null) {
             validationErrors.add(ValidationError.create("plugins.teamcal.event.recurrence.change.content"))
             validationErrors.add(ValidationError(fieldId = "seriesModificationMode"))
@@ -93,13 +102,19 @@ class TeamEventRest() : AbstractDTORest<TeamEventDO, TeamEvent, TeamEventDao>(
      * For events of a series, startDate as param selects the event of the series.
      */
     override fun onBeforeGetItemAndLayout(request: HttpServletRequest, dto: TeamEvent, userAccess: UILayout.UserAccess) {
-        val startDateAsSeconds = NumberHelper.parseLong(request.getParameter("startDate"))
+        val startDateSeconds = NumberHelper.parseLong(request.getParameter("startDate"))
         val endDateSeconds = NumberHelper.parseLong(request.getParameter("endDate"))
+        var origStartDateSeconds = NumberHelper.parseLong(request.getParameter("origStartDate"))
+        var origEndDateSeconds = NumberHelper.parseLong(request.getParameter("origEndDate"))
+        if (origStartDateSeconds == null)
+            origStartDateSeconds = startDateSeconds
+        if (origEndDateSeconds == null)
+            origEndDateSeconds = endDateSeconds
         if (dto.id != null) {
-            if (startDateAsSeconds != null && endDateSeconds != null && dto.hasRecurrence) {
+            if (origStartDateSeconds != null && origEndDateSeconds != null && dto.hasRecurrence) {
                 // Seems to be a event of a series:
-                dto.selectedSeriesEvent = TeamEvent(startDate = PFDateTime.from(startDateAsSeconds)!!.sqlTimestamp,
-                        endDate = PFDateTime.from(endDateSeconds)!!.sqlTimestamp,
+                dto.selectedSeriesEvent = TeamEvent(startDate = PFDateTime.from(origStartDateSeconds)!!.sqlTimestamp,
+                        endDate = PFDateTime.from(origEndDateSeconds)!!.sqlTimestamp,
                         allDay = dto.allDay,
                         sequence = dto.sequence)
             }
@@ -109,7 +124,7 @@ class TeamEventRest() : AbstractDTORest<TeamEventDO, TeamEvent, TeamEventDao>(
                 dto.calendar = teamCalDao.getById(calendarId)
             }
         }
-        if (startDateAsSeconds != null) dto.startDate = PFDateTime.from(startDateAsSeconds)!!.sqlTimestamp
+        if (startDateSeconds != null) dto.startDate = PFDateTime.from(startDateSeconds)!!.sqlTimestamp
         if (endDateSeconds != null) dto.endDate = PFDateTime.from(endDateSeconds)!!.sqlTimestamp
     }
 
@@ -139,17 +154,20 @@ class TeamEventRest() : AbstractDTORest<TeamEventDO, TeamEvent, TeamEventDao>(
             }
             try {
                 val calId = vals[0].toInt()
-                val cal = teamCalDao.getById(calId)
-                if (cal == null) {
-                    log.error("Can't get calendar with id #$calId.")
-
+                val uid = vals[1]
+                val eventDO = teamEventExternalSubscriptionCache.getEvent(calId, uid)
+                if (eventDO == null) {
+                    val cal = teamCalDao.getById(calId)
+                    if (cal == null) {
+                        log.error("Can't get calendar with id #$calId.")
+                    } else if (!cal.externalSubscription) {
+                        log.error("Calendar with id #$calId is not an external subscription, can't get event by uid.")
+                    } else {
+                        log.error("Can't find event with uid '$uid' in subscribed calendar with id #$calId.")
+                    }
                     return TeamEvent()
                 }
-                if (!cal.externalSubscription) {
-                    log.error("Calendar with id #$calId is not an external subscription, can't get event by uid.")
-                    return TeamEvent()
-                }
-                return TeamEvent()//return teamEventExternalSubscriptionCache.getEvent(calId, uid)
+                return transformFromDB(eventDO, editMode)
             } catch (ex: NumberFormatException) {
                 log.error("Can't get event of subscribed calendar. id must be of form {calId}-{uid} but is '$idString', a NumberFormatException occured.")
                 return TeamEvent()
@@ -174,6 +192,11 @@ class TeamEventRest() : AbstractDTORest<TeamEventDO, TeamEvent, TeamEventDao>(
         teamEvent.endDate = timesheet.stopTime
         teamEvent.location = timesheet.location
         teamEvent.note = timesheet.description
+        val calendarId = calendarFilterServicesRest.getCurrentFilter().defaultCalendarId
+        if (calendarId != null && calendarId > 0) {
+            teamEvent.calendar = TeamCalDO()
+            teamEvent.calendar?.id = calendarId
+        }
         val editLayoutData = getItemAndLayout(request, teamEvent, UILayout.UserAccess(false, true))
         return ResponseAction(url = "/calendar/${getRestPath(RestPaths.EDIT)}", targetType = TargetType.UPDATE)
                 .addVariable("data", editLayoutData.data)
@@ -197,13 +220,18 @@ class TeamEventRest() : AbstractDTORest<TeamEventDO, TeamEvent, TeamEventDao>(
     override fun createEditLayout(dto: TeamEvent, userAccess: UILayout.UserAccess): UILayout {
         val calendars = teamCalDao.getAllCalendarsWithFullAccess()
         calendars.removeIf { it.externalSubscription } // Remove full access calendars, but subscribed.
-        val calendarSelectValues = calendars.map { it ->
+        if (dto.calendar != null && calendars.find { it.id == dto.calendar?.id } == null) {
+            // Calendar of event is not in the list of editable calendars. Add this non-editable calendar to show
+            // the calendar of the event.
+            calendars.add(0, dto.calendar)
+        }
+        val calendarSelectValues = calendars.map {
             UISelectValue<Int>(it.id, it.title!!)
         }
         val subject = UIInput("subject", lc)
         subject.focus = true
         val layout = super.createEditLayout(dto, userAccess)
-        if (dto.hasRecurrence) {
+        if (dto.hasRecurrence && !userAccess.onlySelectAccess()) {
             val masterEvent = baseDao.getById(dto.id)
             val radioButtonGroup = UIGroup()
             if (masterEvent?.startDate?.before(dto.selectedSeriesEvent?.startDate) ?: true) {
@@ -224,7 +252,6 @@ class TeamEventRest() : AbstractDTORest<TeamEventDO, TeamEvent, TeamEventDao>(
                                         labelProperty = "title",
                                         valueProperty = "id"))
                                 .add(subject)
-                                .add(lc, "attendees")
                                 .add(lc, "location"))
                         .add(UICol(6)
                                 .add(lc, "startDate", "endDate", "allDay")
@@ -233,7 +260,7 @@ class TeamEventRest() : AbstractDTORest<TeamEventDO, TeamEvent, TeamEventDao>(
                 .add(UIRow().add(UICol(12).add(UICustomized("calendar.recurrency"))))
         layout.addAction(UIButton("switch",
                 title = translate("plugins.teamcal.switchToTimesheetButton"),
-                color = UIColor.SECONDARY,
+                color = UIColor.DARK,
                 responseAction = ResponseAction(getRestRootPath("switch2Timesheet"), targetType = TargetType.POST)))
         layout.addTranslations("plugins.teamcal.event.recurrence",
                 "plugins.teamcal.event.recurrence.customized",

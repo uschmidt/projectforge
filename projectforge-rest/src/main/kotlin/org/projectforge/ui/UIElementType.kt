@@ -33,6 +33,7 @@ enum class UIElementType {
     GROUP,
     INPUT,
     LABEL,
+    LIST,
     NAMED_CONTAINER,
     RADIOBUTTON,
     ROW,

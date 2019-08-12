@@ -1,13 +1,16 @@
 import React from 'react';
+import { Button, Card, CardBody, Table } from 'reactstrap';
 import FavoritesPanel from '../../../../../../containers/panel/favorite/FavoritesPanel';
 import { fetchJsonGet, fetchJsonPost } from '../../../../../../utilities/rest';
 import { DynamicLayoutContext } from '../../../context';
+import { Collapse } from '../../../../../design';
 
 function TimesheetTemplatesAndRecents() {
     const {
         data,
         setData,
         setVariables,
+        translations,
         ui,
         variables,
     } = React.useContext(DynamicLayoutContext);
@@ -15,6 +18,21 @@ function TimesheetTemplatesAndRecents() {
         timesheetFavorites,
         setTimesheetFavorites,
     ] = React.useState(variables.timesheetFavorites);
+
+    const [recentsVisible, setRecentsVisible] = React.useState(false);
+    const [columnsVisibility, setColumnsVisibility] = React.useState([]);
+    const recentsRef = React.useRef(null);
+
+    // Handle mouse events
+    React.useEffect(() => {
+        const handleClickOutside = ({ target }) => {
+            if (recentsRef.current && !recentsRef.current.contains(target)) {
+                setRecentsVisible(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     return React.useMemo(
         () => {
@@ -57,6 +75,11 @@ function TimesheetTemplatesAndRecents() {
                 ({ timesheetFavorites: response }) => setTimesheetFavorites(response),
             );
 
+            const toggleModal = () => {
+                setRecentsVisible(!recentsVisible);
+            };
+
+            /* eslint-disable indent, react/jsx-indent, react/jsx-tag-spacing */
             return (
                 <React.Fragment>
                     <FavoritesPanel
@@ -66,15 +89,57 @@ function TimesheetTemplatesAndRecents() {
                         onFavoriteSelect={handleFavoriteSelect}
                         translations={ui.translations}
                         favorites={timesheetFavorites}
-                        closeOnSelect={false}
                         htmlId="timesheetFavoritesPopover"
                         favoriteButtonText={`${ui.translations.templates} | `}
                     />
-                    Recents
+                    <Button
+                        color="link"
+                        className="selectPanelIconLinks"
+                        onClick={toggleModal}
+                    >
+                        Recents
+                    </Button>
+                    <Collapse
+                        isOpen={recentsVisible}
+                        style={{
+                            maxHeight: '600px',
+                            overflow: 'scroll',
+                            scroll: 'auto',
+                        }}
+                    >
+                        <div ref={recentsRef}>
+                            <Card>
+                                <CardBody>
+                                    <Table striped hover responsive>
+                                        <thead>
+                                        <tr>
+                                            {columnsVisibility.kost2
+                                                ? <th>{translations['fibu.kost2']}</th> : undefined}
+                                            <th>Kunde</th>
+                                            <th>Projekt</th>
+                                            <th>Strukturelement</th>
+                                            <th>Ort</th>
+                                            <th>Tätigkeitsbericht</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </Table>
+                                </CardBody>
+                            </Card>
+                        </div>
+                    </Collapse>
                 </React.Fragment>
             );
         },
-        [timesheetFavorites, ui.translations, data, setTimesheetFavorites, setData, setVariables],
+        [timesheetFavorites,
+            ui.translations,
+            data,
+            setTimesheetFavorites,
+            setData,
+            setVariables,
+            recentsRef,
+            recentsVisible],
     );
 }
 
