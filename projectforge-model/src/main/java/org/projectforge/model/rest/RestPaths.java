@@ -28,40 +28,15 @@ package org.projectforge.model.rest;
  */
 public class RestPaths
 {
-  public static String buildPath(final String... pathElements)
-  {
-    if (pathElements == null) {
-      return "";
-    }
-    final StringBuilder sb = new StringBuilder();
-    sb.append("/" + REST);
-    for (final String pathElement : pathElements) {
-      sb.append("/").append(pathElement);
-    }
-    return sb.toString();
-  }
+  public static final String REST = "/rest";
 
-  public static final String buildListPath(final String path)
-  {
-    return "/" + REST + "/" + path + "/" + LIST;
-  }
-
-  public static final String buildTreePath(final String path)
-  {
-    return "/" + REST + "/" + path + "/" + TREE;
-  }
-
-  public static final String REST = "rest";
-
-  public static final String PUBLIC_REST = "publicRest";
+  public static final String PUBLIC_REST = "/publicRest";
 
   public static final String REST_WEB_APP = "rs";
 
   public static final String REST_WEB_APP_PUBLIC = "rsPublic";
 
-  public static final String ADDRESS = "address";
-
-  public static final String AUTHENTICATE = "authenticate";
+  public static final String AUTHENTICATE = REST + "/authenticate";
 
   public static final String AUTHENTICATE_GET_TOKEN_METHOD = "getToken";
 
@@ -70,12 +45,6 @@ public class RestPaths
   public static final String AUTHENTICATE_INITIAL_CONTACT_METHOD = "initialContact";
 
   public static final String AUTHENTICATE_INITIAL_CONTACT = AUTHENTICATE + "/" + AUTHENTICATE_INITIAL_CONTACT_METHOD;
-
-  public static final String TASK = "task";
-
-  public static final String TIMESHEET = "timesheet";
-
-  public static final String TIMESHEET_TEMPLATE = "timesheetTemplate";
 
   public static final String LIST = "list";
 
@@ -97,13 +66,7 @@ public class RestPaths
 
   public static final String CLONE = "clone";
 
-  public static final String TREE = "tree";
-
-  public static final String TEAMCAL = "teamcal";
-
-  public static final String TEAMEVENTS = "teamevents";
-
-  public static final String VERSION_CHECK = "versionCheck";
+  public static final String VERSION_CHECK = PUBLIC_REST + "/versionCheck";
 
   public static final String FILTER_RESET = "filterReset";
 }

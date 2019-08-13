@@ -104,9 +104,9 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>org.springframework.security.oauth.boot</groupId>
-      <artifactId>spring-security-oauth2-autoconfigure</artifactId>
-      <version>2.0.0.RELEASE</version>
+      <groupId>org.springframework.security.oauth</groupId>
+      <artifactId>spring-security-oauth2</artifactId>
+      <version>2.3.6.RELEASE</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/com.googlecode.lanterna/lanterna -->

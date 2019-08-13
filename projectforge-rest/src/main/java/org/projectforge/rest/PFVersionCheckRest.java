@@ -34,20 +34,15 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 
-@Controller
-@Path(RestPaths.VERSION_CHECK)
+@RestController
+@RequestMapping(RestPaths.VERSION_CHECK)
 public class PFVersionCheckRest
 {
   private static final Logger log = LoggerFactory.getLogger(PFVersionCheckRest.class);
@@ -60,17 +55,14 @@ public class PFVersionCheckRest
   @Autowired
   private SystemService systemService;
 
-  @POST
-  @Consumes(MediaType.APPLICATION_JSON)
-  @Produces(MediaType.APPLICATION_JSON)
-  public @ResponseBody
-  VersionCheck checkVersion(@Context HttpServletRequest request, @RequestBody VersionCheck versionCheck)
+  @PostMapping
+  public ResponseEntity<VersionCheck> checkVersion(@Context HttpServletRequest request, @RequestBody VersionCheck versionCheck)
   {
     log.info(marker, "Request for check PF Version from: " + request.getRemoteAddr() + " (X-FORWARDED-FOR: " + StringUtils
         .defaultIfEmpty(request.getHeader("X-FORWARDED-FOR"), "n.a.") + ")");
     synchronizeWithProjectForgeGithub(versionCheck);
     log.info(marker, "Result for PF version check: " + versionCheck);
-    return versionCheck;
+    return new ResponseEntity<VersionCheck>(versionCheck, HttpStatus.OK);
   }
 
   private VersionCheck synchronizeWithProjectForgeGithub(VersionCheck versionCheck)
@@ -91,5 +83,4 @@ public class PFVersionCheckRest
     }
     return versionCheck;
   }
-
 }

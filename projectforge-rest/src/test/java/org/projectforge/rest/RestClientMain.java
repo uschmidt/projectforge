@@ -27,47 +27,33 @@ import org.projectforge.ProjectForgeVersion;
 import org.projectforge.model.rest.RestPaths;
 import org.projectforge.model.rest.ServerInfo;
 import org.projectforge.model.rest.UserObject;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
-public class RestClientMain
-{
+public class RestClientMain {
   private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RestClientMain.class);
 
   private static String url, username, password;
 
-  public static void main(final String[] args) throws IOException
-  {
+  public static void main(final String[] args) throws IOException {
     final Client client = ClientBuilder.newClient();
     final UserObject user = authenticate(client);
     initialContact(client, user);
   }
 
-  /**
-   * Adds authentication and media type json.
-   *
-   * @param webResource
-   * @param user
-   * @return ClientResponse
-   */
-  public static Response getClientResponse(final WebTarget webResource, final UserObject user)
-  {
-    return webResource.request().accept(MediaType.APPLICATION_JSON)
-        .header(Authentication.AUTHENTICATION_USER_ID, user.getId().toString())
-        .header(Authentication.AUTHENTICATION_TOKEN, user.getAuthenticationToken()).get();
-
-  }
-
-  public static UserObject authenticate(final Client client) throws IOException
-  {
+  public static UserObject authenticate(final Client client) throws IOException {
     initialize();
     return authenticate(client, username, password);
   }
@@ -75,24 +61,24 @@ public class RestClientMain
   /**
    * @return authentication token for further rest calls.
    */
-  public static UserObject authenticate(final Client client, final String username, final String password) throws IOException
-  {
+  public static UserObject authenticate(final Client client, final String username, final String password) throws IOException {
     initialize();
+    HttpHeaders headers = new HttpHeaders();
+    headers.set("Accept", MediaType.APPLICATION_JSON);
+
     // http://localhost:8080/ProjectForge/rest/authenticate/getToken // username / password
-    final String url = getUrl() + RestPaths.buildPath(RestPaths.AUTHENTICATE_GET_TOKEN);
-    final WebTarget webResource = client.target(url);
-    final Response response = webResource.request().accept(MediaType.APPLICATION_JSON)
-        .header(Authentication.AUTHENTICATION_USERNAME, username)
-        .header(Authentication.AUTHENTICATION_PASSWORD, password).get();
-    if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-      log.error("Error while trying to connect to: " + url);
-      throw new RuntimeException("Failed : HTTP error code : " + response.getStatus());
-    }
-    String json = response.readEntity(String.class);
-    log.info(json);
-    final UserObject user = JsonUtils.fromJson(json, UserObject.class);
+    final String url = getUrl() + RestPaths.AUTHENTICATE_GET_TOKEN;
+
+    UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
+            .queryParam(Authentication.AUTHENTICATION_USERNAME, username)
+            .queryParam(Authentication.AUTHENTICATION_PASSWORD, password);
+    HttpEntity<?> entity = new HttpEntity<>(headers);
+
+    RestTemplate restTemplate = new RestTemplate();
+    UserObject user = restTemplate.getForObject(builder.toUriString(), UserObject.class);
+
     if (user == null) {
-      throw new RuntimeException("Can't deserialize user : " + json);
+      throw new RuntimeException("Can't  get user.");
     }
     final Integer userId = user.getId();
     final String authenticationToken = user.getAuthenticationToken();
@@ -100,8 +86,7 @@ public class RestClientMain
     return user;
   }
 
-  public static WebTarget setConnectionSettings(final WebTarget webResource, final ConnectionSettings settings)
-  {
+  public static WebTarget setConnectionSettings(final WebTarget webResource, final ConnectionSettings settings) {
     if (settings == null) {
       return webResource;
     }
@@ -112,32 +97,39 @@ public class RestClientMain
     return res;
   }
 
-  public static void initialContact(final Client client, final UserObject user) throws IOException
-  {
+  public static void initialContact(final Client client, final UserObject user) throws IOException {
     initialize();
+    HttpHeaders headers = new HttpHeaders();
+    headers.set("Accept", MediaType.APPLICATION_JSON);
+    headers.set(Authentication.AUTHENTICATION_USER_ID, user.getId().toString());
+    headers.set(Authentication.AUTHENTICATION_TOKEN, user.getAuthenticationToken());
+
     // http://localhost:8080/ProjectForge/rest/authenticate/initialContact?clientVersion=5.0 // userId / token
-    final WebTarget webResource = client.target(getUrl() + RestPaths.buildPath(RestPaths.AUTHENTICATE_INITIAL_CONTACT)).queryParam(
-        "clientVersion", ProjectForgeVersion.VERSION_STRING);
-    final Response response = getClientResponse(webResource, user);
-    if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-      throw new RuntimeException("Failed : HTTP error code : " + response.getStatus());
-    }
-    final String json = (String) response.getEntity();
-    log.info(json);
-    final ServerInfo serverInfo = JsonUtils.fromJson(json, ServerInfo.class);
+    final String url = getUrl() + RestPaths.AUTHENTICATE_GET_TOKEN;
+
+    UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
+            .queryParam("clientVersion", ProjectForgeVersion.VERSION_STRING);
+    HttpEntity<?> entity = new HttpEntity<>(headers);
+
+    RestTemplate restTemplate = new RestTemplate();
+    ServerInfo serverInfo = restTemplate.exchange(
+            builder.toUriString(),
+            HttpMethod.GET,
+            entity,
+            ServerInfo.class)
+            .getBody();
+
     if (serverInfo == null) {
-      throw new RuntimeException("Can't deserialize serverInfo : " + json);
+      throw new RuntimeException("Can't get serverInfo.");
     }
     log.info("serverInfo=" + serverInfo);
   }
 
-  public static String getUrl()
-  {
+  public static String getUrl() {
     return url;
   }
 
-  private static void initialize()
-  {
+  private static void initialize() {
     if (username != null) {
       // Already initialized.
       return;
@@ -189,14 +181,14 @@ public class RestClientMain
     }
     if (prop == null) {
       log.info("For customized url and username/password please create file '"
-          + filename
-          + "' with following content:\n# For rest test calls\nurl="
-          + url
-          + "\nuser="
-          + username
-          + "\npassword="
-          + password
-          + "\n");
+              + filename
+              + "' with following content:\n# For rest test calls\nurl="
+              + url
+              + "\nuser="
+              + username
+              + "\npassword="
+              + password
+              + "\n");
     }
     log.info("Testing with user '" + username + "': " + url);
   }

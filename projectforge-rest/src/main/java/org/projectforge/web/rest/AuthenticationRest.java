@@ -32,17 +32,15 @@ import org.projectforge.framework.persistence.user.entities.PFUserDO;
 import org.projectforge.model.rest.RestPaths;
 import org.projectforge.model.rest.ServerInfo;
 import org.projectforge.model.rest.UserObject;
-import org.projectforge.rest.JsonUtils;
 import org.projectforge.web.rest.converter.PFUserDOConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 /**
  * REST interface for authentication (tests) and getting the authentication token on initial contact.
@@ -63,8 +61,8 @@ import javax.ws.rs.core.Response;
  *
  * @author Kai Reinhard (k.reinhard@micromata.de)
  */
-@Controller
-@Path(RestPaths.AUTHENTICATE)
+@RestController
+@RequestMapping(RestPaths.AUTHENTICATE)
 public class AuthenticationRest
 {
   private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AuthenticationRest.class);
@@ -83,10 +81,8 @@ public class AuthenticationRest
    *
    * @return {@link UserObject}
    */
-  @GET
-  @Path(RestPaths.AUTHENTICATE_GET_TOKEN_METHOD)
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response getToken()
+  @GetMapping(RestPaths.AUTHENTICATE_GET_TOKEN_METHOD)
+  public ResponseEntity<UserObject> getToken()
   {
     final PFUserDO user = ThreadLocalUserContext.getUser();
     if (user == null) {
@@ -96,8 +92,7 @@ public class AuthenticationRest
     final UserObject userObject = PFUserDOConverter.getUserObject(user);
     final String authenticationToken = userService.getAuthenticationToken(user.getId());
     userObject.setAuthenticationToken(authenticationToken);
-    final String json = JsonUtils.toJson(userObject);
-    return Response.ok(json).build();
+    return new ResponseEntity(userObject, HttpStatus.OK);
   }
 
   /**
@@ -106,10 +101,8 @@ public class AuthenticationRest
    * @param clientVersionString
    * @return {@link ServerInfo}
    */
-  @GET
-  @Path(RestPaths.AUTHENTICATE_INITIAL_CONTACT_METHOD)
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response initialContact(@QueryParam("clientVersion") final String clientVersionString)
+  @GetMapping(RestPaths.AUTHENTICATE_INITIAL_CONTACT_METHOD)
+  public ResponseEntity<ServerInfo> initialContact(@QueryParam("clientVersion") final String clientVersionString)
   {
     final PFUserDO user = ThreadLocalUserContext.getUser();
     if (user == null) {
@@ -132,7 +125,6 @@ public class AuthenticationRest
     } else {
       info.setStatus(ServerInfo.STATUS_OK);
     }
-    final String json = JsonUtils.toJson(info);
-    return Response.ok(json).build();
+    return new ResponseEntity(info, HttpStatus.OK);
   }
 }

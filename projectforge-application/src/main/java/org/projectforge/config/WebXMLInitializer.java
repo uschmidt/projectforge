@@ -29,12 +29,14 @@ import org.projectforge.business.user.filter.UserFilter;
 import org.projectforge.common.EmphasizedLogSupport;
 import org.projectforge.model.rest.RestPaths;
 import org.projectforge.rest.config.CORSFilter;
+import org.projectforge.rest.config.ProjectForgeRestConfiguration;
 import org.projectforge.security.SecurityHeaderFilter;
 import org.projectforge.web.debug.SessionSerializableChecker;
 import org.projectforge.web.doc.TutorialFilter;
 import org.projectforge.web.filter.ResponseHeaderFilter;
 import org.projectforge.web.filter.SpringThreadLocalFilter;
 import org.projectforge.web.rest.RestUserFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.context.annotation.Configuration;
@@ -100,12 +102,6 @@ public class WebXMLInitializer implements ServletContextInitializer {
               "/" + RestPaths.REST_WEB_APP + "/*",
               "/" + RestPaths.REST_WEB_APP_PUBLIC + "/*"); // Needed for login service.
     }
-
-    final FilterRegistration restUserFilter = sc.addFilter("restUserFilter", RestUserFilter.class);
-    restUserFilter.addMappingForUrlPatterns(null, false,
-            "/" + RestPaths.REST + "/*",
-            "/" + RestPaths.REST_WEB_APP + "/*");
-
 
     final FilterRegistration expire = sc.addFilter("expire", ResponseHeaderFilter.class);
     expire.setInitParameter("Cache-Control", "public, max-age=7200");

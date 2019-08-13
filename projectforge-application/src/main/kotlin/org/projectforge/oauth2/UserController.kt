@@ -21,18 +21,17 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-package org.projectforge.rest.config;
+package org.projectforge.oauth2
 
-import org.glassfish.jersey.server.ResourceConfig;
-import org.projectforge.rest.PFVersionCheckRest;
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RestController
+import java.security.Principal
 
-/**
- * Created by blumenstein on 26.01.17.
- */
-public class RestPublicConfiguration extends ResourceConfig
-{
-  public RestPublicConfiguration()
-  {
-    register(PFVersionCheckRest.class);
-  }
+
+@RestController
+class UserController {
+    @GetMapping("/oauth2/user/me")
+    fun user(principal: Principal): Principal {
+        return principal
+    }
 }

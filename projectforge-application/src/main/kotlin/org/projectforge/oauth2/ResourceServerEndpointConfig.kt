@@ -21,30 +21,21 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-package org.projectforge.rest.config;
+package org.projectforge.oauth2
 
-import org.glassfish.jersey.server.ResourceConfig;
-import org.projectforge.rest.AddressDaoRest;
-import org.projectforge.web.rest.AuthenticationRest;
-import org.projectforge.web.rest.TaskDaoRest;
-import org.projectforge.web.rest.TimesheetDaoRest;
-import org.projectforge.web.rest.TimesheetTemplatesRest;
-import org.projectforge.web.teamcal.rest.TeamCalDaoRest;
-import org.projectforge.web.teamcal.rest.TeamEventDaoRest;
+import org.springframework.context.annotation.Configuration
+import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter
 
-/**
- * Created by blumenstein on 26.01.17.
- */
-public class RestPrivateConfiguration extends ResourceConfig
-{
-  public RestPrivateConfiguration()
-  {
-    register(AuthenticationRest.class);
-    register(AddressDaoRest.class);
-    register(TaskDaoRest.class);
-    register(TeamCalDaoRest.class);
-    register(TeamEventDaoRest.class);
-    register(TimesheetDaoRest.class);
-    register(TimesheetTemplatesRest.class);
-  }
+@Configuration
+@EnableResourceServer
+open class ResourceServerEndpointConfig : ResourceServerConfigurerAdapter() {
+
+    override fun configure(http: HttpSecurity) {
+        http
+                .authorizeRequests()
+                .antMatchers("/oauth2/**")
+                .authenticated();
+    }
 }
