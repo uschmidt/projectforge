@@ -38,7 +38,8 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.provider.token.RemoteTokenServices
 import org.springframework.security.oauth2.provider.token.TokenStore
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore
-
+import java.security.SecureRandom
+import java.util.*
 
 
 /**
@@ -47,18 +48,7 @@ import org.springframework.security.oauth2.provider.token.store.InMemoryTokenSto
 @Configuration
 @EnableAuthorizationServer
 open class AuthServerOauth2Config : AuthorizationServerConfigurerAdapter() {
-
-    @Value("\${spring.datasource.driver-class-name}")
-    private lateinit var driverName: String
-
-    @Value("\${spring.datasource.url}")
-    private lateinit var url: String
-
-    @Value("\${spring.datasource.username}")
-    private lateinit var userName: String
-
-    @Value("\${spring.datasource.password}")
-    private lateinit var password: String
+    private val log = org.slf4j.LoggerFactory.getLogger(AuthServerOauth2Config::class.java)
 
     @Value("\${security.oauth2.client.clientId}")
     private lateinit var clientId: String
@@ -85,12 +75,18 @@ open class AuthServerOauth2Config : AuthorizationServerConfigurerAdapter() {
 
     @Throws(Exception::class)
     override fun configure(clients: ClientDetailsServiceConfigurer) {
-        clients
+        val builder = clients
                 .inMemory()
                 .withClient(clientId)
                 .authorizedGrantTypes("password", "authorization_code", "refresh_token")
                 .scopes("read")
-                .secret(clientSecret)
+        if (clientSecret.isNullOrBlank() || clientSecret.length < 10) {
+            log.error("Client secret must have at least 10 characters. Using random secret for preventing access.")
+            builder.secret(generateRandomClientId())
+        } else {
+            builder.secret(clientSecret)
+        }
+        builder
                 .redirectUris(callbackUri)
                 .autoApprove(true)
     }
@@ -115,5 +111,22 @@ open class AuthServerOauth2Config : AuthorizationServerConfigurerAdapter() {
         tokenService.setClientId(clientId)
         tokenService.setClientSecret(clientSecret)
         return tokenService
+    }
+
+    companion object {
+        private fun generateRandomClientId(): String {
+            val random = SecureRandom();
+            val bytes = ByteArray(100)
+            random.nextBytes(bytes);
+            val encoder = Base64.getUrlEncoder().withoutPadding();
+            return encoder.encodeToString(bytes);
+        }
+
+        @JvmStatic
+        fun main(args: Array<String>) {
+            println(generateRandomClientId())
+            println(generateRandomClientId())
+            println(generateRandomClientId())
+        }
     }
 }
