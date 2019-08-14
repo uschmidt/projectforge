@@ -23,6 +23,7 @@
 
 package org.projectforge.oauth2
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
@@ -30,16 +31,20 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 
+
+
 /**
  * https://www.baeldung.com/rest-api-spring-oauth2-angular
  */
 @Configuration
 open class ServerSecurityConfig : WebSecurityConfigurerAdapter() {
 
+    @Autowired
+    private val authProvider: CustomAuthenticationProvider? = null
+
     @Throws(Exception::class)
     override fun configure(auth: AuthenticationManagerBuilder) {
-        auth.inMemoryAuthentication()
-                .withUser("john").password("123").roles("USER")
+        auth.authenticationProvider(authProvider)
     }
 
     @Bean
@@ -53,7 +58,7 @@ open class ServerSecurityConfig : WebSecurityConfigurerAdapter() {
         http
                 .authorizeRequests()
                 .antMatchers("/oauth2/**").authenticated()
-                .antMatchers("/oauth2/login").permitAll()
+                .antMatchers("/oauth2/login/**").permitAll()
                 .and()
                 .formLogin().permitAll()
     }
