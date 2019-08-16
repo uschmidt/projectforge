@@ -41,9 +41,13 @@ import org.springframework.security.web.authentication.session.SessionAuthentica
 
 
 /**
- * https://hub.docker.com/r/jboss/keycloak/
- * https://www.baeldung.com/spring-boot-keycloak
+ * https://hub.docker.com/r/jboss/https://hub.docker.com/r/jboss/keycloak/
  *
+ * docker run jboss/keycloak
+ * docker exec 219fd7122c38 keycloak/bin/add-user-keycloak.sh -u admin -p test123
+ * docker start -p 9990:8080 jboss/keycloak
+ *
+ * https://www.baeldung.com/spring-boot-keycloak
  * spring.profiles.active=keycloak
  *
  * keycloak.auth-server-url=http://localhost:9990/auth
