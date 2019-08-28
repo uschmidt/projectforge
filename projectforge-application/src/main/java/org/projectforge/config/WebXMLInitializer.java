@@ -102,9 +102,9 @@ public class WebXMLInitializer implements ServletContextInitializer {
     }
 
     final FilterRegistration restUserFilter = sc.addFilter("restUserFilter", RestUserFilter.class);
-    restUserFilter.addMappingForUrlPatterns(null, false,
+    /*restUserFilter.addMappingForUrlPatterns(null, false,
             "/" + RestPaths.REST + "/*",
-            "/" + RestPaths.REST_WEB_APP + "/*");
+            "/" + RestPaths.REST_WEB_APP + "/*");*/
 
 
     final FilterRegistration expire = sc.addFilter("expire", ResponseHeaderFilter.class);

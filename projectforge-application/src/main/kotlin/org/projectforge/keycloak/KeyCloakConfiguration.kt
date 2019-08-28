@@ -41,7 +41,8 @@ import org.springframework.security.web.authentication.session.SessionAuthentica
 
 
 /**
- * https://hub.docker.com/r/jboss/https://hub.docker.com/r/jboss/keycloak/
+ * https://hub.docker.com/r/jboss/
+ * https://hub.docker.com/r/jboss/keycloak/
  *
  * docker run jboss/keycloak
  * docker exec 219fd7122c38 keycloak/bin/add-user-keycloak.sh -u admin -p test123
@@ -72,19 +73,19 @@ open class KeyCloakConfiguration : KeycloakWebSecurityConfigurerAdapter() {
         auth.authenticationProvider(keycloakAuthenticationProvider)
     }
 
-    /*@Bean
-    fun KeycloakConfigResolver(): KeycloakSpringBootConfigResolver {
+    @Bean
+    open fun keycloakConfigResolver(): KeycloakSpringBootConfigResolver {
         return KeycloakSpringBootConfigResolver()
-    }*/
+    }
 
     @Bean
-    override protected fun sessionAuthenticationStrategy(): SessionAuthenticationStrategy {
+    override fun sessionAuthenticationStrategy(): SessionAuthenticationStrategy {
         return RegisterSessionAuthenticationStrategy(
                 SessionRegistryImpl())
     }
 
     @Throws(Exception::class)
-    override protected fun configure(http: HttpSecurity) {
+    override fun configure(http: HttpSecurity) {
         super.configure(http)
         http.authorizeRequests()
                 .antMatchers("/*")
