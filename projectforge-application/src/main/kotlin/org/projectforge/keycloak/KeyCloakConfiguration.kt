@@ -38,6 +38,11 @@ import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper
 import org.springframework.security.core.session.SessionRegistryImpl
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy
+import org.springframework.boot.web.servlet.FilterRegistrationBean
+import org.keycloak.adapters.springsecurity.filter.KeycloakPreAuthActionsFilter
+import org.keycloak.adapters.springsecurity.filter.KeycloakAuthenticationProcessingFilter
+
+
 
 
 /**
@@ -62,11 +67,9 @@ import org.springframework.security.web.authentication.session.SessionAuthentica
 @EnableWebSecurity
 @ComponentScan(basePackageClasses = [KeycloakSecurityComponents::class])
 open class KeyCloakConfiguration : KeycloakWebSecurityConfigurerAdapter() {
-    @Autowired
-    @Throws(Exception::class)
-    fun configureGlobal(
-            auth: AuthenticationManagerBuilder) {
 
+    @Autowired
+    fun configureGlobal(auth: AuthenticationManagerBuilder) {
         val keycloakAuthenticationProvider = keycloakAuthenticationProvider()
         keycloakAuthenticationProvider.setGrantedAuthoritiesMapper(
                 SimpleAuthorityMapper())
@@ -80,18 +83,17 @@ open class KeyCloakConfiguration : KeycloakWebSecurityConfigurerAdapter() {
 
     @Bean
     override fun sessionAuthenticationStrategy(): SessionAuthenticationStrategy {
-        return RegisterSessionAuthenticationStrategy(
-                SessionRegistryImpl())
+        return RegisterSessionAuthenticationStrategy(SessionRegistryImpl())
     }
 
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
         super.configure(http)
+        http.csrf().disable()
         http.authorizeRequests()
-                .antMatchers("/*")
-                .hasRole("user")
-                .anyRequest()
-                .permitAll()
+                .antMatchers("/wa/*").hasRole("user")
+                .antMatchers("/rs/*").hasRole("user")
+                .anyRequest().permitAll()
     }
 }
 
