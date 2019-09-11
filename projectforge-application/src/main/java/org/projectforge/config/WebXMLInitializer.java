@@ -101,13 +101,13 @@ public class WebXMLInitializer implements ServletContextInitializer {
               "/" + RestPaths.REST_WEB_APP_PUBLIC + "/*"); // Needed for login service.
     }
 
-    /*FilterRegistration restUserFilter = sc.addFilter("restUserFilter", RestUserFilter.class);
+    FilterRegistration restUserFilter = sc.addFilter("restUserFilter", RestUserFilter.class);
     if(restUserFilter == null){
       restUserFilter = sc.getFilterRegistration("restUserFilter");
     }
     restUserFilter.addMappingForUrlPatterns(null, false,
             "/" + RestPaths.REST + "/*",
-            "/" + RestPaths.REST_WEB_APP + "/*");*/
+            "/" + RestPaths.REST_WEB_APP + "/*");
 
 
     final FilterRegistration expire = sc.addFilter("expire", ResponseHeaderFilter.class);
