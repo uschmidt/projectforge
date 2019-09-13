@@ -362,7 +362,12 @@ abstract class AbstractBaseRest<
         } else {
             log.warn("Could not rename the user's filter. Filter with id '$id' not found for category '$category'.")
         }
+        val currentFilter = getCurrentFilter()
+        if (currentFilter.id == filter?.id) {
+            currentFilter.name = newName
+        }
         return mapOf(
+                "filter" to currentFilter, // Just for the case if the current filter was renamed.
                 "filterFavorites" to favorites.idTitleList)
     }
 
@@ -565,10 +570,17 @@ abstract class AbstractBaseRest<
             : ResponseAction {
         val item = prepareClone(dto)
         val editLayoutData = getItemAndLayout(request, item, UILayout.UserAccess(false, true))
-        return ResponseAction(url = getRestRootPath(RestPaths.EDIT), targetType = TargetType.UPDATE)
+        return ResponseAction(url = getRestEditPath(), targetType = TargetType.UPDATE)
                 .addVariable("data", editLayoutData.data)
                 .addVariable("ui", editLayoutData.ui)
                 .addVariable("variables", editLayoutData.variables)
+    }
+
+    /**
+     * Might be modified e. g. for edit pages handled in modals (timesheets and calendar events).
+     */
+    open protected fun getRestEditPath(): String {
+        return getRestRootPath(RestPaths.EDIT)
     }
 
     /**

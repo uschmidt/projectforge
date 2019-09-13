@@ -1,0 +1,30 @@
+.label {
+  font-size: 1.2em;
+  display: inline-block;
+}
+
+.quickSelectors {
+  list-style: none;
+  margin-block-start: 0;
+  margin-block-end: 0;
+  padding-inline-start: 0;
+  border-right: 1px solid #ddd;
+
+  .quickSelector {
+    padding: 5px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #d1deff;
+    }
+
+    &.selected {
+      background-color: #d1deff;
+      color: #003a71;
+
+      &:hover {
+        background-color: #b8c4e1;
+      }
+    }
+  }
+}

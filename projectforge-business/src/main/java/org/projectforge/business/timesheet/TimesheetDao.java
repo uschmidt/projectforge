@@ -121,7 +121,7 @@ public class TimesheetDao extends BaseDao<TimesheetDO> {
     final Object[] minMaxDate = getSession().createNamedQuery(TimesheetDO.SELECT_MIN_MAX_DATE_FOR_USER, Object[].class)
             .setParameter("userId", userId)
             .getSingleResult();
-    return SQLHelper.getYears((java.sql.Date) minMaxDate[0], (java.sql.Date) minMaxDate[1]);
+    return SQLHelper.getYears((java.util.Date) minMaxDate[0], (java.util.Date) minMaxDate[1]);
   }
 
   /**
@@ -673,7 +673,7 @@ public class TimesheetDao extends BaseDao<TimesheetDO> {
       }
       return false;
     }
-    if (taskNode.hasChilds()) {
+    if (taskNode.hasChildren()) {
       // 3. Is the task not a leaf node and has this task or ancestor task the booking status ONLY_LEAFS?
       node = taskNode;
       do {
@@ -691,7 +691,7 @@ public class TimesheetDao extends BaseDao<TimesheetDO> {
         node = node.getParent();
       } while (node != null);
       // 4. Does any of the descendant task node has an assigned order position?
-      for (final TaskNode child : taskNode.getChilds()) {
+      for (final TaskNode child : taskNode.getChildren()) {
         if (TaskTreeHelper.getTaskTree(timesheet).hasOrderPositions(child.getId(), true)) {
           if (throwException) {
             throw new AccessException("timesheet.error.taskNotBookable.orderPositionsFoundInSubTasks",

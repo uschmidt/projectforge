@@ -23,6 +23,22 @@
     cursor: text;
     position: relative;
 
+    &.withIcon {
+      .icon {
+        position: absolute;
+        bottom: .6em;
+        left: 2px;
+      }
+
+      .input {
+        padding-left: 1.5em;
+      }
+
+      .text {
+        left: 1.5em;
+      }
+    }
+
     .text {
       position: absolute;
       left: 15px;
@@ -36,7 +52,7 @@
       padding-bottom: 0;
       width: 100%;
       position: relative;
-      top: 1.6em;
+      top: 1em;
       background-color: transparent;
       border: none;
       border-bottom: 1px solid #deddde;
@@ -56,6 +72,24 @@
       .text {
         color: #a5a2a5;
         @include transform(translate(0, 0) scale(.7,.7));
+      }
+    }
+
+    &.noLabel {
+      height: 1.1em;
+
+      .input {
+        top: 0;
+      }
+
+      .text {
+        @include transform(none);
+      }
+
+      &.active {
+        .text {
+          opacity: 0;
+        }
       }
     }
 
@@ -455,6 +489,15 @@
 
     span {
       margin-left: 15px;
+    }
+  }
+
+  &.small {
+    margin-bottom: 6px;
+    font-size: 1em;
+
+    .withIcon .icon {
+      top: 2px;
     }
   }
 }

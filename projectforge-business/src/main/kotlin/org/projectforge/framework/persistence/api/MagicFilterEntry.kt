@@ -89,6 +89,10 @@ class MagicFilterEntry(
     var toValueInt: Int? = null
         private set
 
+    @JsonIgnore
+    var isNew: Boolean? = false
+        private set
+
     /**
      * Only for documentation
      */
@@ -159,7 +163,7 @@ class MagicFilterEntry(
                     matchType = MatchType.ENDS_WITH
                 } else {
                     matchType = MatchType.EXACT
-                    dbStr = "$plainStr"
+                    dbStr = plainStr
                 }
             }
             this.plainSearchString = plainStr

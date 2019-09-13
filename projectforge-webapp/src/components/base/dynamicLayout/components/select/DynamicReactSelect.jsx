@@ -22,6 +22,14 @@ export const extractDataValue = (
         const valueOfArray = (typeof dataValue === 'object') ? dataValue[valueProperty] : dataValue;
         dataValue = values.find(it => it[valueProperty] === valueOfArray);
     }
+
+    if (typeof dataValue === 'string') {
+        return {
+            label: dataValue,
+            value: dataValue,
+        };
+    }
+
     return dataValue;
 };
 
@@ -33,13 +41,14 @@ function DynamicReactSelect(props) {
         autoCompletion,
         labelProperty,
         valueProperty,
+        values,
     } = props;
-    const [value, setValue] = React.useState(extractDataValue({ data, ...props }));
+
+    const value = extractDataValue({ data, ...props });
 
     return React.useMemo(() => {
         const onChange = (newValue) => {
-            setValue(newValue);
-            setData({ [id]: newValue });
+            setData({ [id]: newValue.value });
         };
 
         const onFavoriteSelect = (favoriteId, name) => {
@@ -51,7 +60,7 @@ function DynamicReactSelect(props) {
         };
 
         const loadOptions = (search, callback) => fetch(
-            getServiceURL(autoCompletion.url, { search }),
+            getServiceURL(`${autoCompletion.url}${search}`),
             {
                 method: 'GET',
                 credentials: 'include',
@@ -62,7 +71,10 @@ function DynamicReactSelect(props) {
         )
             .then(handleHTTPErrors)
             .then(response => response.json())
-            .then(callback);
+            .then(json => callback(json.map(completion => ({
+                value: completion,
+                label: completion,
+            }))));
 
         const url = autoCompletion ? autoCompletion.url : undefined;
 
@@ -93,7 +105,7 @@ function DynamicReactSelect(props) {
                 </DynamicValidationManager>
             </React.Fragment>
         );
-    }, [data[id], value, setData]);
+    }, [data[id], value, setData, values]);
 }
 
 DynamicReactSelect.propTypes = {

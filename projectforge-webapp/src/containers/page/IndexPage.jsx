@@ -20,7 +20,7 @@ class IndexPage extends React.Component {
         this.fetchInitial();
     }
 
-    componentWillUpdate({ location: nextLocation }) {
+    componentDidUpdate({ location: nextLocation }) {
         const { location, loadUserStatus: checkAuthentication } = this.props;
 
         if (location.key === nextLocation.key) {
@@ -142,31 +142,12 @@ class IndexPage extends React.Component {
                     <Col>
                         <h1>ToDo&apos;s (Fin)</h1>
                         <ol>
-                            <li>
-                                TimesheetEditTaskAndKost2.jsx: set kost2list on initial call and
-                                update of kost2list after task selections. See classic version.
-                                <i>Part of TaskTree refactor</i>
-                            </li>
-                            <li>
-                                Customized Data Image in List Page not working
-                            </li>
-                            <li>
-                                Design improvements for selection of task tree (e. g. time
-                                sheet editing). Highlighting of current active breadcrumb,
-                                smaller search bar, no table head row. Collapse like Apple Finder.
-                            </li>
-                            <li>
-                                Autocompletion for input fields (see outgoing-mail), worked in older
-                                versions (before dynamic rendering).
-                            </li>
+                            <li>Finishing time sheet editing (recents)</li>
                             <li>
                                 Open Popover with focus in Inputfield after selecting a new
                                 field in list&apos;s search filter.
                                 Return key closes the popover, another Return click submits the
                                 filter and requests a new list?
-                            </li>
-                            <li>
-                                Set date of calendar view after editing timesheet or event.
                             </li>
                             <li>
                                 main.chunk.js with hash sum / version id, use service worker for
@@ -177,12 +158,19 @@ class IndexPage extends React.Component {
                                 and date-range picker.
                             </li>
                             <li>
-                                Prepare nested, indexed properties, such as{' '}
+                                Prepare nested, indexed properties, such as
+                                {' '}
                                 <code>invoice.positions[2].amount</code>
+                                <br />
+                                See /incomingInvoice
                             </li>
                         </ol>
                         <h1>Done</h1>
                         <ol style={todoDone}>
+                            <li>
+                                TaskSelect panel: collapse search fields to have more a feeling
+                                of a bread crumb...
+                            </li>
                             <li>Translations in SearchFilter.jsx</li>
                             <li>MagicFilter: send filter settings to server on search action</li>
                             <li>
@@ -206,7 +194,7 @@ class IndexPage extends React.Component {
                                 Display Logo
                                 <ol>
                                     <li>
-                                        Configureation: projectforge.properties:
+                                        Configuration: projectforge.properties:
                                         projectforge.logoFile=Micromata.png
                                     </li>
                                     <li>Logo url in rsPublic/systemStatus (e. g. logo.png)</li>
@@ -247,27 +235,54 @@ class IndexPage extends React.Component {
                                 Bug: States of Inputfields!
                             </li>
                             <li>Change time of day in calendar events.</li>
+                            <li>
+                                TimesheetEditTaskAndKost2.jsx: set kost2list on initial call and
+                                update of kost2list after task selections. See classic version.
+                                <i>Part of TaskTree refactor</i>
+                            </li>
+                            <li>
+                                Design improvements for selection of task tree (e. g. time
+                                sheet editing). Highlighting of current active breadcrumb,
+                                smaller search bar, no table head row. Collapse like Apple Finder.
+                            </li>
+                            <li>
+                                Set date of calendar view after editing timesheet or event.
+                            </li>
+                            <li>Calendar refetch events after deletion/creation etc.</li>
+                            <li>System alert message (front end side)</li>
+                            <li>
+                                Customized Data Image in List Page not working
+                            </li>
+                            <li>
+                                Autocompletion for input fields (see outgoing-mail), worked in older
+                                versions (before dynamic rendering).
+                            </li>
                         </ol>
                     </Col>
                     <Col>
                         <h1>ToDo&apos;s (Kai)</h1>
                         <ol>
-                            <li>Drag&Drop/resize of calendar events</li>
-                            <li>Finishing time sheet editing</li>
                             <li>List pages: addresses, tasks etc.</li>
-                            <li>Search filter</li>
+                            <li>
+                                Search filter
+                                <ol>
+                                    <li>
+                                        <code>
+                                            Querying fields of type &#39;class
+                                            org.projectforge.business.address.AddressStatus&#39; not
+                                            yet implemented.
+                                        </code>
+                                    </li>
+                                </ol>
+                            </li>
                             <li>Setup page</li>
                             <li>Message of the day</li>
-                            <li>System alert message</li>
-                            <li>
-                                TaskSelect panel: collapse search fields to have more a feeling
-                                of a bread crumb...
-                            </li>
-
                             <li>CSRF</li>
                         </ol>
                         <h1>Done</h1>
                         <ol style={todoDone}>
+                            <li>System alert message (server side)</li>
+                            <li>Drag&Drop/resize of calendar events</li>
                             <li>Calendar events (especially recurrences)</li>
                             <li>updateFilter-Rest call for favorites</li>
                             <li>
@@ -311,7 +326,6 @@ class IndexPage extends React.Component {
                     <Col>
                         <h1>ToDo&apos;s (both)</h1>
                         <ol>
-                            <li>Clone button of timesheets and calendar events</li>
                             <li>Magic filter in list pages</li>
                             <li>
                                 Markdown (AsciiDoc) View component for displaying dynamic content.
@@ -321,6 +335,10 @@ class IndexPage extends React.Component {
                             <li>
                                 Registration of customized containers (e. g. for external plugins)
                             </li>
+                        </ol>
+                        <h1>Done</h1>
+                        <ol style={todoDone}>
+                            <li>Clone button of timesheets and calendar events</li>
                         </ol>
                     </Col>
                 </Row>

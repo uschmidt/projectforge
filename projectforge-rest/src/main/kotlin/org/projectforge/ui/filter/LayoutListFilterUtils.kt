@@ -66,8 +66,7 @@ class LayoutListFilterUtils {
                     val element: UIElement
                     if (elInfo.propertyType.isEnum) {
                         @Suppress("UNCHECKED_CAST")
-                        element = UISelect<String>(it, required = elInfo.required, layoutContext = lc,
-                                multi = true)
+                        element = UIFilterSelectElement(it)
                                 .buildValues(i18nEnum = elInfo.propertyType as Class<out Enum<*>>)
                         element.label = element.id // Default label if no translation will be found below.
                     } else {
@@ -89,13 +88,13 @@ class LayoutListFilterUtils {
             return container
         }
 
-        fun getLabel(elInfo: ElementsRegistry.ElementInfo): String {
+        fun getLabel(elInfo: ElementInfo): String {
             val sb = StringBuilder()
             addLabel(sb, elInfo)
             return sb.toString()
         }
 
-        private fun addLabel(sb: StringBuilder, elInfo: ElementsRegistry.ElementInfo?) {
+        private fun addLabel(sb: StringBuilder, elInfo: ElementInfo?) {
             if (elInfo == null) return
             if (sb.length > 1000) { // Paranoia test for endless loops
                 log.error("Oups, paranoia test detects endless loop in ElementInfo.parent '$sb'!")

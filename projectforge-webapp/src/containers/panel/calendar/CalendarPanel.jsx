@@ -34,13 +34,34 @@ const convertJsonDates = e => Object.assign({}, e, {
 
 
 class CalendarPanel extends React.Component {
+    static getDerivedStateFromProps({ location }, { prevLocation }) {
+        const newState = {
+            prevLocation: location,
+        };
+
+        if (
+            location.state !== prevLocation.state
+            && location.state
+            && location.state.date
+        ) {
+            newState.date = new Date(location.state.date);
+        }
+
+        return newState;
+    }
+
     constructor(props) {
         super(props);
 
-        const { firstDayOfWeek, timeZone, locale } = this.props;
-        const useLocale = locale || 'en';
+        const {
+            firstDayOfWeek,
+            locale,
+            location,
+            timeZone,
+        } = this.props;
+
         moment.tz.setDefault(timeZone);
-        moment.updateLocale(useLocale,
+        moment.updateLocale(locale || 'en',
             {
                 week: {
                     dow: firstDayOfWeek, // First day of week (got from UserStatus).
@@ -51,14 +72,18 @@ class CalendarPanel extends React.Component {
         const { defaultDate, defaultView } = props;
 
         this.state = {
-            loading: false,
-            events: undefined,
-            specialDays: undefined,
-            date: defaultDate,
-            view: defaultView,
-            start: defaultDate,
-            end: undefined,
             calendar: '',
+            date: defaultDate,
+            end: undefined,
+            events: undefined,
+            loading: false,
+            // eslint doesn't recognize the usage in the new 'static getDerivedStateFromProps'
+            // function.
+            // eslint-disable-next-line react/no-unused-state
+            prevLocation: location,
+            specialDays: undefined,
+            start: defaultDate,
+            view: defaultView,
         };
 
         this.eventStyle = this.eventStyle.bind(this);
@@ -77,29 +102,24 @@ class CalendarPanel extends React.Component {
         this.fetchEvents();
     }
 
-    componentWillReceiveProps({ location: nextLocation }) {
-        const { location } = this.props;
-
-        if (
-            nextLocation.state !== location.state
-            && nextLocation.state
-            && nextLocation.state.date
-        ) {
-            this.setState({
-                date: new Date(nextLocation.state.date),
-            });
-        }
-    }
-
     componentDidUpdate(
         {
             activeCalendars: prevActiveCalendars,
             timesheetUserId: prevTimesheetUserId,
+            location: prevLocation,
         },
     ) {
-        const { activeCalendars, timesheetUserId } = this.props;
+        const {
+            activeCalendars,
+            timesheetUserId,
+            location,
+            match,
+        } = this.props;
 
-        if (timesheetUserId !== prevTimesheetUserId) {
+        if (
+            (match.isExact && location.pathname !== prevLocation.pathname)
+            || (timesheetUserId !== prevTimesheetUserId)
+        ) {
             this.fetchEvents();
             return;
         }
@@ -269,8 +289,7 @@ class CalendarPanel extends React.Component {
                         specialDays,
                     },
                 );
-            },
-        );
+            });
     }
 
     render() {
@@ -366,7 +385,7 @@ CalendarPanel.propTypes = {
 CalendarPanel.defaultProps = {
     activeCalendars: [],
     timesheetUserId: undefined,
-    locale: undefined,
+    locale: 'en',
     topHeight: '164px',
     defaultDate: new Date(),
     defaultView: 'month',

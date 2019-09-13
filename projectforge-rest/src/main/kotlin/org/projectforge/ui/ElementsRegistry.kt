@@ -26,10 +26,13 @@ package org.projectforge.ui
 import de.micromata.genome.jpa.metainf.ColumnMetadata
 import de.micromata.genome.jpa.metainf.ColumnMetadataBean
 import org.projectforge.business.task.TaskDO
+import org.projectforge.common.anots.PropertyInfo
 import org.projectforge.common.i18n.I18nEnum
 import org.projectforge.common.props.PropUtils
 import org.projectforge.framework.persistence.jpa.PfEmgrFactory
 import org.projectforge.framework.persistence.user.entities.PFUserDO
+import org.springframework.beans.BeanUtils
+import java.lang.reflect.Field
 import java.math.BigDecimal
 import java.util.*
 import javax.persistence.Basic
@@ -44,23 +47,6 @@ import javax.persistence.JoinColumn
 object ElementsRegistry {
     private val log = org.slf4j.LoggerFactory.getLogger(ElementsRegistry::class.java)
 
-    class ElementInfo(val propertyName: String,
-                      var propertyType: Class<*> = String::class.java,
-                      var maxLength: Int? = null,
-                      var required: Boolean? = null,
-                      var i18nKey: String? = null,
-                      var additionalI18nKey: String? = null,
-                      /**
-                       * For nested properties, the property where this is nested in.
-                       */
-                      var parent: ElementInfo? = null) {
-        /**
-         * Property name without parent names if nested, otherwise equals to [propertyName]
-         */
-        val simplePropertyName
-            get() = if (propertyName.contains('.')) propertyName.substring(propertyName.lastIndexOf('.') + 1) else propertyName
-    }
-
     fun getProperties(clazz: Class<*>): Map<String, ElementInfo>? {
         return registryMap[clazz]
     }
@@ -74,40 +60,45 @@ object ElementsRegistry {
      */
     private val unavailableElementsSet = mutableSetOf<String>()
 
-    internal fun buildElement(layoutSettings: LayoutContext, property: String): UIElement {
-        val mapKey = getMapKey(layoutSettings.dataObjectClazz, property) ?: return UILabel(property)
-        val elementInfo = getElementInfo(layoutSettings.dataObjectClazz, property)
+    internal fun buildElement(lc: LayoutContext, property: String): UIElement {
+        val mapKey = getMapKey(lc.dataObjectClazz, property) ?: return UILabel(property)
+        val elementInfo = getElementInfo(lc, property)
         if (elementInfo == null) {
-            log.info("Can't build UIElement from ${mapKey}.")
-            return UILabel("??? ${mapKey} ???")
+            log.info("Can't build UIElement from $mapKey.")
+            return UILabel("??? $mapKey ???")
         }
-
-        var element: UIElement? =
-                when (elementInfo.propertyType) {
-                    String::class.java -> {
-                        val maxLength = elementInfo.maxLength
-                        if (maxLength != null && maxLength > 255) {
-                            UITextArea(property, maxLength = elementInfo.maxLength, layoutContext = layoutSettings)
-                        } else {
-                            UIInput(property, maxLength = elementInfo.maxLength, required = elementInfo.required, layoutContext = layoutSettings)
+        var element: UIElement?
+        if (elementInfo.readOnly) {
+            element = UIReadOnlyField(property, dataType = getDataType(elementInfo) ?: UIDataType.STRING)
+        } else {
+            val dataType = getDataType(elementInfo)
+            element =
+                    when (elementInfo.propertyType) {
+                        String::class.java -> {
+                            val maxLength = elementInfo.maxLength
+                            if (maxLength != null && maxLength > 255) {
+                                UITextArea(property, maxLength = elementInfo.maxLength, layoutContext = lc)
+                            } else {
+                                UIInput(property, maxLength = elementInfo.maxLength, required = elementInfo.required, layoutContext = lc)
+                            }
                         }
+                        Boolean::class.java -> UICheckbox(property)
+                        Date::class.java -> UIInput(property, required = elementInfo.required, layoutContext = lc, dataType = dataType!!)
+                        java.sql.Date::class.java -> UIInput(property, required = elementInfo.required, layoutContext = lc, dataType = dataType!!)
+                        java.sql.Timestamp::class.java -> UIInput(property, required = elementInfo.required, layoutContext = lc, dataType = dataType!!)
+                        PFUserDO::class.java -> UIInput(property, required = elementInfo.required, layoutContext = lc, dataType = dataType!!)
+                        Integer::class.java -> UIInput(property, required = elementInfo.required, layoutContext = lc, dataType = dataType!!)
+                        BigDecimal::class.java -> UIInput(property, required = elementInfo.required, layoutContext = lc, dataType = dataType!!)
+                        TaskDO::class.java -> UIInput(property, required = elementInfo.required, layoutContext = lc, dataType = dataType!!)
+                        Locale::class.java -> UIInput(property, required = elementInfo.required, layoutContext = lc, dataType = dataType!!)
+                        else -> null
                     }
-                    Boolean::class.java -> UICheckbox(property)
-                    Date::class.java -> UIInput(property, required = elementInfo.required, layoutContext = layoutSettings, dataType = UIDataType.TIMESTAMP)
-                    java.sql.Date::class.java -> UIInput(property, required = elementInfo.required, layoutContext = layoutSettings, dataType = UIDataType.DATE)
-                    java.sql.Timestamp::class.java -> UIInput(property, required = elementInfo.required, layoutContext = layoutSettings, dataType = UIDataType.TIMESTAMP)
-                    PFUserDO::class.java -> UIInput(property, required = elementInfo.required, layoutContext = layoutSettings, dataType = UIDataType.USER)
-                    Integer::class.java -> UIInput(property, required = elementInfo.required, layoutContext = layoutSettings, dataType = UIDataType.INT)
-                    BigDecimal::class.java -> UIInput(property, required = elementInfo.required, layoutContext = layoutSettings, dataType = UIDataType.DECIMAL)
-                    TaskDO::class.java -> UIInput(property, required = elementInfo.required, layoutContext = layoutSettings, dataType = UIDataType.TASK)
-                    Locale::class.java -> UIInput(property, required = elementInfo.required, layoutContext = layoutSettings, dataType = UIDataType.LOCALE)
-                    else -> null
-                }
+        }
         if (element == null) {
             if (elementInfo.propertyType.isEnum) {
                 if (I18nEnum::class.java.isAssignableFrom(elementInfo.propertyType)) {
                     @Suppress("UNCHECKED_CAST")
-                    element = UISelect<String>(property, required = elementInfo.required, layoutContext = layoutSettings)
+                    element = UISelect<String>(property, required = elementInfo.required, layoutContext = lc)
                             .buildValues(i18nEnum = elementInfo.propertyType as Class<out Enum<*>>)
                 } else {
                     log.warn("Properties of enum not implementing I18nEnum not yet supported: $mapKey.")
@@ -124,11 +115,40 @@ object ElementsRegistry {
         return element ?: UILabel(property)
     }
 
-    internal fun getElementInfo(layoutSettings: LayoutContext, property: String): ElementInfo? {
-        return getElementInfo(layoutSettings.dataObjectClazz, property)
+    private fun getDataType(elementInfo: ElementInfo): UIDataType? {
+        return when (elementInfo.propertyType) {
+            String::class.java -> UIDataType.STRING
+            Boolean::class.java -> UIDataType.BOOLEAN
+            Date::class.java -> UIDataType.TIMESTAMP
+            java.sql.Date::class.java -> UIDataType.DATE
+            java.sql.Timestamp::class.java -> UIDataType.TIMESTAMP
+            PFUserDO::class.java -> UIDataType.USER
+            Integer::class.java -> UIDataType.INT
+            BigDecimal::class.java -> UIDataType.DECIMAL
+            TaskDO::class.java -> UIDataType.TASK
+            Locale::class.java -> UIDataType.LOCALE
+            else -> null
+        }
+    }
+
+    internal fun getElementInfo(lc: LayoutContext, property: String): ElementInfo? {
+        val parts = property.split('.')
+        if (!parts.isNullOrEmpty()) {
+            val listElementInfo = lc.getListElementInfo(parts[0])
+            if (listElementInfo != null) {
+                // property starts with list element name, therefore try to find the property of this list element
+                // instead of the data object class:
+                if (listElementInfo.genericType != null) {
+                    return getElementInfo(listElementInfo.genericType, property.substring(parts[0].length + 1))
+                }
+                log.warn("Can't detect generic type of list element '$parts[0]' for property '$property'")
+            }
+        }
+        return getElementInfo(lc.dataObjectClazz, property)
     }
 
     /**
+     * If possible, use [getElementInfo] with layoutContext instead for supporting list elements.
      * @param property name of property (nested properties are supported, like timesheet.task.id.
      */
     internal fun getElementInfo(clazz: Class<*>?, property: String): ElementInfo? {
@@ -142,19 +162,30 @@ object ElementsRegistry {
         if (unavailableElementsSet.contains(mapKey)) {
             return null // Element can't be determined (a previous try failed)
         }
-        val propertyType = getPropertyType(clazz, property)
-        if (propertyType == null) {
-            log.info("Property $clazz.$property not found. Can't autodetect layout.")
-            unavailableElementsSet.add(mapKey)
-            return null
+        val propertyField = getPropertyField(clazz, property)
+        if (propertyField != null) {
+            elementInfo = ElementInfo(property, propertyField)
+        } else {
+            elementInfo = getPropertyInfo(clazz, property)
+            if (elementInfo == null) {
+                log.info("Property $clazz.$property not found. Can't autodetect layout.")
+                unavailableElementsSet.add(mapKey)
+                return null
+            }
         }
-        elementInfo = ElementInfo(property, propertyType)
         if (property.contains('.')) { // Nested property, like timesheet.task.id?
             val parentProperty = property.substring(0, property.lastIndexOf('.'))
             val parentInfo = getElementInfo(clazz, parentProperty)
             elementInfo.parent = parentInfo
         }
-        val propertyInfo = PropUtils.get(clazz, property)
+        var propertyInfo: PropertyInfo? = null
+        if (propertyField != null) {
+            propertyInfo = PropUtils.get(clazz, property)
+        }
+        if (propertyInfo == null) {
+            // Try to get the annotation of the getter method.
+            propertyInfo = BeanUtils.getPropertyDescriptor(clazz, property)?.readMethod?.getAnnotation(PropertyInfo::class.java)
+        }
         if (propertyInfo == null) {
             log.warn("@PropertyInfo '$clazz:$property' not found.")
             return elementInfo
@@ -167,15 +198,21 @@ object ElementsRegistry {
         }
         elementInfo.i18nKey = getNullIfEmpty(propertyInfo.i18nKey)
         elementInfo.additionalI18nKey = getNullIfEmpty(propertyInfo.additionalI18nKey)
-
         ensureClassMap(clazz)[property] = elementInfo
         return elementInfo
     }
 
-    private fun getPropertyType(clazz: Class<*>?, property: String): Class<*>? {
+    private fun getPropertyField(clazz: Class<*>?, property: String): Field? {
         if (clazz == null)
             return null
-        return PropUtils.getField(clazz, property)?.type
+        return PropUtils.getField(clazz, property, true)
+    }
+
+    private fun getPropertyInfo(clazz: Class<*>?, property: String): ElementInfo? {
+        if (clazz == null)
+            return null
+        val desc = BeanUtils.getPropertyDescriptor(clazz, property) ?: return null
+        return ElementInfo(property, propertyType = desc.propertyType, readOnly = (desc.writeMethod == null))
     }
 
     private fun ensureClassMap(clazz: Class<*>): MutableMap<String, ElementInfo> {

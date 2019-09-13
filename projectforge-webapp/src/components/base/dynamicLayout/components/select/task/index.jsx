@@ -3,13 +3,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PropTypes from 'prop-types';
 import React from 'react';
 import FavoritesPanel from '../../../../../../containers/panel/favorite/FavoritesPanel';
-import NewTaskTreePanel from '../../../../../../containers/panel/task/NewTaskTreePanel';
 import TaskTreePanel from '../../../../../../containers/panel/task/TaskTreePanel';
+import { useClickOutsideHandler } from '../../../../../../utilities/hooks';
 import { getServiceURL, handleHTTPErrors } from '../../../../../../utilities/rest';
 import { Button, Collapse } from '../../../../../design';
 import inputStyle from '../../../../../design/input/Input.module.scss';
 import { DynamicLayoutContext } from '../../../context';
 import TaskPath from './TaskPath';
+import taskStyle from './TaskSelect.module.scss';
 
 function DynamicTaskSelect(
     {
@@ -27,32 +28,27 @@ function DynamicTaskSelect(
     const [favorites, setFavorites] = React.useState(undefined);
     const panelRef = React.useRef(null);
 
-    // Handle mouse events
-    React.useEffect(() => {
-        const handleClickOutside = ({ target }) => {
-            if (panelRef.current && !panelRef.current.contains(target)) {
-                setPanelVisible(false);
-            }
-        };
+    // Handling Mouse Events
+    useClickOutsideHandler(panelRef, () => setPanelVisible(false), panelVisible);
 
-        document.addEventListener('mousedown', handleClickOutside);
-
-        fetch(
-            getServiceURL('task/favorites/list'),
-            {
-                method: 'GET',
-                credentials: 'include',
-                headers: {
-                    Accept: 'application/json',
-                },
+    const fetchFavorites = (action, params = {}, callback = setFavorites) => fetch(
+        getServiceURL(`task/favorites/${action}`, params),
+        {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                Accept: 'application/json',
             },
-        )
-            .then(handleHTTPErrors)
-            .then(response => response.json())
-            .then(json => setFavorites(json))
-            .catch(error => alert(`Internal error: ${error}`));
+        },
+    )
+        .then(handleHTTPErrors)
+        .then(response => response.json())
+        .then(callback)
+        .catch(error => alert(`Internal error: ${error}`));
 
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+    // Initial Fetch
+    React.useEffect(() => {
+        fetchFavorites('list');
     }, []);
 
     React.useEffect(() => {
@@ -109,83 +105,19 @@ function DynamicTaskSelect(
         };
 
         const handleFavoriteCreate = (name) => {
-            if (!task) {
-                // Do nothing: can't set none existing task as favorite.
-                return;
+            if (task) {
+                fetchFavorites('create', {
+                    name,
+                    taskId: task.id,
+                });
             }
-
-            fetch(
-                getServiceURL(
-                    'task/favorites/create',
-                    {
-                        name,
-                        taskId: task.id,
-                    },
-                ),
-                {
-                    method: 'GET',
-                    credentials: 'include',
-                    headers: {
-                        Accept: 'application/json',
-                    },
-                },
-            )
-                .then(handleHTTPErrors)
-                .then(response => response.json())
-                .then(setFavorites)
-                .catch(error => alert(`Internal error: ${error}`));
         };
-
-        const handleFavoriteDelete = favoriteId => fetch(
-            getServiceURL('task/favorites/delete', { id: favoriteId }),
-            {
-                method: 'GET',
-                credentials: 'include',
-                headers: {
-                    Accept: 'application/json',
-                },
-            },
-        )
-            .then(handleHTTPErrors)
-            .then(response => response.json())
-            .then(setFavorites)
-            .catch(error => alert(`Internal error: ${error}`));
-
-        const handleFavoriteSelect = favoriteId => fetch(
-            getServiceURL('task/favorites/select', { id: favoriteId }),
-            {
-                method: 'GET',
-                credentials: 'include',
-                headers: {
-                    Accept: 'application/json',
-                },
-            },
-        )
-            .then(handleHTTPErrors)
-            .then(response => response.json())
-            .then(setTask)
-            .catch(error => alert(`Internal error: ${error}`));
-
-        const handleFavoriteRename = (favoriteId, newName) => fetch(
-            getServiceURL(
-                'task/favorites/rename',
-                {
-                    id: favoriteId,
-                    newName,
-                },
-            ),
-            {
-                method: 'GET',
-                credentials: 'include',
-                headers: {
-                    Accept: 'application/json',
-                },
-            },
-        )
-            .then(handleHTTPErrors)
-            .then(response => response.json())
-            .then(setFavorites)
-            .catch(error => alert(`Internal error: ${error}`));
+        const handleFavoriteDelete = favoriteId => fetchFavorites('delete', { id: favoriteId });
+        const handleFavoriteSelect = favoriteId => fetchFavorites('select', { id: favoriteId }, setTask);
+        const handleFavoriteRename = (favoriteId, newName) => fetchFavorites('rename', {
+            id: favoriteId,
+            newName,
+        });
 
         const toggleModal = () => {
             setPanelVisible(!panelVisible);
@@ -198,38 +130,8 @@ function DynamicTaskSelect(
             setModalHighlight(taskId); // Highlight selected ancestor task.
         };
 
-        const useNew = false; // Switch for testing NewTaskTreePanel.
-        const treePanel = useNew ? (
-            <div ref={panelRef}>
-                <NewTaskTreePanel
-                    highlightTaskId={modalHighlight || (task ? task.id : undefined)}
-                    onTaskSelect={setTask}
-                    shortForm
-                    showRootForAdmins={showRootForAdmins}
-                    visible={panelVisible}
-                />
-                <TaskTreePanel
-                    highlightTaskId={modalHighlight || (task ? task.id : undefined)}
-                    onTaskSelect={setTask}
-                    shortForm
-                    showRootForAdmins={showRootForAdmins}
-                    visible={panelVisible}
-                />
-            </div>
-        ) : (
-            <div ref={panelRef}>
-                <TaskTreePanel
-                    highlightTaskId={modalHighlight || (task ? task.id : undefined)}
-                    onTaskSelect={setTask}
-                    shortForm
-                    showRootForAdmins={showRootForAdmins}
-                    visible={panelVisible}
-                />
-            </div>
-        );
-
         return (
-            <div>
+            <div ref={panelRef}>
                 {task && task.path
                     ? (
                         <TaskPath
@@ -263,13 +165,15 @@ function DynamicTaskSelect(
                 />
                 <Collapse
                     isOpen={panelVisible}
-                    style={{
-                        maxHeight: '600px',
-                        overflow: 'scroll',
-                        scroll: 'auto',
-                    }}
+                    className={taskStyle.taskCollapse}
                 >
-                    {treePanel}
+                    <TaskTreePanel
+                        highlightTaskId={modalHighlight || (task ? task.id : undefined)}
+                        onTaskSelect={setTask}
+                        shortForm
+                        showRootForAdmins={showRootForAdmins}
+                        visible={panelVisible}
+                    />
                 </Collapse>
             </div>
         );

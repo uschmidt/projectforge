@@ -1,5 +1,5 @@
 import React from 'react';
-import CreatableSelect from 'react-select/lib/Creatable';
+import CreatableSelect from 'react-select/creatable';
 import DynamicActionGroup from '../../../components/base/dynamicLayout/action/DynamicActionGroup';
 import { DynamicLayoutContext } from '../../../components/base/dynamicLayout/context';
 import { Card, CardBody, Col, FormGroup, Label, Row } from '../../../components/design';
@@ -48,77 +48,36 @@ function SearchFilter() {
         }
     };
 
+    const fetchFavorites = (action, { params = {}, body }) => fetch(
+        getServiceURL(`${category}/filter/${action}`, params),
+        {
+            method: body ? 'POST' : 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+            },
+            body: JSON.stringify(body),
+        },
+    )
+        .then(handleHTTPErrors)
+        .then(response => response.json())
+        .then(saveUpdateResponse)
+        .catch(error => alert(`Internal error: ${error}`));
+
     const handleFavoriteCreate = (newFilterName) => {
         filter.name = newFilterName;
-        fetch(getServiceURL(`${category}/filter/create`), {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-            },
-            body: JSON.stringify({ ...filter }),
-        })
-            .then(handleHTTPErrors)
-            .then(response => response.json())
-            .then(saveUpdateResponse)
-            .catch(error => alert(`Internal error: ${error}`));
+        fetchFavorites('create', { body: filter });
     };
-
-    const handleFavoriteDelete = id => fetch(getServiceURL(`${category}/filter/delete`,
-        { id }), {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-            Accept: 'application/json',
+    const handleFavoriteDelete = id => fetchFavorites('delete', { params: { id } });
+    const handleFavoriteSelect = id => fetchFavorites('select', { params: { id } });
+    const handleFavoriteRename = (id, newName) => fetchFavorites('rename', {
+        params: {
+            id,
+            newName,
         },
-    })
-        .then(handleHTTPErrors)
-        .then(response => response.json())
-        .then(saveUpdateResponse)
-        .catch(error => alert(`Internal error: ${error}`));
-
-    const handleFavoriteSelect = id => fetch(getServiceURL(`${category}/filter/select`,
-        { id }), {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-            Accept: 'application/json',
-        },
-    })
-        .then(handleHTTPErrors)
-        .then(response => response.json())
-        .then(saveUpdateResponse)
-        .catch(error => alert(`Internal error: ${error}`));
-
-    const handleFavoriteRename = (id, newName) => fetch(getServiceURL(`${category}/filter/rename`,
-        { id, newName }), {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-            Accept: 'application/json',
-        },
-    })
-        .then(handleHTTPErrors)
-        .then(response => response.json())
-        .then(saveUpdateResponse)
-        .catch(error => alert(`Internal error: ${error}`));
-
-    const handleFavoriteUpdate = () => {
-        fetch(getServiceURL(`${category}/filter/update`), {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-            },
-            body: JSON.stringify({ ...filter }),
-        })
-            .then(handleHTTPErrors)
-            .then(response => response.json())
-            .then(saveUpdateResponse)
-            .catch(error => alert(`Internal error: ${error}`));
-    };
+    });
+    const handleFavoriteUpdate = () => fetchFavorites('update', { body: filter });
 
     const handleMaxRowsChange = ({ value }) => filterHelper.setFilter('maxRows', value);
 
@@ -136,6 +95,7 @@ function SearchFilter() {
                 filterHelper.addEntry({
                     field: meta.option.id,
                     value: '',
+                    isNew: true,
                 });
                 break;
             case 'pop-value':

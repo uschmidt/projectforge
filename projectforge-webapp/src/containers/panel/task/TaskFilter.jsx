@@ -1,9 +1,10 @@
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { Button, CheckBox, Col, Input, Row } from '../../../components/design';
+import { CheckBox, Col, Input, Row } from '../../../components/design';
+import { useClickOutsideHandler } from '../../../utilities/hooks';
+import TaskTreeContext from './TaskTreeContext';
 import style from './TaskTreePanel.module.scss';
 
 function TaskFilter(
@@ -12,18 +13,12 @@ function TaskFilter(
         onCheckBoxChange: handleCheckBoxChange,
         onSubmit: handleSubmitButton,
         filter,
-        translations,
     },
 ) {
+    const { translations } = React.useContext(TaskTreeContext);
     const [isOpen, setIsOpen] = React.useState(false);
     const reference = React.useRef(undefined);
     const basicReference = React.useRef(undefined);
-
-    const handleMouseClick = (event) => {
-        if (reference.current && !reference.current.contains(event.target)) {
-            setIsOpen(false);
-        }
-    };
 
     const handleSubmitButtonClick = (event) => {
         setIsOpen(false);
@@ -37,15 +32,7 @@ function TaskFilter(
         }
     };
 
-    React.useEffect(() => {
-        // Register accessibility listeners when search is open.
-        if (isOpen) {
-            document.addEventListener('click', handleMouseClick);
-        }
-
-        // Remove accessibility listeners when search is closed.
-        return () => document.removeEventListener('click', handleMouseClick);
-    }, [isOpen]);
+    useClickOutsideHandler(reference, setIsOpen, isOpen);
 
     const {
         searchString,
@@ -95,29 +82,16 @@ function TaskFilter(
                 className={classNames(style.search, { [style.isOpen]: isOpen })}
             >
                 <div className={style.basic} ref={basicReference} onFocus={() => setIsOpen(true)}>
-                    <Row>
-                        <Col sm={10}>
-                            <Input
-                                label={translations.searchFilter || ''}
-                                id="taskSearchString"
-                                value={searchValue}
-                                onChange={handleSearchChange}
-                                autoComplete="off"
-                                className={style.searchString}
-                                onKeyPress={handleInputKeyPress}
-                            />
-                        </Col>
-                        <Col sm={2}>
-                            <Button
-                                color="primary"
-                                onClick={handleSubmitButtonClick}
-                                type="button"
-                                size="sm"
-                            >
-                                <FontAwesomeIcon icon={faSearch} />
-                            </Button>
-                        </Col>
-                    </Row>
+                    <Input
+                        placeholder={translations.searchFilter || ''}
+                        icon={faSearch}
+                        id="taskSearchString"
+                        value={searchValue}
+                        onChange={handleSearchChange}
+                        autoComplete="off"
+                        onKeyPress={handleInputKeyPress}
+                        small
+                    />
                 </div>
                 <Row className={style.advanced}>
                     <Col sm={6}>

@@ -35,4 +35,20 @@ class Kost2(
         var kostentraegerStatus: KostentraegerStatus? = null,
         var description: String? = null,
         var formattedNumber: String? = null
-) : BaseDTO<Kost2DO>(id)
+) : BaseDTO<Kost2DO>(id) {
+    override fun copyFromMinimal(src: Kost2DO) {
+        super.copyFromMinimal(src)
+        nummernkreis = src.nummernkreis
+        bereich = src.bereich
+        teilbereich = src.teilbereich
+        endziffer = src.kost2Art?.id ?: 0
+        description = src.description
+        formattedNumber = src.formattedNumber
+    }
+
+    override fun copyFrom(src: Kost2DO) {
+        super.copyFrom(src)
+        endziffer = src.kost2Art?.id ?: 0
+        formattedNumber = src.formattedNumber
+    }
+}

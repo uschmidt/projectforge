@@ -3,11 +3,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { components } from 'react-select';
+import { Button, ButtonGroup } from '.';
 import { CalendarContext } from '../../containers/page/calendar/CalendarContext';
 import CalendarStyler from '../../containers/panel/calendar/CalendarStyler';
+import { useClickOutsideHandler } from '../../utilities/hooks';
 import { getServiceURL, handleHTTPErrors } from '../../utilities/rest';
-import { Button } from './index';
 import Input from './input';
+import DateTimeRange from './input/calendar/DateTimeRange';
+import FormattedTimeRange from './input/calendar/FormattedTimeRange';
 import Popper from './popper';
 
 function EditableMultiValueLabel({ data, selectProps, ...props }) {
@@ -15,23 +18,13 @@ function EditableMultiValueLabel({ data, selectProps, ...props }) {
 
     const { saveUpdateResponseInState } = React.useContext(CalendarContext);
 
-    const [isOpen, setIsOpen] = React.useState(false);
+    const [isOpen, setIsOpen] = React.useState(data.isNew);
     const [value, setValue] = React.useState(initialValue);
 
     const popperRef = React.useRef(null);
 
     // Close Popper when clicking outside
-    React.useEffect(() => {
-        const handleMouseClick = (event) => {
-            if (popperRef.current && !popperRef.current.parentElement.contains(event.target)) {
-                setIsOpen(false);
-            }
-        };
-
-        document.addEventListener('click', handleMouseClick);
-
-        return () => document.removeEventListener('click', handleMouseClick);
-    });
+    useClickOutsideHandler(popperRef, setIsOpen, isOpen);
 
     let input;
     let { label } = data;
@@ -44,6 +37,8 @@ function EditableMultiValueLabel({ data, selectProps, ...props }) {
 
     // Function to set value in react-select
     const submitValue = () => {
+        let sValue = value;
+
         switch (data.filterType) {
             case 'COLOR_PICKER':
                 if (data.id && data.bgColor) {
@@ -60,11 +55,14 @@ function EditableMultiValueLabel({ data, selectProps, ...props }) {
                         .catch(error => alert(`Internal error: ${error}`));
                 }
                 break;
+            case 'SELECT':
+                sValue = sValue.join(',');
+                break;
             default:
         }
 
         setIsOpen(false);
-        selectProps.setMultiValue(data.id, value);
+        selectProps.setMultiValue(data.id, sValue);
     };
 
     // Handle Different Types of Filters
@@ -83,6 +81,68 @@ function EditableMultiValueLabel({ data, selectProps, ...props }) {
         case 'COLOR_PICKER':
             input = (
                 <CalendarStyler calendar={data} submit={submitValue} />
+            );
+            break;
+        case 'SELECT':
+            // TODO CONVERT STRING TO ARRAY
+            if (!Array.isArray(value)) {
+                setValue([]);
+            } else if (value.length !== 0) {
+                label = `${data.label}: ${value
+                // Find Labels for selected items by values
+                    .map(v => data.values.find(dv => dv.value === v).label)
+                    .join(', ')}`;
+            }
+
+            input = (
+                <ButtonGroup>
+                    {data.values.map(selectValue => (
+                        <Button
+                            key={`multi-value-${data.key}-${selectValue.value}`}
+                            onClick={() => {
+                                if (value.includes(selectValue.value)) {
+                                    setValue(value.filter(v => v !== selectValue.value));
+                                } else {
+                                    setValue([...value, selectValue.value]);
+                                }
+                            }}
+                            active={value.includes(selectValue.value)}
+                        >
+                            {selectValue.label}
+                        </Button>
+                    ))}
+                </ButtonGroup>
+            );
+            break;
+        case 'TIME_STAMP':
+            if (!Object.isObject(value)) {
+                setValue({
+                    from: undefined,
+                    to: undefined,
+                });
+            } else if (value.from && value.to) {
+                label = (
+                    <FormattedTimeRange to={value.to} from={value.from} childrenAsPrefix>
+                        {`${data.label}: `}
+                    </FormattedTimeRange>
+                );
+            }
+
+            input = (
+                <React.Fragment>
+                    <DateTimeRange
+                        id={data.id}
+                        onChange={setValue}
+                        {...value}
+                        selectors={[
+                            'YEAR',
+                            'MONTH',
+                            'WEEK',
+                            'DAY',
+                            'UNTIL_NOW',
+                        ]}
+                    />
+                </React.Fragment>
             );
             break;
         // Case for plain searchString without filterType
@@ -138,7 +198,7 @@ function EditableMultiValueLabel({ data, selectProps, ...props }) {
             <div ref={popperRef}>
                 {input}
                 <Button color="success" block onClick={submitValue}>
-                    <FontAwesomeIcon icon={faCheck}/>
+                    <FontAwesomeIcon icon={faCheck} />
                 </Button>
             </div>
         </Popper>

@@ -3,8 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PropTypes from 'prop-types';
 import React from 'react';
 import Select from 'react-select';
-import makeAnimated from 'react-select/lib/animated';
-import AsyncSelect from 'react-select/lib/Async';
+import makeAnimated from 'react-select/animated';
+import AsyncCreatable from 'react-select/async-creatable';
 import { UncontrolledTooltip } from 'reactstrap';
 import revisedRandomId from '../../utilities/revisedRandomId';
 import AdditionalLabel from './input/AdditionalLabel';
@@ -12,21 +12,18 @@ import style from './input/Input.module.scss';
 
 function ReactSelect(
     {
-        label,
         additionalLabel,
-        value,
-        defaultValue,
-        values,
-        multi,
-        required,
-        valueProperty,
-        labelProperty,
-        translations,
-        loadOptions,
         getOptionLabel,
-        onChange,
-        className,
+        label,
+        labelProperty,
+        loadOptions,
+        required,
         tooltip,
+        translations,
+        value,
+        valueProperty,
+        values,
+        ...props
     },
 ) {
     let Tag = Select;
@@ -34,7 +31,7 @@ function ReactSelect(
     let options;
 
     if (loadOptions) {
-        Tag = AsyncSelect;
+        Tag = AsyncCreatable;
         if (values && values.length > 0) {
             // values are now the default options for the drop down without autocompletion call.
             defaultOptions = values;
@@ -66,24 +63,21 @@ function ReactSelect(
     }
     return (
         <React.Fragment>
-            <span className={`mm-select ${style.text}` }>{label}</span>
+            <span className={`mm-select ${style.text}`}>{label}</span>
             {tooltipElement}
             <Tag
                 // closeMenuOnSelect={false}
                 components={makeAnimated()}
-                value={value}
-                defaultValue={defaultValue}
-                isMulti={multi}
                 options={options}
                 isClearable={!required}
                 getOptionValue={option => (option[valueProperty])}
                 getOptionLabel={getOptionLabel || (option => (option[labelProperty]))}
-                onChange={onChange}
                 loadOptions={loadOptions}
                 defaultOptions={defaultOptions}
                 placeholder={translations['select.placeholder']}
-                className={className}
                 cache={{}}
+                value={value || null}
+                {...props}
             />
             <AdditionalLabel title={additionalLabel} />
         </React.Fragment>

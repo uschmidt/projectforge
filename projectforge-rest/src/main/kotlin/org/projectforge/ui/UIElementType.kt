@@ -36,6 +36,7 @@ enum class UIElementType {
     LIST,
     NAMED_CONTAINER,
     RADIOBUTTON,
+    READONLY_FIELD,
     ROW,
     SELECT,
     TABLE,

@@ -23,10 +23,13 @@
 
 package org.projectforge.ui
 
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.projectforge.business.fibu.RechnungDO
+import org.projectforge.business.fibu.RechnungsPositionDO
 import org.projectforge.business.timesheet.TimesheetDO
 import org.projectforge.test.AbstractTestBase
+import java.math.BigDecimal
 
 class ElementRegistryTest : AbstractTestBase() {
     @Test
@@ -37,5 +40,46 @@ class ElementRegistryTest : AbstractTestBase() {
         assertEquals("task.assignedUser", userInfo!!.i18nKey)
         val taskInfo = userInfo.parent
         assertEquals("task", taskInfo!!.i18nKey)
+    }
+
+    @Test
+    fun testListElements() {
+        val lc = LayoutContext(RechnungDO::class.java)
+        var info = ElementsRegistry.getElementInfo(lc, "positionen")
+        assertEquals(RechnungsPositionDO::class.java, info!!.genericType)
+
+        lc.registerListElement("position", "positionen")
+        info = ElementsRegistry.getElementInfo(lc, "position.menge")
+        assertEquals(BigDecimal::class.java, info!!.propertyType)
+        assertFalse(info.readOnly)
+
+        lc.registerListElement("kostZuweisung", "position.kostZuweisungen")
+        info = ElementsRegistry.getElementInfo(lc, "kostZuweisung.netto")
+        assertEquals(BigDecimal::class.java, info!!.propertyType)
+        assertFalse(info.readOnly)
+        assertEquals("fibu.common.netto", info.i18nKey)
+    }
+
+    @Test
+    fun testGetterProperties() {
+        val lc = LayoutContext(RechnungDO::class.java)
+        var info = ElementsRegistry.getElementInfo(lc, "grossSum")
+        assertEquals(BigDecimal::class.java, info!!.propertyType)
+        assertTrue(info.readOnly)
+        assertEquals("fibu.common.brutto", info.i18nKey)
+
+        info = ElementsRegistry.getElementInfo(lc, "netSum")
+        assertEquals(BigDecimal::class.java, info!!.propertyType)
+        assertTrue(info.readOnly)
+        assertEquals("fibu.common.netto", info.i18nKey)
+
+        info = ElementsRegistry.getElementInfo(lc, "nonExistingGetterAndField")
+        assertNull(info)
+
+        lc.registerListElement("position", "positionen")
+        info = ElementsRegistry.getElementInfo(lc, "position.netSum")
+        assertEquals(BigDecimal::class.java, info!!.propertyType)
+        assertTrue(info.readOnly)
+        assertEquals("fibu.common.netto", info.i18nKey)
     }
 }
