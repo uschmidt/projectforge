@@ -58,7 +58,6 @@ open class LogoutRest {
     fun logout(request: HttpServletRequest,
                response: HttpServletResponse)
             : ResponseAction {
-        //request.logout()
         val stayLoggedInCookie = cookieService.getStayLoggedInCookie(request)
         val user = UserFilter.getUser(request)
         if (user != null) {
@@ -76,6 +75,7 @@ open class LogoutRest {
         if (stayLoggedInCookie != null) {
             response.addCookie(stayLoggedInCookie)
         }
+        request.logout()
         return ResponseAction(url = "/", targetType = TargetType.REDIRECT)
     }
 }

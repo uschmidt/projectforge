@@ -134,7 +134,7 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-spring-security-adapter</artifactId>
-      <version>7.0.0</version>
+      <version>${keycloak.version}</version>
     </dependency>
   </dependencies>
   <dependencyManagement>

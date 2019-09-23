@@ -23,6 +23,7 @@
 
 package org.projectforge.rest.pub
 
+import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken
 import org.projectforge.Const
 import org.projectforge.business.login.LoginDefaultHandler
 import org.projectforge.business.login.LoginProtection
@@ -88,6 +89,7 @@ open class LoginRest {
               request: HttpServletRequest,
               response: HttpServletResponse)
             : ResponseEntity<String> {
+        val principalName = getPrincipalName(request)
         val loginResultStatus = _login(request, response, loginData)
         if (loginResultStatus == LoginResultStatus.SUCCESS)
             return ResponseEntity.ok("Success")
@@ -100,7 +102,7 @@ open class LoginRest {
         if (user == null || loginResult.loginResultStatus != LoginResultStatus.SUCCESS) {
             return loginResult.loginResultStatus
         }
-        if (UserFilter.isUpdateRequiredFirst() == true) {
+        if (UserFilter.isUpdateRequiredFirst()) {
             log.warn("******* Update of ProjectForge required first. Please login via old login page. LoginService should be used instead.")
             return LoginResultStatus.FAILED
         }
@@ -125,7 +127,7 @@ open class LoginRest {
         val offset = loginProtection.getFailedLoginTimeOffsetIfExists(loginData.username, clientIpAddress)
         if (offset > 0) {
             val seconds = (offset / 1000).toString()
-            log.warn("The account for '${loginData.username}' is locked for ${seconds} seconds due to failed login attempts. Please try again later.")
+            log.warn("The account for '${loginData.username}' is locked for $seconds seconds due to failed login attempts. Please try again later.")
 
             val numberOfFailedAttempts = loginProtection.getNumberOfFailedLoginAttempts(loginData.username, clientIpAddress)
             return LoginResult().setLoginResultStatus(LoginResultStatus.LOGIN_TIME_OFFSET).setMsgParams(seconds,
@@ -151,7 +153,7 @@ open class LoginRest {
             if (remoteAddr.contains(",")) {
                 // sometimes the header is of form client ip,proxy 1 ip,proxy 2 ip,...,proxy n ip,
                 // we just want the client
-                remoteAddr = remoteAddr.split(',')[0].trim({ it <= ' ' })
+                remoteAddr = remoteAddr.split(',')[0].trim { it <= ' ' }
             }
             try {
                 // If ip4/6 address string handed over, simply does pattern validation.
@@ -172,5 +174,10 @@ open class LoginRest {
 
     private fun getUserGroupCache(): UserGroupCache {
         return getTenantRegistry().userGroupCache
+    }
+
+    private fun getPrincipalName(request: HttpServletRequest): String? {
+        val userPrincipal = request.userPrincipal as KeycloakAuthenticationToken
+        return userPrincipal.account.keycloakSecurityContext.token.preferredUsername
     }
 }
