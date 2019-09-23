@@ -44,7 +44,7 @@ public class ImportTestDataTest extends AbstractTestBase {
 
   @Override
   protected void beforeAll() {
-    recreateDataBase();
+    clearDatabase();
   }
 
   @Override

@@ -24,13 +24,13 @@
 package org.projectforge.business.calendar
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 import org.projectforge.business.user.UserPrefDao
 import org.projectforge.favorites.Favorites
 import org.projectforge.framework.configuration.ConfigXml
+import org.projectforge.framework.i18n.translate
 import org.projectforge.framework.persistence.user.api.ThreadLocalUserContext
 import org.projectforge.framework.persistence.user.api.UserContext
 import org.projectforge.framework.persistence.user.entities.PFUserDO
@@ -60,8 +60,7 @@ class CalendarFilterFavoritesTest {
         val favs = Favorites<CalendarFilter>()
         favs.add(CalendarFilter())
         val prefix = favs.getElementAt(0)!!.name ?: fail("prefix can't be null")
-        assertTrue(prefix.startsWith("???")) // Translations not available
-        assertTrue(prefix.endsWith("???")) // Translations not available
+        assertEquals(translate("favorite.untitled"), prefix)
         favs.add(CalendarFilter())
         assertEquals("$prefix 1", favs.getElementAt(1)!!.name)
         favs.add(CalendarFilter(name = "My favorite"))
