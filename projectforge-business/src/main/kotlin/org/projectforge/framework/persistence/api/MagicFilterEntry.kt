@@ -24,10 +24,6 @@
 package org.projectforge.framework.persistence.api
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import org.projectforge.common.props.PropUtils
-import org.projectforge.framework.time.PFDateTime
-import org.projectforge.framework.utils.NumberHelper
-import java.util.*
 
 class MagicFilterEntry(
         /**
@@ -39,148 +35,25 @@ class MagicFilterEntry(
          */
         var value: String? = null) {
 
-    @JsonIgnore
-    internal var type: Class<*>? = null
+    /**
+     * Find entries where the given field is equals or higher than the given fromValue (range search).
+     */
+    var fromValue: String? = null
 
     /**
-     * The search string for data base queries (SQL), '*' will be replaced by '%'.
+     * Find entries where the given field is equals or lower than the given toValue (range search).
      */
-    @JsonIgnore
-    internal var dbSearchString: String? = null
-
-    @JsonIgnore
-    internal var plainSearchString: String? = null
-
-    @JsonIgnore
-    internal var matchType: MatchType? = null
-
-    @JsonIgnore
-    internal var searchType: SearchType? = null
-
-    @JsonIgnore
-    var fromValue: String? = null
-        private set
-
-    @JsonIgnore
     var toValue: String? = null
-        private set
 
-    @JsonIgnore
+    /**
+     * Find entries where the given field has one of the given values).
+     */
     var values: Array<String>? = null
-        private set
-
-    @JsonIgnore
-    var fromValueDate: PFDateTime? = null
-        private set
-
-    @JsonIgnore
-    var toValueDate: PFDateTime? = null
-        private set
-
-    @JsonIgnore
-    var valueInt: Int? = null
-        private set
-
-    @JsonIgnore
-    var fromValueInt: Int? = null
-        private set
-
-    @JsonIgnore
-    var toValueInt: Int? = null
         private set
 
     @JsonIgnore
     var isNew: Boolean? = false
         private set
-
-    /**
-     * Only for documentation
-     */
-    private class Value(
-            /**
-             * Find entries where the given field is equals to this given single value, or as search string.
-             */
-            var value: String? = null,
-            /**
-             * Find entries where the given field is equals or higher than the given fromValue (range search).
-             */
-            var fromValue: String? = null,
-            /**
-             * Find entries where the given field is equals or lower than the given toValue (range search).
-             */
-            var toValue: String? = null,
-            /**
-             * Find entries where the given field has one of the given values).
-             */
-            var values: MutableList<String>? = null)
-
-    internal enum class SearchType { NONE, STRING_SEARCH, FIELD_STRING_SEARCH, FIELD_RANGE_SEARCH, FIELD_VALUES_SEARCH }
-
-    enum class MatchType {
-        /**
-         * '*string*'
-         */
-        CONTAINS,
-        /**
-         * 'string'
-         */
-        EXACT,
-        /**
-         * 'string*' (default)
-         */
-        STARTS_WITH,
-        /**
-         * '*string'
-         */
-        ENDS_WITH
-    }
-
-    @JsonIgnore
-    private val log = org.slf4j.LoggerFactory.getLogger(MagicFilterEntry::class.java)
-
-    internal fun analyze(entityClass: Class<*>) {
-        val fieldType = PropUtils.getField(entityClass, field)?.type ?: String::class.java
-        this.type = fieldType
-        if (fieldType == String::class.java) {
-            searchType = if (field.isNullOrBlank()) SearchType.STRING_SEARCH else SearchType.FIELD_STRING_SEARCH
-            val str = value?.trim() ?: ""
-            var plainStr = str
-            var dbStr: String
-            if (str.startsWith("*")) {
-                plainStr = plainStr.substring(1)
-                if (str.endsWith("*")) {
-                    plainStr = plainStr.substring(0, plainStr.lastIndex)
-                    dbStr = "%$plainStr%"
-                    matchType = MatchType.CONTAINS
-                } else {
-                    dbStr = "%$plainStr"
-                    matchType = MatchType.STARTS_WITH
-                }
-            } else {
-                if (str.endsWith("*")) {
-                    plainStr = plainStr.substring(0, plainStr.lastIndex)
-                    dbStr = "$plainStr%"
-                    matchType = MatchType.ENDS_WITH
-                } else {
-                    matchType = MatchType.EXACT
-                    dbStr = plainStr
-                }
-            }
-            this.plainSearchString = plainStr
-            this.dbSearchString = dbStr
-        } else if (fieldType == Date::class.java) {
-            fromValueDate = PFDateTime.parseUTCDate(fromValue)
-            toValueDate = PFDateTime.parseUTCDate(toValue)
-        } else if (fieldType == Integer::class.java) {
-            valueInt = NumberHelper.parseInteger(value)
-            fromValueInt = NumberHelper.parseInteger(fromValue)
-            toValueInt = NumberHelper.parseInteger(toValue)
-        } else if (BaseDO::class.java.isAssignableFrom(fieldType)) {
-            valueInt = NumberHelper.parseInteger(value)
-        } else {
-            log.warn("Search entry of type '${fieldType.name}' not yet supported for field '$field'.")
-        }
-    }
 
     fun isModified(other: MagicFilterEntry): Boolean {
         if (this.field != other.field) return true

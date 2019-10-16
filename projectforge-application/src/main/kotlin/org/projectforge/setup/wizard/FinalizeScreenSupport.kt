@@ -47,9 +47,9 @@ object FinalizeScreenSupport {
         setupData.domain = domain
         setupData.serverPort = if (port in 1..65535) port else 8080
         setupData.currencySymbol = currencySymbol
-        setupData.defaultLocale = listOfLocales.get(defaultLocaleSelectedIndex).value
-        setupData.defaultFirstDayOfWeek = listOfWeekdays.get(defaultFirstDayOfWeekSelectedIndex).value
-        setupData.defaultTimeNotation = listOfTimeNotations.get(defaultTimeNotationSelectedIndex).value
+        setupData.defaultLocale = listOfLocales[defaultLocaleSelectedIndex].value
+        setupData.defaultFirstDayOfWeek = listOfWeekdays[defaultFirstDayOfWeekSelectedIndex].value
+        setupData.defaultTimeNotation = listOfTimeNotations[defaultTimeNotationSelectedIndex].value
         setupData.startServer = startServer
         setupData.developmentMode = developmentMode
     }
@@ -69,7 +69,7 @@ object FinalizeScreenSupport {
 
     fun getInfoText(portText: String, dir: File): String {
         val sb = StringBuilder()
-        sb.append("Please open your favorite browser after startup: http://localhost:${portText} and enjoy it!\n\n")
+        sb.append("Please open your favorite browser after startup: http://localhost:$portText and enjoy it!\n\n")
         if (ProjectForgeHomeFinder.isStandardProjectForgeUserDir(dir)) {
             sb.append("You chose the standard directory of ProjectForge, that will be found by ProjectForge automatically (OK).\n\n")
         } else {

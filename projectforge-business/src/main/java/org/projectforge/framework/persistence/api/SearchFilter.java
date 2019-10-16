@@ -23,13 +23,13 @@
 
 package org.projectforge.framework.persistence.api;
 
-import java.util.Date;
-
 import org.apache.commons.lang3.StringUtils;
 import org.projectforge.business.task.TaskDO;
 import org.projectforge.framework.persistence.user.entities.PFUserDO;
 import org.projectforge.framework.time.DateHolder;
 import org.projectforge.framework.time.DatePrecision;
+
+import java.util.Date;
 
 public class SearchFilter extends BaseSearchFilter
 {
@@ -106,7 +106,7 @@ public class SearchFilter extends BaseSearchFilter
    */
   public boolean isEmpty()
   {
-    return StringUtils.isEmpty(searchString) == true
+    return StringUtils.isEmpty(searchString)
         && modifiedByUserId == null
         && startTimeOfModification == null
         && stopTimeOfModification == null;

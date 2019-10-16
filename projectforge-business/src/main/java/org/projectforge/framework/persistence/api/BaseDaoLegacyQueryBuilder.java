@@ -69,7 +69,7 @@ public class BaseDaoLegacyQueryBuilder {
   public <O extends ExtendedBaseDO<Integer>> List<O> getList(BaseDao<O> baseDao, final QueryFilter filter) throws AccessException {
     long begin = System.currentTimeMillis();
     baseDao.checkLoggedInUserSelectAccess();
-    if (accessChecker.isRestrictedUser() == true) {
+    if (accessChecker.isRestrictedUser()) {
       return new ArrayList<>();
     }
     List<O> list = internalGetList(baseDao, filter);
@@ -97,7 +97,7 @@ public class BaseDaoLegacyQueryBuilder {
   public  <O extends ExtendedBaseDO<Integer>>  List<O> internalGetList(BaseDao<O> baseDao, final QueryFilter filter) throws AccessException {
     final BaseSearchFilter searchFilter = filter.getFilter();
     filter.clearErrorMessage();
-    if (searchFilter.isIgnoreDeleted() == false) {
+    if (!searchFilter.isIgnoreDeleted()) {
       filter.add(Restrictions.eq("deleted", searchFilter.isDeleted()));
     }
     if (searchFilter.getModifiedSince() != null) {
@@ -107,7 +107,7 @@ public class BaseDaoLegacyQueryBuilder {
     List<O> list = null;
     Session session = baseDao.getSession();
     {
-      if (searchFilter.isSearchNotEmpty() == true) {
+      if (searchFilter.isSearchNotEmpty()) {
         final String searchString = HibernateSearchFilterUtils.modifySearchString(searchFilter.getSearchString());
         final String[] searchFields = searchFilter.getSearchFields() != null ? searchFilter.getSearchFields() : baseDao.getSearchFields();
         try {
@@ -122,7 +122,7 @@ public class BaseDaoLegacyQueryBuilder {
             setCacheRegion(baseDao, criteria);
 
             FullTextSession fullTextSession = Search.getFullTextSession(session);
-            org.apache.lucene.search.Query query = HibernateSearchFilterUtils.createFullTextQuery(fullTextSession, searchFields, filter, searchString, baseDao.clazz);
+            org.apache.lucene.search.Query query = HibernateSearchFilterUtils.createFullTextQuery(fullTextSession, searchFields, searchString, baseDao.clazz);
             FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(query, baseDao.clazz);
 
             fullTextQuery.setCriteriaQuery(criteria);
@@ -133,7 +133,7 @@ public class BaseDaoLegacyQueryBuilder {
 
             result = fullTextQuery.list(); // return a list of managed objects
             allResult.addAll(result);
-          } while (result.isEmpty() == false);
+          } while (!result.isEmpty());
 
           list = allResult;
         } catch (final Exception ex) {
@@ -157,9 +157,9 @@ public class BaseDaoLegacyQueryBuilder {
         if (list.size() > 0 && searchFilter.applyModificationFilter()) {
           // Search now all history entries which were modified by the given user and/or in the given time period.
           final Set<Integer> idSet = baseDao.getHistoryEntries(baseDao.getSession(), searchFilter);
-          final List<O> result = new ArrayList<O>();
+          final List<O> result = new ArrayList<>();
           for (final O entry : list) {
-            if (baseDao.contains(idSet, entry) == true) {
+            if (baseDao.contains(idSet, entry)) {
               result.add(entry);
             }
           }
@@ -167,16 +167,16 @@ public class BaseDaoLegacyQueryBuilder {
         }
       }
     }
-    if (searchFilter.isSearchHistory() == true && searchFilter.isSearchNotEmpty() == true) {
+    if (searchFilter.isSearchHistory() && searchFilter.isSearchNotEmpty()) {
       // Search now all history for the given search string.
       final Set<Integer> idSet = baseDao.searchHistoryEntries(baseDao.getSession(), searchFilter);
-      if (CollectionUtils.isNotEmpty(idSet) == true) {
+      if (CollectionUtils.isNotEmpty(idSet)) {
         for (final O entry : list) {
-          if (idSet.contains(entry.getId()) == true) {
+          if (idSet.contains(entry.getId())) {
             idSet.remove(entry.getId()); // Object does already exist in list.
           }
         }
-        if (idSet.isEmpty() == false) {
+        if (!idSet.isEmpty()) {
           final Criteria criteria = filter.buildCriteria(baseDao.getSession(), baseDao.clazz);
           setCacheRegion(baseDao, criteria);
           criteria.add(Restrictions.in("id", idSet));
@@ -187,14 +187,14 @@ public class BaseDaoLegacyQueryBuilder {
     }
     if (list == null) {
       // History search without search string.
-      list = new ArrayList<O>();
+      list = new ArrayList<>();
     }
     return list;
   }
 
   private void setCacheRegion(BaseDao baseDao, final Criteria criteria) {
     criteria.setCacheable(true);
-    if (baseDao.useOwnCriteriaCacheRegion() == false) {
+    if (!baseDao.useOwnCriteriaCacheRegion()) {
       return;
     }
     criteria.setCacheRegion(baseDao.getClass().getName());

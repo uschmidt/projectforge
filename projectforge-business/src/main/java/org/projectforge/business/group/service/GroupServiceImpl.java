@@ -23,12 +23,6 @@
 
 package org.projectforge.business.group.service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-
 import org.apache.commons.lang3.StringUtils;
 import org.projectforge.business.multitenancy.TenantRegistryMap;
 import org.projectforge.business.user.GroupDao;
@@ -40,6 +34,8 @@ import org.projectforge.framework.persistence.user.entities.GroupDO;
 import org.projectforge.framework.persistence.user.entities.PFUserDO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
 
 @Service
 public class GroupServiceImpl implements GroupService
@@ -74,7 +70,7 @@ public class GroupServiceImpl implements GroupService
     if (groupSet == null) {
       return "";
     }
-    final List<String> list = new ArrayList<String>();
+    final List<String> list = new ArrayList<>();
     for (final Integer groupId : groupSet) {
       final GroupDO group = getGroup(groupId);
       if (group != null) {
@@ -93,11 +89,11 @@ public class GroupServiceImpl implements GroupService
   @Override
   public List<String> getGroupNames(final String groupIds)
   {
-    if (StringUtils.isEmpty(groupIds) == true) {
+    if (StringUtils.isEmpty(groupIds)) {
       return null;
     }
     final int[] ids = StringHelper.splitToInts(groupIds, ",", false);
-    final List<String> list = new ArrayList<String>();
+    final List<String> list = new ArrayList<>();
     for (final int id : ids) {
       final GroupDO group = getGroup(id);
       if (group != null) {
@@ -117,10 +113,10 @@ public class GroupServiceImpl implements GroupService
   @Override
   public Collection<GroupDO> getSortedGroups(final String groupIds)
   {
-    if (StringUtils.isEmpty(groupIds) == true) {
+    if (StringUtils.isEmpty(groupIds)) {
       return null;
     }
-    Collection<GroupDO> sortedGroups = new TreeSet<GroupDO>(groupsComparator);
+    Collection<GroupDO> sortedGroups = new TreeSet<>(groupsComparator);
     final int[] ids = StringHelper.splitToInts(groupIds, ",", false);
     for (final int id : ids) {
       final GroupDO group = getGroup(id);
@@ -151,10 +147,10 @@ public class GroupServiceImpl implements GroupService
   {
 
       final Collection<GroupDO> allGroups = getUserGroupCache().getAllGroups();
-    TreeSet<GroupDO> sortedGroups = new TreeSet<GroupDO>(groupsComparator);
+    TreeSet<GroupDO> sortedGroups = new TreeSet<>(groupsComparator);
       final PFUserDO loggedInUser = ThreadLocalUserContext.getUser();
       for (final GroupDO group : allGroups) {
-        if (group.isDeleted() == false && groupDao.hasSelectAccess(loggedInUser, group, false) == true) {
+        if (!group.isDeleted() && groupDao.hasSelectAccess(loggedInUser, group, false)) {
           sortedGroups.add(group);
         }
       }

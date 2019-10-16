@@ -23,19 +23,18 @@
 
 package org.projectforge.framework.utils;
 
+import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
-
-import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -123,7 +122,7 @@ public class Crypt
   private static void initialize()
   {
     synchronized (log) {
-      if (initialized == false) {
+      if (!initialized) {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         initialized = true;
       }

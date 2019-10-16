@@ -41,7 +41,7 @@ public class ConnectionSettings
 
   private static final DateTimeFormat DEFAULT_DATE_TIME_FORMAT = DateTimeFormat.ISO_DATE_TIME_MILLIS;
 
-  private static ThreadLocal<ConnectionSettings> context = new ThreadLocal<ConnectionSettings>();
+  private static ThreadLocal<ConnectionSettings> context = new ThreadLocal<>();
 
   private DateTimeFormat dateTimeFormat = DEFAULT_DATE_TIME_FORMAT;
 
@@ -72,7 +72,7 @@ public class ConnectionSettings
    */
   public final static void set(final ConnectionSettings settings)
   {
-    if (log.isDebugEnabled() == true) {
+    if (log.isDebugEnabled()) {
       log.debug("set connection settings: " + settings);
     }
     context.set(settings);

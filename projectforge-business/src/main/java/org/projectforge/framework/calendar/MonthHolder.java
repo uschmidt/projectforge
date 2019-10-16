@@ -23,19 +23,13 @@
 
 package org.projectforge.framework.calendar;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
-
 import org.projectforge.framework.time.DateHelper;
 import org.projectforge.framework.time.DateHolder;
 import org.projectforge.framework.time.DatePrecision;
 import org.projectforge.framework.time.DayHolder;
+
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * 
@@ -125,7 +119,7 @@ public class MonthHolder
     dateHolder.computeTime();
     dateHolder.setBeginOfWeek(); // get first week (with days of previous month)
 
-    weeks = new ArrayList<WeekHolder>();
+    weeks = new ArrayList<>();
     do {
       final WeekHolder week = new WeekHolder(dateHolder.getCalendar(), month);
       weeks.add(week);
@@ -145,10 +139,10 @@ public class MonthHolder
 
   public List<DayHolder> getDays()
   {
-    final List<DayHolder> list = new LinkedList<DayHolder>();
+    final List<DayHolder> list = new LinkedList<>();
     DayHolder dh = new DayHolder(begin);
     int paranoiaCounter = 40;
-    while (dh.after(end) == false && --paranoiaCounter > 0) {
+    while (!dh.after(end) && --paranoiaCounter > 0) {
       list.add(dh);
       dh = dh.clone();
       dh.add(Calendar.DAY_OF_MONTH, 1);
@@ -204,7 +198,7 @@ public class MonthHolder
    */
   public boolean containsDay(final DayHolder day)
   {
-    return (day.getDate().before(begin) == false && day.getDate().after(end) == false);
+    return (!day.getDate().before(begin) && !day.getDate().after(end));
   }
 
   public BigDecimal getNumberOfWorkingDays()

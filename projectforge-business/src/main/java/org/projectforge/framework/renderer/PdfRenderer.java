@@ -73,7 +73,7 @@ public class PdfRenderer
   {
     if (fontResourcePath == null) {
       final File dir = new File(configurationService.getFontsDir());
-      if (dir.exists() == false) {
+      if (!dir.exists()) {
         log.error("Application's font dir does not exist: " + dir.getAbsolutePath());
       }
       this.fontResourcePath = dir.getAbsolutePath();
@@ -133,7 +133,7 @@ public class PdfRenderer
       final String url = (String) result[1];
       if (url == null) {
         log.error("Url of xsl resource is null.");
-        throw new InternalErrorException();
+        throw new InternalErrorException("exception.internalError");
       }
       xltStreamSource.setSystemId(url);
 
@@ -161,9 +161,6 @@ public class PdfRenderer
       // Start XSLT transformation and FOP processing
       transformer.transform(src, res);
     } catch (final FOPException ex) {
-      log.error(ex.getMessage(), ex);
-      throw new RuntimeException(ex);
-    } catch (final TransformerConfigurationException ex) {
       log.error(ex.getMessage(), ex);
       throw new RuntimeException(ex);
     } catch (final TransformerException ex) {

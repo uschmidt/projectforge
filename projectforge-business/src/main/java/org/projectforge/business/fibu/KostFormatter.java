@@ -64,8 +64,8 @@ public class KostFormatter {
     if (projekt == null) {
       return "?.???.???";
     }
-    final String delimiter = (numberFormat == true) ? "" : ".";
-    final StringBuffer buf = new StringBuffer();
+    final String delimiter = (numberFormat) ? "" : ".";
+    final StringBuilder buf = new StringBuilder();
     buf.append(String.valueOf(projekt.getNummernkreis())).append(delimiter);
     if (projekt.getKunde() != null) {
       buf.append(format(projekt.getKunde()));
@@ -86,7 +86,7 @@ public class KostFormatter {
     if (projekt == null) {
       return "";
     }
-    final StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
     buf.append(format(projekt));
     if (projekt.getKunde() != null) {
       buf.append(" - ").append(StringUtils.abbreviate(projekt.getKunde().getName(), 30)).append(": ");
@@ -118,11 +118,11 @@ public class KostFormatter {
    * @return formatKunde(kunde), kundeText
    */
   public static String formatKunde(final KundeDO kunde, final String kundeText) {
-    final StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
     if (kunde != null) {
       buf.append(formatKunde(kunde));
     }
-    if (StringUtils.isNotBlank(kundeText) == true) {
+    if (StringUtils.isNotBlank(kundeText)) {
       if (kunde != null) {
         buf.append(", ");
       }
@@ -180,8 +180,8 @@ public class KostFormatter {
     if (kost2 == null) {
       return "";
     }
-    final String delimiter = (numberFormat == true) ? "" : ".";
-    final StringBuffer buf = new StringBuffer();
+    final String delimiter = (numberFormat) ? "" : ".";
+    final StringBuilder buf = new StringBuilder();
     buf.append(kost2.getNummernkreis()).append(delimiter).append(format3Digits(kost2.getBereich())).append(delimiter)
             .append(format2Digits(kost2.getTeilbereich())).append(delimiter);
     if (kost2.getKost2Art() != null) {
@@ -207,8 +207,8 @@ public class KostFormatter {
     if (kost2 == null) {
       return "";
     }
-    final StringBuffer buf = new StringBuffer();
-    if (StringUtils.isNotBlank(kost2.getDescription()) == true) {
+    final StringBuilder buf = new StringBuilder();
+    if (StringUtils.isNotBlank(kost2.getDescription())) {
       buf.append(kost2.getDescription()).append("; ");
     }
     if (kost2.getProjekt() != null) {
@@ -245,11 +245,11 @@ public class KostFormatter {
     if (kost2 == null) {
       return "";
     }
-    final StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
     buf.append(format(kost2));
     if (kost2.getProjekt() != null) {
       buf.append(" - ").append(kost2.getKost2Art().getName());
-      if (kost2.getKost2Art().getFakturiert() == false) {
+      if (!kost2.getKost2Art().getFakturiert()) {
         buf.append(" (nf)");
       }
     } else {
@@ -272,8 +272,8 @@ public class KostFormatter {
     if (kost1 == null) {
       return "";
     }
-    final String delimiter = (numberFormat == true) ? "" : ".";
-    final StringBuffer buf = new StringBuffer();
+    final String delimiter = (numberFormat) ? "" : ".";
+    final StringBuilder buf = new StringBuilder();
     buf.append(kost1.getNummernkreis()).append(delimiter).append(format3Digits(kost1.getBereich())).append(delimiter)
             .append(format2Digits(kost1.getTeilbereich())).append(delimiter).append(format2Digits(kost1.getEndziffer()));
     return buf.toString();
@@ -397,7 +397,7 @@ public class KostFormatter {
   }
 
   public static String formatZeitraum(final int fromYear, final int fromMonth, final int toYear, final int toMonth) {
-    final StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
     if (fromYear > 0) {
       buf.append(formatBuchungsmonat(fromYear, fromMonth));
       if (toYear > 0) {

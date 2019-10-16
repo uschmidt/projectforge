@@ -23,17 +23,8 @@
 
 package org.projectforge.framework.persistence.jpa.impl;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-
-import javax.persistence.Id;
-
+import de.micromata.genome.db.jpa.history.api.WithHistory;
+import de.micromata.genome.util.runtime.ClassUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.standard.ClassicAnalyzer;
@@ -49,7 +40,6 @@ import org.hibernate.search.annotations.DocumentId;
 import org.projectforge.common.BeanHelper;
 import org.projectforge.framework.configuration.ApplicationContextProvider;
 import org.projectforge.framework.persistence.api.BaseSearchFilter;
-import org.projectforge.framework.persistence.api.QueryFilter;
 import org.projectforge.framework.persistence.history.entities.PfHistoryMasterDO;
 import org.projectforge.framework.persistence.jpa.PfEmgrFactory;
 import org.projectforge.framework.time.DateFormats;
@@ -57,8 +47,15 @@ import org.projectforge.framework.time.DateHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.micromata.genome.db.jpa.history.api.WithHistory;
-import de.micromata.genome.util.runtime.ClassUtils;
+import javax.persistence.Id;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Some methods pulled out of BaseDao.
@@ -106,12 +103,12 @@ public class HibernateSearchFilterUtils
     if (searchString == null) {
       return "";
     }
-    if (searchString.startsWith("'") == true) {
+    if (searchString.startsWith("'")) {
       return searchString.substring(1);
     }
     for (int i = 0; i < searchString.length(); i++) {
       final char ch = searchString.charAt(i);
-      if (Character.isLetterOrDigit(ch) == false && Character.isWhitespace(ch) == false) {
+      if (!Character.isLetterOrDigit(ch) && !Character.isWhitespace(ch)) {
         final String allowed = (i == 0) ? ALLOWED_BEGINNING_CHARS : ALLOWED_CHARS;
         if (allowed.indexOf(ch) < 0) {
           return searchString;
@@ -119,22 +116,22 @@ public class HibernateSearchFilterUtils
       }
     }
     final String[] tokens = StringUtils.split(searchString, ' ');
-    final StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
     boolean first = true;
     for (final String token : tokens) {
-      if (first == true) {
+      if (first) {
         first = false;
       } else {
         buf.append(" ");
       }
-      if (ArrayUtils.contains(luceneReservedWords, token) == false) {
+      if (!ArrayUtils.contains(luceneReservedWords, token)) {
         final String modified = modifySearchToken(token);
-        if (tokens.length > 1 && andSearch == true && StringUtils.containsNone(modified, ESCAPE_CHARS) == true) {
+        if (tokens.length > 1 && andSearch && StringUtils.containsNone(modified, ESCAPE_CHARS)) {
           buf.append("+");
         }
         buf.append(modified);
-        if (modified.endsWith("*") == false && StringUtils.containsNone(modified, ESCAPE_CHARS) == true) {
-          if (andSearch == false || tokens.length > 1) {
+        if (!modified.endsWith("*") && StringUtils.containsNone(modified, ESCAPE_CHARS)) {
+          if (!andSearch || tokens.length > 1) {
             // Don't append '*' if used by SearchForm and only one token is given. It's will be appended automatically by BaseDao before the
             // search is executed.
             buf.append('*');
@@ -163,7 +160,7 @@ public class HibernateSearchFilterUtils
    */
   protected static String modifySearchToken(final String searchToken)
   {
-    final StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
     for (int i = 0; i < searchToken.length(); i++) {
       final char ch = searchToken.charAt(i);
       /*
@@ -192,7 +189,7 @@ public class HibernateSearchFilterUtils
   {
     String className = clazz.getName();//ClassUtils.getShortClassName(clazz);
 
-    final StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
     buf.append("(+entityName:").append(className);
     if (filter.getStartTimeOfModification() != null || filter.getStopTimeOfModification() != null) {
       final DateFormat df = new SimpleDateFormat(DateFormats.LUCENE_TIMESTAMP_MINUTE);
@@ -220,7 +217,7 @@ public class HibernateSearchFilterUtils
     try {
       final FullTextSession fullTextSession = Search.getFullTextSession(session);
 
-      final org.apache.lucene.search.Query query = createFullTextQuery(fullTextSession, HISTORY_SEARCH_FIELDS, null,
+      final org.apache.lucene.search.Query query = createFullTextQuery(fullTextSession, HISTORY_SEARCH_FIELDS,
           searchString, PfHistoryMasterDO.class);
       if (query == null) {
         // An error occured:
@@ -297,7 +294,7 @@ public class HibernateSearchFilterUtils
       return ret;
     }
     for (String addf : additionalSearchFields) {
-      if (ret.contains(addf) == false) {
+      if (!ret.contains(addf)) {
         LOG.warn("Searchfield added: " + clazz.getName() + "." + addf);
         ret.add(addf);
       }
@@ -313,20 +310,20 @@ public class HibernateSearchFilterUtils
   public static String[] determineSearchFields(Class<?> clazz, String[] additionalSearchFields)
   {
     boolean useMeta = true;
-    if (useMeta == true) {
+    if (useMeta) {
       Set<String> set = getSearchFields(clazz, additionalSearchFields);
       return set.toArray(new String[] {});
     }
 
     final Field[] fields = BeanHelper.getAllDeclaredFields(clazz);
-    final Set<String> fieldNames = new TreeSet<String>();
+    final Set<String> fieldNames = new TreeSet<>();
     for (final Field field : fields) {
-      if (field.isAnnotationPresent(org.hibernate.search.annotations.Field.class) == true) {
+      if (field.isAnnotationPresent(org.hibernate.search.annotations.Field.class)) {
         // @Field(index = Index.YES /*TOKENIZED*/),
         final org.hibernate.search.annotations.Field annotation = field
             .getAnnotation(org.hibernate.search.annotations.Field.class);
         fieldNames.add(getSearchName(field.getName(), annotation));
-      } else if (field.isAnnotationPresent(org.hibernate.search.annotations.Fields.class) == true) {
+      } else if (field.isAnnotationPresent(org.hibernate.search.annotations.Fields.class)) {
         // @Fields( {
         // @Field(index = Index.YES /*TOKENIZED*/),
         // @Field(name = "name_forsort", index = Index.YES, analyze = Analyze.NO /*UN_TOKENIZED*/)
@@ -336,19 +333,19 @@ public class HibernateSearchFilterUtils
         for (final org.hibernate.search.annotations.Field annotation : annFields.value()) {
           fieldNames.add(getSearchName(field.getName(), annotation));
         }
-      } else if (field.isAnnotationPresent(Id.class) == true) {
+      } else if (field.isAnnotationPresent(Id.class)) {
         fieldNames.add(field.getName());
-      } else if (field.isAnnotationPresent(DocumentId.class) == true) {
+      } else if (field.isAnnotationPresent(DocumentId.class)) {
         fieldNames.add(field.getName());
       }
     }
     final Method[] methods = clazz.getMethods();
     for (final Method method : methods) {
-      if (method.isAnnotationPresent(org.hibernate.search.annotations.Field.class) == true) {
+      if (method.isAnnotationPresent(org.hibernate.search.annotations.Field.class)) {
         final org.hibernate.search.annotations.Field annotation = method
             .getAnnotation(org.hibernate.search.annotations.Field.class);
         fieldNames.add(getSearchName(method.getName(), annotation));
-      } else if (method.isAnnotationPresent(DocumentId.class) == true) {
+      } else if (method.isAnnotationPresent(DocumentId.class)) {
         final String prop = BeanHelper.determinePropertyName(method);
         fieldNames.add(prop);
       }
@@ -365,7 +362,7 @@ public class HibernateSearchFilterUtils
 
   private static String getSearchName(final String fieldName, final org.hibernate.search.annotations.Field annotation)
   {
-    if (StringUtils.isNotEmpty(annotation.name()) == true) {
+    if (StringUtils.isNotEmpty(annotation.name())) {
       // Name of field is changed for hibernate-search via annotation:
       return annotation.name();
     } else {
@@ -374,8 +371,7 @@ public class HibernateSearchFilterUtils
   }
 
   public static org.apache.lucene.search.Query createFullTextQuery(FullTextSession fullTextSession,
-      String[] searchFields,
-      QueryFilter filter, String searchString, Class<?> clazz)
+      String[] searchFields, String searchString, Class<?> clazz)
   {
     final MultiFieldQueryParser parser = new MultiFieldQueryParser(searchFields, new ClassicAnalyzer());
     parser.setAllowLeadingWildcard(true);

@@ -205,7 +205,7 @@ public abstract class AbstractBaseDO<I extends Serializable> implements Extended
   public void setTransientAttribute(final String key, final Object value)
   {
     if (attributeMap == null) {
-      attributeMap = new HashMap<String, Object>();
+      attributeMap = new HashMap<>();
     }
     attributeMap.put(key, value);
   }
@@ -271,17 +271,14 @@ public abstract class AbstractBaseDO<I extends Serializable> implements Extended
       // Reject field from inner class.
       return false;
     }
-    if (Modifier.isTransient(field.getModifiers()) == true) {
+    if (Modifier.isTransient(field.getModifiers())) {
       // transients.
       return false;
     }
-    if (Modifier.isStatic(field.getModifiers()) == true) {
+    if (Modifier.isStatic(field.getModifiers())) {
       // transients.
       return false;
     }
-    if ("created".equals(field.getName()) == true || "lastUpdate".equals(field.getName()) == true) {
-      return false;
-    }
-    return true;
+    return "created".equals(field.getName()) != true && "lastUpdate".equals(field.getName()) != true;
   }
 }

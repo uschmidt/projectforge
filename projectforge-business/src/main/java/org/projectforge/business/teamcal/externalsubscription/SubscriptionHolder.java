@@ -47,7 +47,7 @@ public class SubscriptionHolder implements Serializable {
   private boolean sorted;
 
   public SubscriptionHolder() {
-    eventList = new ArrayList<TeamEventDO>();
+    eventList = new ArrayList<>();
     sorted = false;
   }
 
@@ -79,7 +79,7 @@ public class SubscriptionHolder implements Serializable {
         return o1.getStartDate().compareTo(o2.getStartDate());
       }
     };
-    Collections.sort(eventList, comparator);
+    eventList.sort(comparator);
     sorted = true;
   }
 
@@ -94,19 +94,19 @@ public class SubscriptionHolder implements Serializable {
   public List<TeamEventDO> getResultList(final Long startTime, final Long endTime, final boolean minimalAccess) {
     // sorting should by synchronized
     synchronized (this) {
-      if (sorted == false) {
+      if (!sorted) {
         sort();
       }
     }
-    final List<TeamEventDO> result = new ArrayList<TeamEventDO>();
+    final List<TeamEventDO> result = new ArrayList<>();
     for (final TeamEventDO teamEventDo : eventList) {
       // all our events are sorted, if we find a event which starts
       // after the end date, we can break this iteration
       if (teamEventDo.getStartDate().getTime() > endTime) {
         break;
       }
-      if (matches(teamEventDo, startTime, endTime) == true) {
-        if (minimalAccess == true) {
+      if (matches(teamEventDo, startTime, endTime)) {
+        if (minimalAccess) {
           result.add(teamEventDo.createMinimalCopy());
         } else {
           result.add(teamEventDo);

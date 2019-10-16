@@ -23,14 +23,11 @@
 
 package org.projectforge.framework.persistence.history;
 
-import java.io.Serializable;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
+import de.micromata.genome.db.jpa.history.api.DiffEntry;
+import de.micromata.genome.db.jpa.history.api.HistProp;
+import de.micromata.genome.db.jpa.history.api.HistoryEntry;
+import de.micromata.genome.db.jpa.history.entities.EntityOpType;
+import de.micromata.genome.jpa.metainf.EntityMetadata;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
 import org.apache.commons.lang3.StringUtils;
@@ -46,11 +43,9 @@ import org.projectforge.framework.persistence.user.entities.PFUserDO;
 import org.projectforge.framework.time.DateHelper;
 import org.projectforge.framework.utils.NumberHelper;
 
-import de.micromata.genome.db.jpa.history.api.DiffEntry;
-import de.micromata.genome.db.jpa.history.api.HistProp;
-import de.micromata.genome.db.jpa.history.api.HistoryEntry;
-import de.micromata.genome.db.jpa.history.entities.EntityOpType;
-import de.micromata.genome.jpa.metainf.EntityMetadata;
+import java.io.Serializable;
+import java.sql.Timestamp;
+import java.util.*;
 
 /**
  * For storing the hibernate history entries in flat format.
@@ -92,7 +87,7 @@ public class DisplayHistoryEntry implements Serializable
 
   private PFUserDO getUser(final UserGroupCache userGroupCache, final String userId)
   {
-    if (StringUtils.isBlank(userId) == true) {
+    if (StringUtils.isBlank(userId)) {
       return null;
     }
     final Integer id = NumberHelper.parseInteger(userId);
@@ -165,20 +160,20 @@ public class DisplayHistoryEntry implements Serializable
     if (prop == null) {
       return null;
     }
-    if (StringUtils.isBlank(prop.getValue()) == true) {
+    if (StringUtils.isBlank(prop.getValue())) {
       return prop.getValue();
     }
     String type = prop.getType();
-    if (String.class.getName().equals(type) == true) {
+    if (String.class.getName().equals(type)) {
       return prop.getValue();
     }
-    if (PFUserDO.class.getName().equals(type) == true) {
+    if (PFUserDO.class.getName().equals(type)) {
       PFUserDO user = getUser(userGroupCache, prop.getValue());
       if (user != null) {
         return user;
       }
     }
-    if (EmployeeDO.class.getName().equals(type) == true || AddressbookDO.class.getName().equals(type) == true) {
+    if (EmployeeDO.class.getName().equals(type) || AddressbookDO.class.getName().equals(type)) {
       StringBuffer sb = new StringBuffer();
       getDBObjects(session, prop).forEach(dbObject -> {
         if (dbObject instanceof EmployeeDO) {

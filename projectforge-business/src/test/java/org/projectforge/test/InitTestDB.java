@@ -105,11 +105,11 @@ public class InitTestDB {
   @Autowired
   private UserRightDao userRightDao;
 
-  private final Map<String, GroupDO> groupMap = new HashMap<String, GroupDO>();
+  private final Map<String, GroupDO> groupMap = new HashMap<>();
 
-  private final Map<String, PFUserDO> userMap = new HashMap<String, PFUserDO>();
+  private final Map<String, PFUserDO> userMap = new HashMap<>();
 
-  private final Map<String, TaskDO> taskMap = new HashMap<String, TaskDO>();
+  private final Map<String, TaskDO> taskMap = new HashMap<>();
 
   public void putUser(final PFUserDO user) {
     this.userMap.put(user.getUsername(), user);
@@ -140,7 +140,7 @@ public class InitTestDB {
     tenantsToAssign.add(tenantService.getDefaultTenant());
     tenantDao.internalAssignTenants(user, tenantsToAssign, null, false, false);
     putUser(user);
-    if (user.getUsername().equals(AbstractTestBase.ADMIN) == true) {
+    if (user.getUsername().equals(AbstractTestBase.ADMIN)) {
       AbstractTestBase.ADMIN_USER = user;
     }
     return user;
@@ -162,7 +162,7 @@ public class InitTestDB {
     final GroupDO group = new GroupDO();
     group.setName(groupname);
     if (usernames != null) {
-      final Set<PFUserDO> col = new HashSet<PFUserDO>();
+      final Set<PFUserDO> col = new HashSet<>();
       for (final String username : usernames) {
         col.add(getUser(username));
       }
@@ -371,11 +371,11 @@ public class InitTestDB {
   }
 
   private void initTaskTree() {
-    if (log.isDebugEnabled() == true) {
+    if (log.isDebugEnabled()) {
       log.debug("Setting taskTree.expired: " + taskDao.getTaskTree());
     }
     taskDao.getTaskTree().clear();
-    if (log.isDebugEnabled() == true) {
+    if (log.isDebugEnabled()) {
       log.debug("TaskTree after reload: " + taskDao.getTaskTree());
     }
     if (taskDao.getTaskTree().getRootTaskNode() == null) {

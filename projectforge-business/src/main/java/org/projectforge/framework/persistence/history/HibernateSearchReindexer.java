@@ -23,10 +23,6 @@
 
 package org.projectforge.framework.persistence.history;
 
-import java.util.Date;
-import java.util.Locale;
-import java.util.Set;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -48,6 +44,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
+
+import java.util.Date;
+import java.util.Locale;
+import java.util.Set;
 
 @Service
 public class HibernateSearchReindexer
@@ -80,11 +80,11 @@ public class HibernateSearchReindexer
       return;
     }
     final String result = rebuildDatabaseSearchIndices();
-    if (result.contains("*") == true) {
+    if (result.contains("*")) {
       log.error(ERROR_MSG);
       final String recipients = GlobalConfiguration.getInstance()
           .getStringValue(ConfigurationParam.SYSTEM_ADMIN_E_MAIL);
-      if (StringUtils.isNotBlank(recipients) == true) {
+      if (StringUtils.isNotBlank(recipients)) {
         log.info("Try to inform administrator about re-indexing error.");
         final Mail msg = new Mail();
         msg.addTo(recipients);

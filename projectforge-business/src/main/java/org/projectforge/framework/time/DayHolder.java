@@ -23,17 +23,12 @@
 
 package org.projectforge.framework.time;
 
-import java.math.BigDecimal;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
-
 import org.apache.commons.lang3.Validate;
 import org.projectforge.framework.calendar.Holidays;
 import org.projectforge.framework.i18n.UserException;
+
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * @author Kai Reinhard (k.reinhard@micromata.de)
@@ -76,12 +71,12 @@ public class DayHolder extends DateHolder
   {
     Validate.notNull(from);
     Validate.notNull(to);
-    if (to.before(from) == true) {
+    if (to.before(from)) {
       return BigDecimal.ZERO;
     }
-    if (from.isSameDay(to) == true) {
+    if (from.isSameDay(to)) {
       final DayHolder day = new DayHolder(from);
-      if (day.isWorkingDay() == true) {
+      if (day.isWorkingDay()) {
         final BigDecimal workFraction = day.getWorkFraction();
         if (workFraction != null) {
           return day.getWorkFraction();
@@ -96,7 +91,7 @@ public class DayHolder extends DateHolder
     BigDecimal numberOfWorkingDays = BigDecimal.ZERO;
     int numberOfFullWorkingDays = 0;
     int dayCounter = 1;
-    if (day.isWorkingDay() == true) {
+    if (day.isWorkingDay()) {
       final BigDecimal workFraction = day.getWorkFraction();
       if (workFraction != null) {
         numberOfWorkingDays = numberOfWorkingDays.add(day.getWorkFraction());
@@ -110,7 +105,7 @@ public class DayHolder extends DateHolder
         throw new UserException(
             "getNumberOfWorkingDays does not support calculation of working days for a time period greater than two years!");
       }
-      if (day.isWorkingDay() == true) {
+      if (day.isWorkingDay()) {
         final BigDecimal workFraction = day.getWorkFraction();
         if (workFraction != null) {
           numberOfWorkingDays = numberOfWorkingDays.add(day.getWorkFraction());
@@ -118,7 +113,7 @@ public class DayHolder extends DateHolder
           numberOfFullWorkingDays++;
         }
       }
-    } while (day.isSameDay(to) == false);
+    } while (!day.isSameDay(to));
     numberOfWorkingDays = numberOfWorkingDays.add(new BigDecimal(numberOfFullWorkingDays));
     return numberOfWorkingDays;
   }
@@ -194,7 +189,7 @@ public class DayHolder extends DateHolder
 
   public boolean isSunOrHoliday()
   {
-    if (isSunday() == true || isHoliday() == true)
+    if (isSunday() || isHoliday())
       return true;
     else return false;
   }
@@ -280,7 +275,7 @@ public class DayHolder extends DateHolder
   public DayHolder addObject(final String key, final Object value)
   {
     if (this.objects == null) {
-      this.objects = new HashMap<String, Object>();
+      this.objects = new HashMap<>();
     }
     this.objects.put(key, value);
     return this;

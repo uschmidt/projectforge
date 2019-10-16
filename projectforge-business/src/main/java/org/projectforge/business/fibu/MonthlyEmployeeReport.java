@@ -167,9 +167,9 @@ public class MonthlyEmployeeReport implements Serializable {
   /**
    * Days with time sheets.
    */
-  private final Set<Integer> bookedDays = new HashSet<Integer>();
+  private final Set<Integer> bookedDays = new HashSet<>();
 
-  private final List<Integer> unbookedDays = new ArrayList<Integer>();
+  private final List<Integer> unbookedDays = new ArrayList<>();
 
   /**
    * Key is kost2.id.
@@ -246,7 +246,7 @@ public class MonthlyEmployeeReport implements Serializable {
       this.employee = employeeService.getEmployeeByUserId(this.user.getId());
     }
     // Create the weeks:
-    this.weeks = new ArrayList<MonthlyEmployeeReportWeek>();
+    this.weeks = new ArrayList<>();
     final DateHolder dh = new DateHolder();
     dh.setDate(year, month, 1, 0, 0, 0);
     fromDate = dh.getDate();
@@ -270,7 +270,7 @@ public class MonthlyEmployeeReport implements Serializable {
     final DayHolder day = new DayHolder(sheet.getStartTime());
     bookedDays.add(day.getDayOfMonth());
     for (final MonthlyEmployeeReportWeek week : weeks) {
-      if (week.matchWeek(sheet) == true) {
+      if (week.matchWeek(sheet)) {
         week.addEntry(sheet, hasSelectAccess);
         return;
       }
@@ -286,12 +286,12 @@ public class MonthlyEmployeeReport implements Serializable {
 
   public void calculate() {
     Validate.notEmpty(weeks);
-    kost2Rows = new TreeMap<String, Kost2Row>();
-    taskEntries = new TreeMap<String, TaskDO>();
-    kost2Durations = new HashMap<Integer, MonthlyEmployeeReportEntry>();
-    taskDurations = new HashMap<Integer, MonthlyEmployeeReportEntry>();
+    kost2Rows = new TreeMap<>();
+    taskEntries = new TreeMap<>();
+    kost2Durations = new HashMap<>();
+    taskDurations = new HashMap<>();
     for (final MonthlyEmployeeReportWeek week : weeks) {
-      if (MapUtils.isNotEmpty(week.getKost2Entries()) == true) {
+      if (MapUtils.isNotEmpty(week.getKost2Entries())) {
         for (final MonthlyEmployeeReportEntry entry : week.getKost2Entries().values()) {
           Validate.notNull(entry.getKost2());
           kost2Rows.put(entry.getKost2().getShortDisplayName(), new Kost2Row(entry.getKost2()));
@@ -308,7 +308,7 @@ public class MonthlyEmployeeReport implements Serializable {
           totalNetDuration += entry.getWorkFractionMillis();
         }
       }
-      if (MapUtils.isNotEmpty(week.getTaskEntries()) == true) {
+      if (MapUtils.isNotEmpty(week.getTaskEntries())) {
         for (final MonthlyEmployeeReportEntry entry : week.getTaskEntries().values()) {
           Validate.notNull(entry.getTask());
           int taskId = entry.getTask().getId();
@@ -338,8 +338,8 @@ public class MonthlyEmployeeReport implements Serializable {
     this.numberOfWorkingDays = monthHolder.getNumberOfWorkingDays();
     for (final WeekHolder week : monthHolder.getWeeks()) {
       for (final DayHolder day : week.getDays()) {
-        if (day.getMonth() == this.month && day.isWorkingDay() == true
-                && bookedDays.contains(day.getDayOfMonth()) == false) {
+        if (day.getMonth() == this.month && day.isWorkingDay()
+                && !bookedDays.contains(day.getDayOfMonth())) {
           unbookedDays.add(day.getDayOfMonth());
         }
       }
@@ -363,10 +363,10 @@ public class MonthlyEmployeeReport implements Serializable {
    * @return Days of month without time sheets: 03.11., 08.11., ... or null if no entries exists.
    */
   public String getFormattedUnbookedDays() {
-    final StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
     boolean first = true;
     for (final Integer dayOfMonth : unbookedDays) {
-      if (first == true) {
+      if (first) {
         first = false;
       } else {
         buf.append(", ");
@@ -374,7 +374,7 @@ public class MonthlyEmployeeReport implements Serializable {
       buf.append(StringHelper.format2DigitNumber(dayOfMonth)).append(".")
               .append(StringHelper.format2DigitNumber(month + 1)).append(".");
     }
-    if (first == true) {
+    if (first) {
       return null;
     }
     return buf.toString();

@@ -23,23 +23,6 @@
 
 package org.projectforge.business.user.filter;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Locale;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import org.projectforge.Const;
 import org.projectforge.common.StringHelper;
 import org.projectforge.framework.persistence.user.api.ThreadLocalUserContext;
@@ -52,6 +35,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+
+import javax.servlet.*;
+import javax.servlet.http.*;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Locale;
 
 /**
  * Ensures that an user is logged in and put the user id, locale and ip to the logging mdc.<br/>
@@ -161,7 +151,7 @@ public class UserFilter implements Filter
       throws IOException, ServletException
   {
     HttpServletRequest request = (HttpServletRequest) req;
-    if (log.isDebugEnabled() == true) {
+    if (log.isDebugEnabled()) {
       log.debug("doFilter " + request.getRequestURI() + ": " + request.getSession().getId());
       final Cookie[] cookies = request.getCookies();
       if (cookies != null) {
@@ -186,9 +176,9 @@ public class UserFilter implements Filter
     try {
       MDC.put("ip", request.getRemoteAddr());
       MDC.put("session", request.getSession().getId());
-      if (ignoreFilterFor(request) == true) {
+      if (ignoreFilterFor(request)) {
         // Ignore the filter for this request:
-        if (log.isDebugEnabled() == true) {
+        if (log.isDebugEnabled()) {
           log.debug("Ignore: " + request.getRequestURI());
         }
         chain.doFilter(request, response);
@@ -196,19 +186,19 @@ public class UserFilter implements Filter
         // final boolean sessionTimeout = request.isRequestedSessionIdValid() == false;
         userContext = (UserContext) request.getSession().getAttribute(SESSION_KEY_USER);
         if (userContext != null) {
-          if (updateRequiredFirst == false) {
+          if (!updateRequiredFirst) {
             // Get the fresh user from the user cache (not in maintenance mode because user group cache is perhaps not initialized correctly
             // if updates of e. g. the user table are necessary.
             userContext.refreshUser();
           }
-          if (log.isDebugEnabled() == true) {
+          if (log.isDebugEnabled()) {
             log.debug("User found in session: " + request.getRequestURI());
           }
-        } else if (updateRequiredFirst == false) {
+        } else if (!updateRequiredFirst) {
           // Ignore stay-logged-in if redirect to update page is required.
           userContext = cookieService.checkStayLoggedIn(request, response);
           if (userContext != null) {
-            if (log.isDebugEnabled() == true) {
+            if (log.isDebugEnabled()) {
               log.debug("User's stay logged-in cookie found: " + request.getRequestURI());
             }
             userContext.setStayLoggedIn(true); // Used by MenuMobilePage.
@@ -222,7 +212,7 @@ public class UserFilter implements Filter
           request = decorateWithLocale(request);
           chain.doFilter(request, response);
         } else {
-          if (((HttpServletRequest) req).getRequestURI().startsWith(WICKET_PAGES_PREFIX) == true) {
+          if (((HttpServletRequest) req).getRequestURI().startsWith(WICKET_PAGES_PREFIX)) {
             // Access-checking is done by Wicket, not by this filter:
             request = decorateWithLocale(request);
             chain.doFilter(request, response);
@@ -239,8 +229,8 @@ public class UserFilter implements Filter
       if (user != null) {
         MDC.remove("user");
       }
-      if (log.isDebugEnabled() == true) {
-        StringBuffer sb = new StringBuffer();
+      if (log.isDebugEnabled()) {
+        StringBuilder sb = new StringBuilder();
         sb.append("doFilter finished for ");
         sb.append(request.getRequestURI());
         if (request.getSession(false) != null) {
@@ -285,7 +275,7 @@ public class UserFilter implements Filter
     final String uri = hreq.getRequestURI();
     // If you have an NPE you have probably forgotten to call setServletContext on applications start-up.
     // Paranoia setting. May-be there could be a vulnerability with request parameters:
-    if (uri.contains("?") == false) {
+    if (!uri.contains("?")) {
       // if (uri.startsWith(IGNORE_PREFIX_WICKET) && StringHelper.endsWith(uri, ".js", ".css", ".gif", ".png") == true) {
       // No access checking for Wicket resources.
       // return true;
@@ -294,7 +284,7 @@ public class UserFilter implements Filter
       // No access checking for documentation (including site doc).
       // return true;
       // } else
-      if (StringHelper.startsWith(uri, IGNORE_PREFIX_LOGO, IGNORE_PREFIX_SMS_REVEIVE_SERVLET) == true) {
+      if (StringHelper.startsWith(uri, IGNORE_PREFIX_LOGO, IGNORE_PREFIX_SMS_REVEIVE_SERVLET)) {
         // No access checking for logo and sms receiver servlet.
         // The sms receiver servlet has its own authentification (key).
         return true;

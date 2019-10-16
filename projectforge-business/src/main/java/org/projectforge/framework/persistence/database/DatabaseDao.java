@@ -23,19 +23,9 @@
 
 package org.projectforge.framework.persistence.database;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-
+import de.micromata.genome.jpa.StdRecord;
 import org.apache.commons.lang3.ClassUtils;
-import org.hibernate.CacheMode;
-import org.hibernate.Criteria;
-import org.hibernate.FlushMode;
-import org.hibernate.ScrollMode;
-import org.hibernate.ScrollableResults;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
+import org.hibernate.*;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
@@ -57,7 +47,10 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import de.micromata.genome.jpa.StdRecord;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * Creates index creation script and re-indexes data-base.
@@ -84,7 +77,7 @@ public class DatabaseDao
    */
   public static ReindexSettings createReindexSettings(final boolean onlyNewest)
   {
-    if (onlyNewest == true) {
+    if (onlyNewest) {
       final DayHolder day = new DayHolder();
       day.add(Calendar.DAY_OF_MONTH, -1); // Since yesterday:
       return new ReindexSettings(day.getDate(), 1000); // Maximum 1,000 newest entries.
@@ -135,7 +128,7 @@ public class DatabaseDao
       return reindexObjects(clazz, settings);
     }
     // OK, full re-index required:
-    if (isIn(clazz, TimesheetDO.class, PfHistoryMasterDO.class) == true) {
+    if (isIn(clazz, TimesheetDO.class, PfHistoryMasterDO.class)) {
       // MassIndexer throws LazyInitializationException for some classes, so use it only for the important classes (with most entries):
       return reindexMassIndexer(clazz);
     }
@@ -145,7 +138,7 @@ public class DatabaseDao
   private boolean isIn(final Class<?> clazz, final Class<?>... classes)
   {
     for (final Class<?> cls : classes) {
-      if (clazz.equals(cls) == true) {
+      if (clazz.equals(cls)) {
         return true;
       }
     }
@@ -157,7 +150,7 @@ public class DatabaseDao
     final Session session = sessionFactory.getCurrentSession();
     Criteria criteria = createCriteria(session, clazz, settings, true);
     final Long number = (Long) criteria.uniqueResult(); // Get number of objects to re-index (select count(*) from).
-    final boolean scrollMode = number > MIN_REINDEX_ENTRIES_4_USE_SCROLL_MODE ? true : false;
+    final boolean scrollMode = number > MIN_REINDEX_ENTRIES_4_USE_SCROLL_MODE;
     log.info("Starting re-indexing of "
         + number
         + " entries (total number) of type "
@@ -170,11 +163,11 @@ public class DatabaseDao
     HibernateCompatUtils.setFlushMode(fullTextSession, FlushMode.MANUAL);
     HibernateCompatUtils.setCacheMode(fullTextSession, CacheMode.IGNORE);
     long index = 0;
-    if (scrollMode == true) {
+    if (scrollMode) {
       // Scroll-able results will avoid loading too many objects in memory
       criteria = createCriteria(fullTextSession, clazz, settings, false);
       final ScrollableResults results = criteria.scroll(ScrollMode.FORWARD_ONLY);
-      while (results.next() == true) {
+      while (results.next()) {
         final Object obj = results.get(0);
         if (obj instanceof ExtendedBaseDO<?>) {
           ((ExtendedBaseDO<?>) obj).recalculate();
@@ -220,7 +213,6 @@ public class DatabaseDao
           //.cacheMode(CacheMode.NORMAL) //
           .threadsToLoadObjects(5) //
           //.threadsForIndexWriter(1) //
-          .threadsForSubsequentFetching(20) //
           .startAndWait();
     } catch (final InterruptedException ex) {
       log.error("Exception encountered while reindexing: " + ex.getMessage(), ex);
@@ -236,7 +228,7 @@ public class DatabaseDao
       final boolean rowCount)
   {
     final Criteria criteria = session.createCriteria(clazz);
-    if (rowCount == true) {
+    if (rowCount) {
       criteria.setProjection(Projections.rowCount());
     } else {
       if (settings != null) {
@@ -244,9 +236,9 @@ public class DatabaseDao
           criteria.addOrder(Order.desc("id")).setMaxResults(settings.getLastNEntries());
         }
         String lastUpdateProperty = null;
-        if (AbstractBaseDO.class.isAssignableFrom(clazz) == true) {
+        if (AbstractBaseDO.class.isAssignableFrom(clazz)) {
           lastUpdateProperty = "lastUpdate";
-        } else if (StdRecord.class.isAssignableFrom(clazz) == true) {
+        } else if (StdRecord.class.isAssignableFrom(clazz)) {
           lastUpdateProperty = "modifiedAt";
         }
         if (lastUpdateProperty != null && settings.getFromDate() != null) {

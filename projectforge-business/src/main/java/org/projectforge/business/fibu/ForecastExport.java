@@ -23,28 +23,8 @@
 
 package org.projectforge.business.fibu;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
-
 import org.apache.commons.collections4.CollectionUtils;
-import org.projectforge.business.excel.ContentProvider;
-import org.projectforge.business.excel.ExportCell;
-import org.projectforge.business.excel.ExportRow;
-import org.projectforge.business.excel.ExportSheet;
-import org.projectforge.business.excel.ExportWorkbook;
-import org.projectforge.business.excel.PropertyMapping;
+import org.projectforge.business.excel.*;
 import org.projectforge.business.multitenancy.TenantRegistryMap;
 import org.projectforge.business.task.TaskNode;
 import org.projectforge.common.DateFormatType;
@@ -56,6 +36,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Forcast excel export.
@@ -254,7 +241,7 @@ public class ForecastExport
     final Calendar beginDistribute;
 
     // handle payment schedule
-    if (paymentSchedules.isEmpty() == false) {
+    if (!paymentSchedules.isEmpty()) {
       BigDecimal sum = BigDecimal.ZERO;
       beginDistribute = Calendar.getInstance();
       beginDistribute.setTime(paymentSchedules.get(0).getScheduleDate());
@@ -309,7 +296,7 @@ public class ForecastExport
     currentMonth.setTime(startDate.getTime());
     currentMonth.add(Calendar.MONTH, -1);
 
-    for (int i = 0; i < monthCols.length; i++) {
+    for (PosCol monthCol : monthCols) {
       currentMonth.add(Calendar.MONTH, 1);
       BigDecimal sum = new BigDecimal(0.0);
 
@@ -330,7 +317,7 @@ public class ForecastExport
       }
 
       if (sum.compareTo(BigDecimal.ZERO) > 0 && checkAfterMonthBefore(currentMonth)) {
-        mapping.add(monthCols[i], sum);
+        mapping.add(monthCol, sum);
       }
     }
   }

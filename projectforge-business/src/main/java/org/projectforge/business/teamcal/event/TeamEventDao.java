@@ -31,9 +31,11 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.hibernate.Query;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
+import org.hibernate.type.DateType;
+import org.hibernate.type.StringType;
 import org.projectforge.business.calendar.event.model.ICalendarEvent;
 import org.projectforge.business.calendar.event.model.SeriesModificationMode;
 import org.projectforge.business.multitenancy.TenantService;
@@ -48,10 +50,7 @@ import org.projectforge.business.user.UserRightId;
 import org.projectforge.framework.calendar.CalendarUtils;
 import org.projectforge.framework.calendar.ICal4JUtils;
 import org.projectforge.framework.i18n.UserException;
-import org.projectforge.framework.persistence.api.BaseDao;
-import org.projectforge.framework.persistence.api.BaseSearchFilter;
-import org.projectforge.framework.persistence.api.ModificationStatus;
-import org.projectforge.framework.persistence.api.QueryFilter;
+import org.projectforge.framework.persistence.api.*;
 import org.projectforge.framework.persistence.history.DisplayHistoryEntry;
 import org.projectforge.framework.persistence.jpa.PfEmgrFactory;
 import org.projectforge.framework.persistence.user.api.ThreadLocalUserContext;
@@ -141,7 +140,7 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
       message.append("DBObj was null -> new values were set; ");
     }
     if (dbObj.getReminderActionType() != null) {
-      if (dbObj.getReminderActionType().equals(newObj.getReminderActionType()) == false) {
+      if (!dbObj.getReminderActionType().equals(newObj.getReminderActionType())) {
         reminderHasChanged = true;
         message.append(
                 "DBObj.getReminderActionType() was " + dbObj.getReminderActionType() + " NewObj.getReminderActionType() is " + newObj.getReminderActionType()
@@ -149,14 +148,14 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
       }
     }
     if (dbObj.getReminderDuration() != null) {
-      if (dbObj.getReminderDuration().equals(newObj.getReminderDuration()) == false) {
+      if (!dbObj.getReminderDuration().equals(newObj.getReminderDuration())) {
         reminderHasChanged = true;
         message.append(
                 "DBObj.getReminderDuration() was " + dbObj.getReminderActionType() + " NewObj.getReminderDuration() is " + newObj.getReminderActionType() + "; ");
       }
     }
     if (dbObj.getReminderDurationUnit() != null) {
-      if (dbObj.getReminderDurationUnit().equals(newObj.getReminderDurationUnit()) == false) {
+      if (!dbObj.getReminderDurationUnit().equals(newObj.getReminderDurationUnit())) {
         reminderHasChanged = true;
         message.append(
                 "DBObj.getReminderDurationUnit() was " + dbObj.getReminderActionType() + " NewObj.getReminderDurationUnit() is " + newObj.getReminderActionType()
@@ -240,7 +239,7 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
   protected void onChange(final TeamEventDO obj, final TeamEventDO dbObj) {
     handleSeriesUpdates(obj);
     // only increment sequence if PF has ownership!
-    if (obj.getOwnership() != null && obj.getOwnership() == false) {
+    if (obj.getOwnership() != null && !obj.getOwnership()) {
       return;
     }
 
@@ -285,7 +284,7 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
       recurrenceData.setUntil(getUntilDate(selectedEvent.getStartDate()));
       event.setRecurrence(recurrenceData);
       save(newEvent);
-      if (log.isDebugEnabled() == true) {
+      if (log.isDebugEnabled()) {
         log.debug("Recurrence until date of master entry will be set to: " + DateHelper.formatAsUTC(recurrenceData.getUntil()));
         log.debug("The new event is: " + newEvent);
       }
@@ -298,7 +297,7 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
       }
       newEvent.setRecurrence((RRule) null); // User only wants to modify single event, ignore recurrence.
       save(newEvent);
-      if (log.isDebugEnabled() == true) {
+      if (log.isDebugEnabled()) {
         log.debug("Recurrency ex date of master entry is now added: "
                 + DateHelper.formatAsUTC(selectedEvent.getStartDate())
                 + ". The new string is: "
@@ -370,7 +369,7 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
     }
 
     // If is all day event, set start and stop to midnight
-    if (event.getAllDay() == true) {
+    if (event.getAllDay()) {
       final Date startDate = event.getStartDate();
       if (startDate != null) {
         event.setStartDate(CalendarUtils.getUTCMidnightTimestamp(startDate));
@@ -398,9 +397,9 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
   public List<ICalendarEvent> getEventList(final TeamEventFilter filter, final boolean calculateRecurrenceEvents) {
     final List<ICalendarEvent> result = new ArrayList<>();
     List<TeamEventDO> list = getList(filter);
-    if (CollectionUtils.isNotEmpty(list) == true) {
+    if (CollectionUtils.isNotEmpty(list)) {
       for (final TeamEventDO eventDO : list) {
-        if (eventDO.hasRecurrence() == true) {
+        if (eventDO.hasRecurrence()) {
           // Added later.
           continue;
         }
@@ -421,12 +420,12 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
     final TimeZone timeZone = ThreadLocalUserContext.getTimeZone();
     if (list != null) {
       for (final TeamEventDO eventDO : list) {
-        if (eventDO.hasRecurrence() == false) {
+        if (!eventDO.hasRecurrence()) {
           log.warn("Shouldn't occur! Please contact developer.");
           // This event was handled above.
           continue;
         }
-        if (calculateRecurrenceEvents == false) {
+        if (!calculateRecurrenceEvents) {
           result.add(eventDO);
           continue;
         }
@@ -435,7 +434,7 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
           continue;
         }
         for (final ICalendarEvent event : events) {
-          if (matches(event.getStartDate(), event.getEndDate(), event.getAllDay(), teamEventFilter) == false) {
+          if (!matches(event.getStartDate(), event.getEndDate(), event.getAllDay(), teamEventFilter)) {
             continue;
           }
           result.add(event);
@@ -452,9 +451,9 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
   public List<TeamEventDO> getListForSearchDao(final BaseSearchFilter filter) {
     final TeamEventFilter teamEventFilter = new TeamEventFilter(filter); // May-be called by SeachPage
     final Collection<TeamCalDO> allAccessibleCalendars = teamCalCache.getAllAccessibleCalendars();
-    if (CollectionUtils.isEmpty(allAccessibleCalendars) == true) {
+    if (CollectionUtils.isEmpty(allAccessibleCalendars)) {
       // No calendars accessible, nothing to search.
-      return new ArrayList<TeamEventDO>();
+      return new ArrayList<>();
     }
     teamEventFilter.setTeamCals(getCalIdList(allAccessibleCalendars));
     return getList(teamEventFilter);
@@ -472,25 +471,25 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
     } else {
       teamEventFilter = new TeamEventFilter(filter);
     }
-    if (CollectionUtils.isEmpty(teamEventFilter.getTeamCals()) == true && teamEventFilter.getTeamCalId() == null) {
-      return new ArrayList<TeamEventDO>();
+    if (CollectionUtils.isEmpty(teamEventFilter.getTeamCals()) && teamEventFilter.getTeamCalId() == null) {
+      return new ArrayList<>();
     }
     final QueryFilter qFilter = buildQueryFilter(teamEventFilter);
     final List<TeamEventDO> list = getList(qFilter);
-    final List<TeamEventDO> result = new ArrayList<TeamEventDO>();
+    final List<TeamEventDO> result = new ArrayList<>();
     if (list != null) {
       for (final TeamEventDO event : list) {
-        if (matches(event.getStartDate(), event.getEndDate(), event.getAllDay(), teamEventFilter) == true) {
+        if (matches(event.getStartDate(), event.getEndDate(), event.getAllDay(), teamEventFilter)) {
           result.add(event);
         }
       }
     }
     // subscriptions
-    final List<Integer> alreadyAdded = new ArrayList<Integer>();
+    final List<Integer> alreadyAdded = new ArrayList<>();
     // precondition for abos: existing teamcals in filter
     if (teamEventFilter.getTeamCals() != null) {
       for (final Integer calendarId : teamEventFilter.getTeamCals()) {
-        if (teamEventExternalSubscriptionCache.isExternalSubscribedCalendar(calendarId) == true) {
+        if (teamEventExternalSubscriptionCache.isExternalSubscribedCalendar(calendarId)) {
           addEventsToList(teamEventFilter, result, teamEventExternalSubscriptionCache, calendarId);
           alreadyAdded.add(calendarId);
         }
@@ -498,8 +497,8 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
     }
     // if the getTeamCalId is not null and we do not added this before, do it now
     final Integer teamCalId = teamEventFilter.getTeamCalId();
-    if (teamCalId != null && alreadyAdded.contains(teamCalId) == false) {
-      if (teamEventExternalSubscriptionCache.isExternalSubscribedCalendar(teamCalId) == true) {
+    if (teamCalId != null && !alreadyAdded.contains(teamCalId)) {
+      if (teamEventExternalSubscriptionCache.isExternalSubscribedCalendar(teamCalId)) {
         addEventsToList(teamEventFilter, result, teamEventExternalSubscriptionCache, teamCalId);
       }
     }
@@ -516,7 +515,7 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
     if (calendars == null || calendars.length == 0) {
       return null;
     }
-    if (StringUtils.isBlank(searchString) == true) {
+    if (StringUtils.isBlank(searchString)) {
       return null;
     }
     checkLoggedInUserSelectAccess();
@@ -527,10 +526,9 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
     query.setParameterList("cals", calendars);
     final DateHolder dh = new DateHolder();
     dh.add(Calendar.YEAR, -1);
-    query.setDate("lastUpdate", dh.getDate());
-    query.setString("location", "%" + StringUtils.lowerCase(searchString) + "%");
-    final List<String> list = query.list();
-    return list;
+    query.setParameter("lastUpdate", dh.getDate(), DateType.INSTANCE);
+    query.setParameter("location", "%" + StringUtils.lowerCase(searchString) + "%", StringType.INSTANCE);
+    return (List<String>) query.list();
   }
 
   private void addEventsToList(final TeamEventFilter teamEventFilter, final List<TeamEventDO> result,
@@ -549,39 +547,30 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
                           final TeamEventFilter teamEventFilter) {
     final Date startDate = teamEventFilter.getStartDate();
     final Date endDate = teamEventFilter.getEndDate();
-    if (allDay == true) {
+    if (allDay) {
       // Check date match:
       final Calendar utcCal = Calendar.getInstance(DateHelper.UTC);
       utcCal.setTime(eventStartDate);
-      if (startDate != null && eventEndDate.before(startDate) == true) {
+      if (startDate != null && eventEndDate.before(startDate)) {
         // Check same day (eventStartDate in UTC and startDate of filter in user's time zone):
         final Calendar userCal = Calendar.getInstance(ThreadLocalUserContext.getTimeZone());
         userCal.setTime(startDate);
-        if (CalendarUtils.isSameDay(utcCal, utcCal) == true) {
-          return true;
-        }
-        return false;
+        return CalendarUtils.isSameDay(utcCal, utcCal);
       }
-      if (endDate != null && eventStartDate.after(endDate) == true) {
+      if (endDate != null && eventStartDate.after(endDate)) {
         // Check same day (eventEndDate in UTC and endDate of filter in user's time zone):
         final Calendar userCal = Calendar.getInstance(ThreadLocalUserContext.getTimeZone());
         userCal.setTime(endDate);
-        if (CalendarUtils.isSameDay(utcCal, utcCal) == true) {
-          return true;
-        }
-        return false;
+        return CalendarUtils.isSameDay(utcCal, utcCal);
       }
       return true;
     } else {
       // Check start and stop date due to extension of time period of buildQueryFilter:
-      if (startDate != null && eventEndDate.before(startDate) == true) {
+      if (startDate != null && eventEndDate.before(startDate)) {
         return false;
       }
-      if (endDate != null && eventStartDate.after(endDate) == true) {
-        return false;
-      }
+      return endDate == null || !eventStartDate.after(endDate);
     }
-    return true;
   }
 
   /**
@@ -594,7 +583,7 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
   private QueryFilter buildQueryFilter(final TeamEventFilter filter) {
     final QueryFilter queryFilter = new QueryFilter(filter);
     final Collection<Integer> cals = filter.getTeamCals();
-    if (CollectionUtils.isNotEmpty(cals) == true) {
+    if (CollectionUtils.isNotEmpty(cals)) {
       queryFilter.add(Restrictions.in("calendar.id", cals));
     } else if (filter.getTeamCalId() != null) {
       queryFilter.add(Restrictions.eq("calendar.id", filter.getTeamCalId()));
@@ -611,7 +600,7 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
     }
     // limit events to load to chosen date view.
     if (startDate != null && endDate != null) {
-      if (filter.isOnlyRecurrence() == false) {
+      if (!filter.isOnlyRecurrence()) {
         queryFilter.add(Restrictions.or(
                 (Restrictions.or(Restrictions.between("startDate", startDate, endDate),
                         Restrictions.between("endDate", startDate, endDate))),
@@ -625,7 +614,7 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
                                 Restrictions.gt("recurrenceUntil", startDate)))));
       }
     } else if (startDate != null) {
-      if (filter.isOnlyRecurrence() == false) {
+      if (!filter.isOnlyRecurrence()) {
         queryFilter.add(Restrictions.ge("startDate", startDate));
       } else {
         // This branch is reached for subscriptions and calendar downloads.
@@ -637,7 +626,7 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
       queryFilter.add(Restrictions.le("startDate", endDate));
     }
     queryFilter.addOrder(Order.desc("startDate"));
-    if (log.isDebugEnabled() == true) {
+    if (log.isDebugEnabled()) {
       log.debug(ToStringBuilder.reflectionToString(filter));
     }
     return queryFilter;
@@ -651,10 +640,10 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
   @Override
   public List<DisplayHistoryEntry> getDisplayHistoryEntries(final TeamEventDO obj) {
     final List<DisplayHistoryEntry> list = super.getDisplayHistoryEntries(obj);
-    if (hasLoggedInUserHistoryAccess(obj, false) == false) {
+    if (!hasLoggedInUserHistoryAccess(obj, false)) {
       return list;
     }
-    if (CollectionUtils.isNotEmpty(obj.getAttendees()) == true) {
+    if (CollectionUtils.isNotEmpty(obj.getAttendees())) {
       for (final TeamEventAttendeeDO attendee : obj.getAttendees()) {
         final List<DisplayHistoryEntry> entries = internalGetDisplayHistoryEntries(attendee);
         for (final DisplayHistoryEntry entry : entries) {
@@ -669,12 +658,7 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
         list.addAll(entries);
       }
     }
-    Collections.sort(list, new Comparator<DisplayHistoryEntry>() {
-      @Override
-      public int compare(final DisplayHistoryEntry o1, final DisplayHistoryEntry o2) {
-        return (o2.getTimestamp().compareTo(o1.getTimestamp()));
-      }
-    });
+    list.sort((o1, o2) -> (o2.getTimestamp().compareTo(o1.getTimestamp())));
     return list;
   }
 
@@ -686,16 +670,15 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
   /**
    * Returns also true, if idSet contains the id of any attendee.
    *
-   * @see org.projectforge.framework.persistence.api.BaseDao#contains(java.util.Set,
-   * org.projectforge.core.ExtendedBaseDO)
+   * @see org.projectforge.framework.persistence.api.BaseDao#contains(Set, ExtendedBaseDO)
    */
   @Override
-  protected boolean contains(final Set<Integer> idSet, final TeamEventDO entry) {
-    if (super.contains(idSet, entry) == true) {
+  public boolean contains(final Set<Integer> idSet, final TeamEventDO entry) {
+    if (super.contains(idSet, entry)) {
       return true;
     }
     for (final TeamEventAttendeeDO pos : entry.getAttendees()) {
-      if (idSet.contains(pos.getId()) == true) {
+      if (idSet.contains(pos.getId())) {
         return true;
       }
     }
@@ -731,7 +714,7 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
 
   public Collection<ICalendarEvent> rollOutRecurrenceEvents(final java.util.Date startDate, final java.util.Date endDate,
                                                             final TeamEventDO event, final java.util.TimeZone timeZone) {
-    if (event.hasRecurrence() == false) {
+    if (!event.hasRecurrence()) {
       return null;
     }
     final Recur recur = event.getRecurrenceObject();
@@ -741,15 +724,15 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
       return null;
     }
     final java.util.TimeZone timeZone4Calc = timeZone;
-    final String eventStartDateString = event.getAllDay() == true
+    final String eventStartDateString = event.getAllDay()
             ? DateHelper.formatIsoDate(event.getStartDate(), timeZone) : DateHelper
             .formatIsoTimestamp(event.getStartDate(), DateHelper.UTC);
     java.util.Date eventStartDate = event.getStartDate();
-    if (log.isDebugEnabled() == true) {
+    if (log.isDebugEnabled()) {
       log.debug("---------- startDate=" + DateHelper.formatIsoTimestamp(eventStartDate, timeZone) + ", timeZone="
               + timeZone.getID());
     }
-    net.fortuna.ical4j.model.TimeZone ical4jTimeZone = null;
+    net.fortuna.ical4j.model.TimeZone ical4jTimeZone;
     try {
       ical4jTimeZone = ICal4JUtils.getTimeZone(timeZone4Calc);
     } catch (final Exception e) {
@@ -776,14 +759,14 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
       OuterLoop:
       for (final Object obj : dateList) {
         final net.fortuna.ical4j.model.DateTime dateTime = (net.fortuna.ical4j.model.DateTime) obj;
-        final String isoDateString = event.getAllDay() == true ? DateHelper.formatIsoDate(dateTime, timeZone)
+        final String isoDateString = event.getAllDay() ? DateHelper.formatIsoDate(dateTime, timeZone)
                 : DateHelper.formatIsoTimestamp(dateTime, DateHelper.UTC);
         if (exDates != null && exDates.size() > 0) {
           for (Date exDate : exDates) {
-            if (event.getAllDay() == false) {
+            if (!event.getAllDay()) {
               Date recurDateJavaUtil = new Date(dateTime.getTime());
               if (recurDateJavaUtil.equals(exDate)) {
-                if (log.isDebugEnabled() == true) {
+                if (log.isDebugEnabled()) {
                   log.debug("= ex-dates equals: " + isoDateString + " == " + exDate);
                 }
                 // this date is part of ex dates, so don't use it.
@@ -792,20 +775,20 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
             } else {
               // Allday event.
               final String isoExDateString = DateHelper.formatIsoDate(exDate, DateHelper.UTC);
-              if (isoDateString.equals(isoExDateString) == true) {
-                if (log.isDebugEnabled() == true) {
+              if (isoDateString.equals(isoExDateString)) {
+                if (log.isDebugEnabled()) {
                   log.debug(String.format("= ex-dates equals: %s == %s", isoDateString, isoExDateString));
                 }
                 // this date is part of ex dates, so don't use it.
                 continue OuterLoop;
               }
             }
-            if (log.isDebugEnabled() == true) {
+            if (log.isDebugEnabled()) {
               log.debug("ex-dates not equals: " + isoDateString + " != " + exDate);
             }
           }
         }
-        if (isoDateString.equals(eventStartDateString) == true) {
+        if (isoDateString.equals(eventStartDateString)) {
           // Put event itself to the list.
           col.add(event);
         } else {
@@ -817,7 +800,7 @@ public class TeamEventDao extends BaseDao<TeamEventDO> {
         }
       }
     }
-    if (log.isDebugEnabled() == true) {
+    if (log.isDebugEnabled()) {
       for (final ICalendarEvent ev : col) {
         log.debug("startDate="
                 + DateHelper.formatIsoTimestamp(ev.getStartDate(), timeZone)

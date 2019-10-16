@@ -23,11 +23,11 @@
 
 package org.projectforge.business.fibu;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
-
 import java.util.Objects;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * Repräsentiert einee Position innerhalb eines Auftrags als Übersichtsobject (value object) zur Verwendung z. B. im TaskTree.
@@ -165,9 +165,9 @@ public class AuftragsPositionVO implements Comparable<AuftragsPositionVO>, Seria
   {
     if (o instanceof AuftragsPositionVO) {
       AuftragsPositionVO other = (AuftragsPositionVO) o;
-      if (Objects.equals(this.getNumber(), other.getNumber()) == false)
+      if (!Objects.equals(this.getNumber(), other.getNumber()))
         return false;
-      if (Objects.equals(this.getAuftragId(), other.getAuftragId()) == false)
+      if (!Objects.equals(this.getAuftragId(), other.getAuftragId()))
         return false;
       return true;
     }
@@ -186,15 +186,9 @@ public class AuftragsPositionVO implements Comparable<AuftragsPositionVO>, Seria
   @Override
   public int compareTo(final AuftragsPositionVO o)
   {
-    if (this.auftragNummer.equals(o.auftragNummer) == false) {
+    if (!this.auftragNummer.equals(o.auftragNummer)) {
       return this.auftragNummer.compareTo(o.auftragNummer);
     }
-    if (this.number < o.number) {
-      return -1;
-    } else if (this.number == o.number) {
-      return 0;
-    } else {
-      return +1;
-    }
+    return Short.compare(this.number, o.number);
   }
 }

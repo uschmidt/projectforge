@@ -23,6 +23,12 @@
 
 package org.projectforge.business.gantt;
 
+import net.sf.mpxj.*;
+import net.sf.mpxj.mpx.MPXWriter;
+import net.sf.mpxj.mspdi.MSPDIWriter;
+import net.sf.mpxj.writer.ProjectWriter;
+import org.projectforge.framework.time.DayHolder;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
@@ -32,20 +38,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.projectforge.framework.time.DayHolder;
-
-import net.sf.mpxj.Day;
-import net.sf.mpxj.Duration;
-import net.sf.mpxj.ProjectCalendar;
-import net.sf.mpxj.ProjectFile;
-import net.sf.mpxj.ProjectHeader;
-import net.sf.mpxj.RelationType;
-import net.sf.mpxj.Task;
-import net.sf.mpxj.TimeUnit;
-import net.sf.mpxj.mpx.MPXWriter;
-import net.sf.mpxj.mspdi.MSPDIWriter;
-import net.sf.mpxj.writer.ProjectWriter;
 
 /**
  * Uses the implementation of http://mpxj.sourceforge.net/, which is distributed under the terms of the GNU LGPL.
@@ -120,22 +112,22 @@ public class ExportMSProject
     final DayHolder dh = new DayHolder(ganttChart.getCalculatedStartDate());
     for (int i = 0; i < 3000; i++) { // Endless loop protection (paranoia)
       dh.add(Calendar.DAY_OF_MONTH, 1);
-      if (dh.isWorkingDay() == false && dh.isHoliday() == true && dh.isWeekend() == false) {
+      if (!dh.isWorkingDay() && dh.isHoliday() && !dh.isWeekend()) {
         // Add this holiday to the calendar:
         final Date date = dh.getSQLDate();
         calendar.addCalendarException(date, date);
-        if (log.isDebugEnabled() == true) {
+        if (log.isDebugEnabled()) {
           log.debug("Add holiday: " + date);
         }
       }
-      if (dh.before(ganttChart.getCalculatedEndDate()) == false) {
+      if (!dh.before(ganttChart.getCalculatedEndDate())) {
         break;
       }
     }
 
     final List<GanttTask> children = ganttChart.getRootNode().getChildren();
     if (children != null) {
-      final Map<Serializable, Task> taskMap = new HashMap<Serializable, Task>();
+      final Map<Serializable, Task> taskMap = new HashMap<>();
       for (final GanttTask child : children) {
         addTask(file, taskMap, null, child);
       }
@@ -211,7 +203,7 @@ public class ExportMSProject
         if (predecessorOffset == null) {
           value = 0;
         } else {
-          value = predecessorOffset.intValue();
+          value = predecessorOffset;
         }
         task.addPredecessor(predecessor, getRelationType(ganttTask.getRelationType()), Duration.getInstance(value, TimeUnit.DAYS));
       }

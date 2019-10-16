@@ -23,59 +23,16 @@
 
 package org.projectforge.framework.persistence.database;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-
-import javax.annotation.PostConstruct;
-import javax.persistence.Transient;
-
+import com.thoughtworks.xstream.XStream;
+import de.micromata.genome.db.jpa.history.api.HistoryEntry;
+import de.micromata.genome.jpa.metainf.EntityMetadata;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ClassUtils;
-import java.util.Objects;
 import org.apache.commons.lang3.Validate;
-import org.hibernate.EmptyInterceptor;
-import org.hibernate.FlushMode;
-import org.hibernate.Hibernate;
-import org.hibernate.LockOptions;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.projectforge.business.fibu.AbstractRechnungDO;
-import org.projectforge.business.fibu.AbstractRechnungsPositionDO;
-import org.projectforge.business.fibu.AuftragDO;
-import org.projectforge.business.fibu.AuftragsPositionDO;
-import org.projectforge.business.fibu.EingangsrechnungDO;
-import org.projectforge.business.fibu.EingangsrechnungsPositionDO;
-import org.projectforge.business.fibu.EmployeeSalaryDO;
-import org.projectforge.business.fibu.KontoDO;
-import org.projectforge.business.fibu.KundeDO;
-import org.projectforge.business.fibu.ProjektDO;
-import org.projectforge.business.fibu.RechnungDO;
-import org.projectforge.business.fibu.RechnungsPositionDO;
+import org.hibernate.*;
+import org.projectforge.business.fibu.*;
 import org.projectforge.business.fibu.kost.Kost1DO;
 import org.projectforge.business.fibu.kost.Kost2ArtDO;
 import org.projectforge.business.fibu.kost.Kost2DO;
@@ -94,11 +51,7 @@ import org.projectforge.framework.persistence.api.UserRightService;
 import org.projectforge.framework.persistence.entities.AbstractBaseDO;
 import org.projectforge.framework.persistence.hibernate.HibernateCompatUtils;
 import org.projectforge.framework.persistence.jpa.PfEmgrFactory;
-import org.projectforge.framework.persistence.user.entities.GroupDO;
-import org.projectforge.framework.persistence.user.entities.PFUserDO;
-import org.projectforge.framework.persistence.user.entities.UserPrefDO;
-import org.projectforge.framework.persistence.user.entities.UserPrefEntryDO;
-import org.projectforge.framework.persistence.user.entities.UserRightDO;
+import org.projectforge.framework.persistence.user.entities.*;
 import org.projectforge.framework.persistence.xstream.HibernateXmlConverter;
 import org.projectforge.framework.persistence.xstream.XStreamSavingConverter;
 import org.projectforge.framework.xstream.XStreamHelper;
@@ -111,10 +64,18 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.orm.hibernate5.HibernateTemplate;
 import org.springframework.stereotype.Service;
 
-import com.thoughtworks.xstream.XStream;
-
-import de.micromata.genome.db.jpa.history.api.HistoryEntry;
-import de.micromata.genome.jpa.metainf.EntityMetadata;
+import javax.annotation.PostConstruct;
+import javax.persistence.Transient;
+import java.io.*;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Dumps and restores the data-base.
@@ -143,7 +104,7 @@ public class XmlDump
   @Autowired
   PluginAdminService pluginAdminService;
 
-  private final List<XmlDumpHook> xmlDumpHooks = new LinkedList<XmlDumpHook>();
+  private final List<XmlDumpHook> xmlDumpHooks = new LinkedList<>();
 
   @Autowired
   private PfEmgrFactory emf;
@@ -171,7 +132,7 @@ public class XmlDump
   public void registerHook(final XmlDumpHook xmlDumpHook)
   {
     for (final XmlDumpHook hook : xmlDumpHooks) {
-      if (hook.getClass().equals(xmlDumpHook.getClass()) == true) {
+      if (hook.getClass().equals(xmlDumpHook.getClass())) {
         log.error("Can't register XmlDumpHook twice: " + xmlDumpHook);
         return;
       }
@@ -186,10 +147,7 @@ public class XmlDump
   {
     try {
       return restoreDatabase(new InputStreamReader(new FileInputStream(XML_DUMP_FILENAME), "utf-8"));
-    } catch (final UnsupportedEncodingException ex) {
-      log.error(ex.getMessage(), ex);
-      throw new RuntimeException(ex);
-    } catch (final FileNotFoundException ex) {
+    } catch (final UnsupportedEncodingException | FileNotFoundException ex) {
       log.error(ex.getMessage(), ex);
       throw new RuntimeException(ex);
     }
@@ -347,7 +305,7 @@ public class XmlDump
     Reader reader;
     try {
       InputStream in;
-      if (path.endsWith(".gz") == true) {
+      if (path.endsWith(".gz")) {
         in = new GZIPInputStream(cpres.getInputStream());
       } else {
         in = cpres.getInputStream();
@@ -387,7 +345,7 @@ public class XmlDump
     Writer writer = null;
     GZIPOutputStream gzipOut = null;
     try {
-      if (filename.endsWith(".gz") == true) {
+      if (filename.endsWith(".gz")) {
         gzipOut = new GZIPOutputStream(out);
         writer = new OutputStreamWriter(gzipOut, "utf-8");
       } else {
@@ -437,7 +395,7 @@ public class XmlDump
           continue;
         }
         for (final Object obj : objects) {
-          if (HibernateUtils.isEntity(obj.getClass()) == false) {
+          if (!HibernateUtils.isEntity(obj.getClass())) {
             continue;
           }
           final Serializable id = HibernateUtils.getIdentifier(obj);
@@ -449,7 +407,7 @@ public class XmlDump
           final Object databaseObject = session.get(entityClass, id, LockOptions.READ);
           Hibernate.initialize(databaseObject);
           final boolean equals = equals(obj, databaseObject, true);
-          if (equals == false) {
+          if (!equals) {
             log.error("Object not sucessfully imported! xml object=[" + obj + "], data base=[" + databaseObject + "]");
             hasError = true;
           }
@@ -472,7 +430,7 @@ public class XmlDump
         }
         ++counter;
       }
-      if (hasError == true) {
+      if (hasError) {
         log.error(
             "*********** A inconsistency in the import was found! This may result in a data loss or corrupted data! Please retry the import. "
                 + counter
@@ -498,12 +456,12 @@ public class XmlDump
   {
     if (o1 == null) {
       final boolean equals = (o2 == null);
-      if (equals == false && logDifference == true) {
+      if (!equals && logDifference) {
         log.error("Value 1 is null and value 2 is " + o2);
       }
       return equals;
     } else if (o2 == null) {
-      if (logDifference == true) {
+      if (logDifference) {
         log.error("Value 2 is null and value 1 is " + o1);
       }
       return false;
@@ -512,15 +470,15 @@ public class XmlDump
     final Field[] fields = cls1.getDeclaredFields();
     AccessibleObject.setAccessible(fields, true);
     for (final Field field : fields) {
-      if (accept(field) == false) {
+      if (!accept(field)) {
         continue;
       }
       try {
         final Object fieldValue1 = getValue(o1, o2, field);
         final Object fieldValue2 = getValue(o2, o1, field);
-        if (field.getType().isPrimitive() == true) {
-          if (Objects.equals(fieldValue2, fieldValue1) == false) {
-            if (logDifference == true) {
+        if (field.getType().isPrimitive()) {
+          if (!Objects.equals(fieldValue2, fieldValue1)) {
+            if (logDifference) {
               log.error("Field is different: " + field.getName() + "; value 1 '" + fieldValue1 + "' 2 '"
                   + fieldValue2 + "'.");
             }
@@ -530,12 +488,12 @@ public class XmlDump
         } else if (fieldValue1 == null) {
           if (fieldValue2 != null) {
             if (fieldValue2 instanceof Collection<?>) {
-              if (CollectionUtils.isEmpty((Collection<?>) fieldValue2) == true) {
+              if (CollectionUtils.isEmpty((Collection<?>) fieldValue2)) {
                 // null is equals to empty collection in this case.
                 return true;
               }
             }
-            if (logDifference == true) {
+            if (logDifference) {
               log.error("Field '" + field.getName() + "': value 1 '" + fieldValue1 + "' is different from value 2 '"
                   + fieldValue2 + "'.");
             }
@@ -543,7 +501,7 @@ public class XmlDump
           }
         } else if (fieldValue2 == null) {
           if (fieldValue1 != null) {
-            if (logDifference == true) {
+            if (logDifference) {
               log.error("Field '" + field.getName() + "': value 1 '" + fieldValue1 + "' is different from value 2 '"
                   + fieldValue2 + "'.");
             }
@@ -553,7 +511,7 @@ public class XmlDump
           final Collection<?> col1 = (Collection<?>) fieldValue1;
           final Collection<?> col2 = (Collection<?>) fieldValue2;
           if (col1.size() != col2.size()) {
-            if (logDifference == true) {
+            if (logDifference) {
               log.error("Field '"
                   + field.getName()
                   + "': colection's size '"
@@ -564,14 +522,14 @@ public class XmlDump
             }
             return false;
           }
-          if (equals(field, col1, col2, logDifference) == false || equals(field, col2, col1, logDifference) == false) {
+          if (!equals(field, col1, col2, logDifference) || !equals(field, col2, col1, logDifference)) {
             return false;
           }
-        } else if (HibernateUtils.isEntity(fieldValue1.getClass()) == true) {
+        } else if (HibernateUtils.isEntity(fieldValue1.getClass())) {
           if (fieldValue2 == null
-              || Objects.equals(HibernateUtils.getIdentifier(fieldValue1),
-              HibernateUtils.getIdentifier(fieldValue2)) == false) {
-            if (logDifference == true) {
+              || !Objects.equals(HibernateUtils.getIdentifier(fieldValue1),
+              HibernateUtils.getIdentifier(fieldValue2))) {
+            if (logDifference) {
               log.error("Field '"
                   + field.getName()
                   + "': Hibernate object id '"
@@ -584,22 +542,22 @@ public class XmlDump
           }
         } else if (fieldValue1 instanceof BigDecimal) {
           if (fieldValue2 == null || ((BigDecimal) fieldValue1).compareTo((BigDecimal) fieldValue2) != 0) {
-            if (logDifference == true) {
+            if (logDifference) {
               log.error("Field '" + field.getName() + "': value 1 '" + fieldValue1 + "' is different from value 2 '"
                   + fieldValue2 + "'.");
             }
             return false;
           }
-        } else if (fieldValue1.getClass().isArray() == true) {
-          if (ArrayUtils.isEquals(fieldValue1, fieldValue2) == false) {
-            if (logDifference == true) {
+        } else if (fieldValue1.getClass().isArray()) {
+          if (!ArrayUtils.isEquals(fieldValue1, fieldValue2)) {
+            if (logDifference) {
               log.error("Field '" + field.getName() + "': value 1 '" + fieldValue1 + "' is different from value 2 '"
                   + fieldValue2 + "'.");
             }
             return false;
           }
-        } else if (Objects.equals(fieldValue2, fieldValue1) == false) {
-          if (logDifference == true) {
+        } else if (!Objects.equals(fieldValue2, fieldValue1)) {
+          if (logDifference) {
             log.error("Field '" + field.getName() + "': value 1 '" + fieldValue1 + "' is different from value 2 '"
                 + fieldValue2 + "'.");
           }
@@ -626,13 +584,13 @@ public class XmlDump
     for (final Object colVal1 : col1) {
       boolean equals = false;
       for (final Object colVal2 : col2) {
-        if (equals(colVal1, colVal2, false) == true) {
+        if (equals(colVal1, colVal2, false)) {
           equals = true; // Equal object found.
           break;
         }
       }
-      if (equals == false) {
-        if (logDifference == true) {
+      if (!equals) {
+        if (logDifference) {
           log.error("Field '" + field.getName() + "': value '" + colVal1 + "' not found in other collection.");
         }
         return false;
@@ -656,9 +614,9 @@ public class XmlDump
     final Method getter = BeanHelper.determineGetter(obj.getClass(), field.getName());
     final Method getter2 = BeanHelper.determineGetter(compareObj.getClass(), field.getName());
     if (getter != null
-        && getter.isAnnotationPresent(Transient.class) == false
+        && !getter.isAnnotationPresent(Transient.class)
         && getter2 != null
-        && getter2.isAnnotationPresent(Transient.class) == false) {
+        && !getter2.isAnnotationPresent(Transient.class)) {
       val = BeanHelper.invoke(obj, getter);
     }
     if (val == null) {
@@ -677,15 +635,15 @@ public class XmlDump
       // Reject field from inner class.
       return false;
     }
-    if (field.getName().equals("handler") == true) {
+    if (field.getName().equals("handler")) {
       // Handler of Javassist proxy should be ignored.
       return false;
     }
-    if (Modifier.isTransient(field.getModifiers()) == true) {
+    if (Modifier.isTransient(field.getModifiers())) {
       // transients.
       return false;
     }
-    if (Modifier.isStatic(field.getModifiers()) == true) {
+    if (Modifier.isStatic(field.getModifiers())) {
       // transients.
       return false;
     }

@@ -23,9 +23,6 @@
 
 package org.projectforge.business.teamcal.admin.model;
 
-import java.util.Collection;
-import java.util.TreeSet;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.document.Document;
 import org.hibernate.search.bridge.FieldBridge;
@@ -42,6 +39,9 @@ import org.projectforge.framework.configuration.ApplicationContextProvider;
 import org.projectforge.framework.persistence.user.entities.GroupDO;
 import org.projectforge.framework.persistence.user.entities.PFUserDO;
 import org.springframework.context.ApplicationContext;
+
+import java.util.Collection;
+import java.util.TreeSet;
 
 /**
  * Users and groups bridge for hibernate search.
@@ -94,7 +94,7 @@ public class HibernateSearchUsersGroupsBridge implements FieldBridge
       appendUsers(getSortedUsers(doObject.getMinimalAccessUserIds()), buf);
     }
 
-    if (log.isDebugEnabled() == true) {
+    if (log.isDebugEnabled()) {
       log.debug(buf.toString());
     }
     luceneOptions.addFieldToDocument(name, buf.toString(), document);
@@ -102,10 +102,10 @@ public class HibernateSearchUsersGroupsBridge implements FieldBridge
 
   private Collection<GroupDO> getSortedGroups(final String groupIds)
   {
-    if (StringUtils.isEmpty(groupIds) == true) {
+    if (StringUtils.isEmpty(groupIds)) {
       return null;
     }
-    Collection<GroupDO> sortedGroups = new TreeSet<GroupDO>(groupsComparator);
+    Collection<GroupDO> sortedGroups = new TreeSet<>(groupsComparator);
     final int[] ids = StringHelper.splitToInts(groupIds, ",", false);
     for (final int id : ids) {
       final GroupDO group = groupDao.internalGetById(id);
@@ -120,10 +120,10 @@ public class HibernateSearchUsersGroupsBridge implements FieldBridge
 
   private Collection<PFUserDO> getSortedUsers(final String userIds)
   {
-    if (StringUtils.isEmpty(userIds) == true) {
+    if (StringUtils.isEmpty(userIds)) {
       return null;
     }
-    Collection<PFUserDO> sortedUsers = new TreeSet<PFUserDO>(usersComparator);
+    Collection<PFUserDO> sortedUsers = new TreeSet<>(usersComparator);
     final int[] ids = StringHelper.splitToInts(userIds, ",", false);
     for (final int id : ids) {
       final PFUserDO user = userDao.internalGetById(id);

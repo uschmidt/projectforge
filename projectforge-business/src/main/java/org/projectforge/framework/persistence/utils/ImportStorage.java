@@ -23,12 +23,12 @@
 
 package org.projectforge.framework.persistence.utils;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.Validate;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.Validate;
 
 /**
  * Stores the imported data for displaying and committing.
@@ -72,18 +72,18 @@ public class ImportStorage<T> implements Serializable
   {
     Validate.notNull(sheet);
     if (sheets == null) {
-      sheets = new ArrayList<ImportedSheet<T>>();
+      sheets = new ArrayList<>();
     }
     sheets.add(sheet);
   }
 
   public ImportedSheet<T> getNamedSheet(final String name)
   {
-    if (CollectionUtils.isEmpty(sheets) == true) {
+    if (CollectionUtils.isEmpty(sheets)) {
       return null;
     }
     for (final ImportedSheet<T> sheet : sheets) {
-      if (name.equals(sheet.getName()) == true) {
+      if (name.equals(sheet.getName())) {
         return sheet;
       }
     }

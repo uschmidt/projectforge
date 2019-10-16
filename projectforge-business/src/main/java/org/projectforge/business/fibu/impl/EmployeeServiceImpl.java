@@ -119,17 +119,11 @@ public class EmployeeServiceImpl extends CorePersistenceServiceImpl<Integer, Emp
     try {
       Class<?> type = EmployeeDO.class.getDeclaredField(attributeName).getType();
       Method declaredMethod = EmployeeDO.class.getDeclaredMethod(
-              "set" + attributeName.substring(0, 1).toUpperCase() + attributeName.substring(1, attributeName.length()),
+              "set" + attributeName.substring(0, 1).toUpperCase() + attributeName.substring(1),
               type);
       declaredMethod.invoke(employeeDO, type.cast(attribute));
 
-    } catch (NoSuchFieldException e) {
-      e.printStackTrace();
-    } catch (NoSuchMethodException e) {
-      e.printStackTrace();
-    } catch (InvocationTargetException e) {
-      e.printStackTrace();
-    } catch (IllegalAccessException e) {
+    } catch (NoSuchFieldException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
       e.printStackTrace();
     }
 
@@ -257,7 +251,7 @@ public class EmployeeServiceImpl extends CorePersistenceServiceImpl<Integer, Emp
   public EmployeeStatus getEmployeeStatus(final EmployeeDO employee) {
     final EmployeeTimedDO attrRow = timeableService
             .getAttrRowValidAtDate(employee, InternalAttrSchemaConstants.EMPLOYEE_STATUS_GROUP_NAME, new Date());
-    if (attrRow != null && StringUtils.isEmpty(attrRow.getStringAttribute(InternalAttrSchemaConstants.EMPLOYEE_STATUS_DESC_NAME)) == false) {
+    if (attrRow != null && !StringUtils.isEmpty(attrRow.getStringAttribute(InternalAttrSchemaConstants.EMPLOYEE_STATUS_DESC_NAME))) {
       return EmployeeStatus.findByi18nKey(attrRow.getStringAttribute(InternalAttrSchemaConstants.EMPLOYEE_STATUS_DESC_NAME));
     }
     return null;
@@ -305,7 +299,7 @@ public class EmployeeServiceImpl extends CorePersistenceServiceImpl<Integer, Emp
     filter.setUserId(user.getId());
     List<TimesheetDO> list = timesheetDao.getList(filter);
     PFUserDO loggedInUser = ThreadLocalUserContext.getUser();
-    if (CollectionUtils.isNotEmpty(list) == true) {
+    if (CollectionUtils.isNotEmpty(list)) {
       for (TimesheetDO sheet : list) {
         monthlyEmployeeReport.addTimesheet(sheet, timesheetDao.hasSelectAccess(loggedInUser, sheet, false));
       }

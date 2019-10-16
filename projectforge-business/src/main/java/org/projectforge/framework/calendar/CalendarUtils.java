@@ -23,13 +23,13 @@
 
 package org.projectforge.framework.calendar;
 
+import org.projectforge.framework.persistence.user.api.ThreadLocalUserContext;
+import org.projectforge.framework.time.DateHelper;
+
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-
-import org.projectforge.framework.persistence.user.api.ThreadLocalUserContext;
-import org.projectforge.framework.time.DateHelper;
 
 /**
  * @author Kai Reinhard (k.reinhard@micromata.de)
@@ -170,7 +170,7 @@ public class CalendarUtils
       }
     }
     result += to.get(Calendar.DAY_OF_YEAR) - cal.get(Calendar.DAY_OF_YEAR);
-    if (positive == true) {
+    if (positive) {
       return result;
     } else {
       return -result;

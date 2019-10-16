@@ -23,10 +23,6 @@
 
 package org.projectforge.business.fibu;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.collections.MapUtils;
 import org.hibernate.LazyInitializationException;
 import org.projectforge.framework.cache.AbstractCache;
@@ -35,6 +31,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate5.HibernateTemplate;
 import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Caches the DATEV accounts.
@@ -148,7 +148,7 @@ public class KontoCache extends AbstractCache
   {
     log.info("Initializing KontoCache ...");
     // This method must not be synchronized because it works with a new copy of maps.
-    final Map<Integer, KontoDO> map = new HashMap<Integer, KontoDO>();
+    final Map<Integer, KontoDO> map = new HashMap<>();
     final List<KontoDO> list = (List<KontoDO>) hibernateTemplate.find("from KontoDO t where deleted=false");
     for (final KontoDO konto : list) {
       map.put(konto.getId(), konto);

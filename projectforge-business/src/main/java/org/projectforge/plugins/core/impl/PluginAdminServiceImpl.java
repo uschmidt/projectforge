@@ -23,13 +23,6 @@
 
 package org.projectforge.plugins.core.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ServiceLoader;
-import java.util.Set;
-import java.util.TreeSet;
-
 import org.apache.commons.lang3.StringUtils;
 import org.projectforge.continuousdb.SystemUpdater;
 import org.projectforge.continuousdb.UpdateEntry;
@@ -38,17 +31,15 @@ import org.projectforge.framework.configuration.ConfigurationParam;
 import org.projectforge.framework.configuration.GlobalConfiguration;
 import org.projectforge.framework.configuration.entities.ConfigurationDO;
 import org.projectforge.framework.persistence.database.DatabaseService;
-import org.projectforge.plugins.core.AbstractPlugin;
-import org.projectforge.plugins.core.AvailablePlugin;
-import org.projectforge.plugins.core.PluginAdminService;
-import org.projectforge.plugins.core.PluginsRegistry;
-import org.projectforge.plugins.core.PFPluginService;
+import org.projectforge.plugins.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
 
 /**
  * Standard implementation of PluginAdminService.
@@ -102,7 +93,7 @@ public class PluginAdminServiceImpl implements PluginAdminService
   {
     String activateds = GlobalConfiguration.getInstance().getStringValue(ConfigurationParam.PLUGIN_ACTIVATED);
     String[] sa = new String[0];
-    if (StringUtils.isBlank(activateds) == false) {
+    if (!StringUtils.isBlank(activateds)) {
       sa = StringUtils.split(activateds, ", ");
     }
     Set<String> activated = new TreeSet<>(Arrays.asList(sa));
@@ -125,7 +116,7 @@ public class PluginAdminServiceImpl implements PluginAdminService
   {
     List<AvailablePlugin> plugins = getAvailablePlugins();
     for (AvailablePlugin plugin : plugins) {
-      if (onlyConfiguredActive != false && plugin.isActivated() == false && plugin.isBuildIn() == false) {
+      if (onlyConfiguredActive && !plugin.isActivated() && !plugin.isBuildIn()) {
         continue;
       }
       activatePlugin(plugin.getProjectForgePluginService());
@@ -152,7 +143,7 @@ public class PluginAdminServiceImpl implements PluginAdminService
   public boolean storePluginToBeActivated(String id, boolean activate)
   {
     Set<String> active = getActivePlugins();
-    if (activate == true) {
+    if (activate) {
       active.add(id);
     } else {
       active.remove(id);
@@ -185,7 +176,7 @@ public class PluginAdminServiceImpl implements PluginAdminService
     SystemUpdater systemUpdater = myDatabaseUpdater.getSystemUpdater();
     final UpdateEntry updateEntry = plugin.getInitializationUpdateEntry();
     if (updateEntry != null) {
-      if (updateEntry.isInitial() == false) {
+      if (!updateEntry.isInitial()) {
         LOG.error(
             "The given UpdateEntry returned by plugin.getInitializationUpdateEntry() is not initial! Please use constructor without parameter version: "
                 + plugin.getClass());
@@ -195,7 +186,7 @@ public class PluginAdminServiceImpl implements PluginAdminService
     final List<UpdateEntry> updateEntries = plugin.getUpdateEntries();
     if (updateEntries != null) {
       for (final UpdateEntry entry : updateEntries) {
-        if (entry.isInitial() == true) {
+        if (entry.isInitial()) {
           LOG.error(
               "The given UpdateEntry returned by plugin.getUpdateEntries() is initial! Please use constructor with parameter version: "
                   + plugin.getClass()

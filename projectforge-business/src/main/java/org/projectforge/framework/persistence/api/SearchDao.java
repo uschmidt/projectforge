@@ -23,12 +23,12 @@
 
 package org.projectforge.framework.persistence.api;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Kai Reinhard (k.reinhard@micromata.de) TODO RK check if needed and may replace
@@ -46,7 +46,7 @@ public class SearchDao
       return null;
     }
     log.debug("Searching in " + clazz);
-    if (baseDao.hasLoggedInUserSelectAccess(false) == false || baseDao.hasLoggedInUserHistoryAccess(false) == false) {
+    if (!baseDao.hasLoggedInUserSelectAccess(false) || !baseDao.hasLoggedInUserHistoryAccess(false)) {
       // User has in general no access to history entries of the given object type (clazz).
       return null;
     }
@@ -62,7 +62,7 @@ public class SearchDao
       // An error occured.
       return null;
     }
-    final List<SearchResultData> result = new ArrayList<SearchResultData>();
+    final List<SearchResultData> result = new ArrayList<>();
     if (list.size() == 0) {
       return result;
     }

@@ -23,12 +23,6 @@
 
 package org.projectforge.statistics;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.Calendar;
-import java.util.Iterator;
-import java.util.List;
-
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
 import org.jfree.data.time.Day;
@@ -40,6 +34,12 @@ import org.projectforge.business.timesheet.TimesheetDao;
 import org.projectforge.business.timesheet.TimesheetFilter;
 import org.projectforge.charting.XYChartBuilder;
 import org.projectforge.framework.time.DayHolder;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Erzeugt wahlweise eins von zwei Diagrammen:<br/>
@@ -123,20 +123,20 @@ public class TimesheetDisciplineChartBuilder
     actualWorkingHours = 0;
     final Iterator<TimesheetDO> it = list.iterator();
     TimesheetDO current = null;
-    if (it.hasNext() == true) {
+    if (it.hasNext()) {
       current = it.next();
     }
     for (int i = 0; i <= forLastNDays; i++) {
-      while (current != null && (dh.isSameDay(current.getStartTime()) == true || current.getStartTime().before(dh.getDate()) == true)) {
+      while (current != null && (dh.isSameDay(current.getStartTime()) || current.getStartTime().before(dh.getDate()))) {
         actualWorkingHours += ((double) current.getWorkFractionDuration()) / 3600000;
-        if (it.hasNext() == true) {
+        if (it.hasNext()) {
           current = it.next();
         } else {
           current = null;
           break;
         }
       }
-      if (dh.isWorkingDay() == true) {
+      if (dh.isWorkingDay()) {
         final BigDecimal workFraction = dh.getWorkFraction();
         if (workFraction != null) {
           planWorkingHours += workFraction.doubleValue() * workingHoursPerDay;
@@ -186,7 +186,7 @@ public class TimesheetDisciplineChartBuilder
     final TimeSeries actualSeries = new TimeSeries("Ist");
     final Iterator<TimesheetDO> it = list.iterator();
     TimesheetDO current = null;
-    if (it.hasNext() == true) {
+    if (it.hasNext()) {
       current = it.next();
     }
     long numberOfBookedDays = 0;
@@ -194,11 +194,11 @@ public class TimesheetDisciplineChartBuilder
     for (int i = 0; i <= forLastNDays; i++) {
       long difference = 0;
       long totalDuration = 0; // Weight for average.
-      while (current != null && (dh.isSameDay(current.getStartTime()) == true || current.getStartTime().before(dh.getDate()) == true)) {
+      while (current != null && (dh.isSameDay(current.getStartTime()) || current.getStartTime().before(dh.getDate()))) {
         final long duration = current.getWorkFractionDuration();
         difference += (current.getCreated().getTime() - current.getStartTime().getTime()) * duration;
         totalDuration += duration;
-        if (it.hasNext() == true) {
+        if (it.hasNext()) {
           current = it.next();
         } else {
           current = null;

@@ -35,7 +35,7 @@ public class PluginsRegistry
 
   private static PluginsRegistry instance;
 
-  private final List<AbstractPlugin> plugins = new ArrayList<AbstractPlugin>();
+  private final List<AbstractPlugin> plugins = new ArrayList<>();
 
   public synchronized static PluginsRegistry instance()
   {
@@ -52,7 +52,7 @@ public class PluginsRegistry
   public void register(final AbstractPlugin plugin)
   {
     for (final AbstractPlugin pl : plugins) {
-      if (pl.getClass().equals(plugin.getClass()) == true) {
+      if (pl.getClass().equals(plugin.getClass())) {
         log.warn("Can't add plugin twice. Plugin '" + plugin.getClass() + "' already added.");
         return;
       }

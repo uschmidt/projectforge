@@ -23,17 +23,16 @@
 
 package org.projectforge.framework.xstream.converter;
 
-import org.joda.time.DateMidnight;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import org.joda.time.DateMidnight;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 /**
  * XStream converter that converts Joda DateMidnight.
@@ -83,7 +82,7 @@ public class JodaDateMidnightConverter implements Converter
   @SuppressWarnings("rawtypes")
   public boolean canConvert(final Class clazz)
   {
-    if (DateMidnight.class.isAssignableFrom(clazz) == true) {
+    if (DateMidnight.class.isAssignableFrom(clazz)) {
       return true;
     }
     return false;

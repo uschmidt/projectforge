@@ -23,11 +23,7 @@
 
 package org.projectforge.framework.utils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 
 /**
  * For cloning a object including all fields (recursive).
@@ -66,10 +62,7 @@ public class CloneHelper
     try {
       object = (T) new ObjectInputStream(bais).readObject();
       return object;
-    } catch (final ClassNotFoundException ex) {
-      log.error("Exception encountered while cloning given object '" + origin + "': " + ex, ex);
-      return null;
-    } catch (final IOException ex) {
+    } catch (final ClassNotFoundException | IOException ex) {
       log.error("Exception encountered while cloning given object '" + origin + "': " + ex, ex);
       return null;
     }

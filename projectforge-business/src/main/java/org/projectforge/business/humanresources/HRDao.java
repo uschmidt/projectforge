@@ -23,10 +23,6 @@
 
 package org.projectforge.business.humanresources;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.hibernate.criterion.Order;
 import org.projectforge.business.fibu.KundeDO;
 import org.projectforge.business.fibu.ProjektDO;
@@ -49,6 +45,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * 
@@ -87,7 +87,7 @@ public class HRDao implements IDao<HRViewData>
       day.setEndOfWeek();
       filter.setStopTime(day.getDate());
     }
-    if (filter.isShowBookedTimesheets() == true) {
+    if (filter.isShowBookedTimesheets()) {
       final TimesheetFilter tsFilter = new TimesheetFilter();
       tsFilter.setStartTime(filter.getStartTime());
       tsFilter.setStopTime(filter.getStopTime());
@@ -114,7 +114,7 @@ public class HRDao implements IDao<HRViewData>
         }
       }
     }
-    if (filter.isShowPlanning() == true) {
+    if (filter.isShowPlanning()) {
       final HRPlanningFilter hrFilter = new HRPlanningFilter();
       final DateHolder date = new DateHolder(filter.getStartTime());
       hrFilter.setStartTime(date.getSQLDate()); // Considers the user's time zone.
@@ -127,7 +127,7 @@ public class HRDao implements IDao<HRViewData>
           continue;
         }
         for (final HRPlanningEntryDO entry : planning.getEntries()) {
-          if (entry.isDeleted() == true) {
+          if (entry.isDeleted()) {
             continue;
           }
           final PFUserDO user = userGroupCache.getUser(planning.getUserId());
@@ -146,12 +146,12 @@ public class HRDao implements IDao<HRViewData>
         }
       }
     }
-    if (filter.isOnlyMyProjects() == true) {
+    if (filter.isOnlyMyProjects()) {
       // remove all user entries which have no planning or booking on my projects.
       final List<HRViewUserData> list = data.getUserDatas();
       if (list != null) {
         final Iterator<HRViewUserData> it = list.iterator();
-        while (it.hasNext() == true) {
+        while (it.hasNext()) {
           final HRViewUserData entry = it.next();
           boolean hasEntries = false;
           if (entry.entries != null) {
@@ -162,7 +162,7 @@ public class HRDao implements IDao<HRViewData>
               }
             }
           }
-          if (hasEntries == false) {
+          if (!hasEntries) {
             it.remove();
           }
         }
@@ -180,14 +180,14 @@ public class HRDao implements IDao<HRViewData>
   @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
   public List<PFUserDO> getUnplannedResources(final HRViewData data)
   {
-    final List<PFUserDO> users = new ArrayList<PFUserDO>();
+    final List<PFUserDO> users = new ArrayList<>();
     final QueryFilter queryFilter = new QueryFilter(new BaseSearchFilter());
     queryFilter.addOrder(Order.asc("firstname")).addOrder(Order.asc("lastname"));
     final List<PFUserDO> allUsers = userDao.getList(queryFilter);
     if (allUsers != null) {
       for (final PFUserDO user : allUsers) {
         final HRViewUserData userData = data.getUserData(user);
-        if (userData == null || NumberHelper.isNotZero(userData.getPlannedDaysSum()) == false) {
+        if (userData == null || !NumberHelper.isNotZero(userData.getPlannedDaysSum())) {
           users.add(user);
         }
       }
@@ -209,9 +209,9 @@ public class HRDao implements IDao<HRViewData>
       return null;
     }
     final KundeDO kunde = projekt.getKunde();
-    if (filter.isOnlyMyProjects() == true) {
-      if (isMyProject(userGroupCache, projekt) == true) {
-        if (filter.isAllProjectsGroupedByCustomer() == true) {
+    if (filter.isOnlyMyProjects()) {
+      if (isMyProject(userGroupCache, projekt)) {
+        if (filter.isAllProjectsGroupedByCustomer()) {
           return kunde;
         } else {
           return projekt;
@@ -219,10 +219,10 @@ public class HRDao implements IDao<HRViewData>
       } else {
         return null;
       }
-    } else if (filter.isAllProjectsGroupedByCustomer() == true) {
+    } else if (filter.isAllProjectsGroupedByCustomer()) {
       return kunde;
-    } else if (filter.isOtherProjectsGroupedByCustomer() == true) {
-      if (isMyProject(userGroupCache, projekt) == true) {
+    } else if (filter.isOtherProjectsGroupedByCustomer()) {
+      if (isMyProject(userGroupCache, projekt)) {
         return projekt;
       } else {
         return kunde;
@@ -237,7 +237,7 @@ public class HRDao implements IDao<HRViewData>
   {
     return (projekt != null && projekt.getProjektManagerGroup() != null
         && userGroupCache.isLoggedInUserMemberOfGroup(projekt
-            .getProjektManagerGroupId()) == true);
+        .getProjektManagerGroupId()));
   }
 
   /**

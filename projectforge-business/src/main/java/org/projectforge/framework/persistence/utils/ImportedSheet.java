@@ -23,15 +23,10 @@
 
 package org.projectforge.framework.persistence.utils;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
 import org.apache.commons.collections.CollectionUtils;
+
+import java.io.Serializable;
+import java.util.*;
 
 /**
  * Represents an imported sheet (e. g. MS Excel sheet) containing the bean objects.
@@ -82,7 +77,7 @@ public class ImportedSheet<T> implements Serializable
   public void addElement(final ImportedElement<T> element)
   {
     if (elements == null) {
-      elements = new ArrayList<ImportedElement<T>>();
+      elements = new ArrayList<>();
     }
     elements.add(element);
   }
@@ -108,7 +103,7 @@ public class ImportedSheet<T> implements Serializable
       return;
     }
     for (final ImportedElement<T> element : elements) {
-      if (onlyModified == false || element.isModified() == true || element.isNew() == true) {
+      if (!onlyModified || element.isModified() || element.isNew()) {
         element.setSelected(select);
       } else {
         element.setSelected(!select);
@@ -123,7 +118,7 @@ public class ImportedSheet<T> implements Serializable
     }
     int counter = number;
     for (final ImportedElement<T> element : elements) {
-      if (onlyModified == false || element.isModified() == true || element.isNew() == true) {
+      if (!onlyModified || element.isModified() || element.isNew()) {
         if (--counter < 0) {
           element.setSelected(!select);
         } else {
@@ -163,29 +158,29 @@ public class ImportedSheet<T> implements Serializable
     if (elements != null) {
       for (final ImportedElement<T> element : elements) {
         totalNumberOfElements++;
-        if (reconciled == true) {
+        if (reconciled) {
           element.setReconciled(true);
-          if (element.isNew() == true) {
+          if (element.isNew()) {
             numberOfNewElements++;
             changes = true;
-          } else if (element.isModified() == true) {
+          } else if (element.isModified()) {
             numberOfModifiedElements++;
             changes = true;
-          } else if (element.isUnmodified() == true) {
+          } else if (element.isUnmodified()) {
             numberOfUnmodifiedElements++;
           }
         }
-        if (element.isFaulty() == true) {
+        if (element.isFaulty()) {
           numberOfFaultyElements++;
         }
       }
     }
     if (status == ImportStatus.RECONCILED) {
-      if (changes == false) {
+      if (!changes) {
         status = ImportStatus.NOTHING_TODO;
       }
     }
-    if (isFaulty() == true) {
+    if (isFaulty()) {
       status = ImportStatus.HAS_ERRORS;
     }
     dirty = false;
@@ -193,7 +188,7 @@ public class ImportedSheet<T> implements Serializable
 
   private void checkStatistics()
   {
-    if (dirty == true) {
+    if (dirty) {
       calculateStatistics();
     }
   }
@@ -264,7 +259,7 @@ public class ImportedSheet<T> implements Serializable
   public void setProperty(final String key, final Object value)
   {
     if (this.properties == null) {
-      this.properties = new HashMap<String, Object>();
+      this.properties = new HashMap<>();
     }
     this.properties.put(key, value);
   }
@@ -279,27 +274,27 @@ public class ImportedSheet<T> implements Serializable
 
   public Map<String, Set<Object>> getErrorProperties()
   {
-    if (dirty == false && this.errorProperties != null) {
+    if (!dirty && this.errorProperties != null) {
       return this.errorProperties;
     }
-    if (CollectionUtils.isEmpty(this.elements) == true) {
+    if (CollectionUtils.isEmpty(this.elements)) {
       return null;
     }
     errorProperties = null;
     for (final ImportedElement<T> el : this.elements) {
-      if (el.isFaulty() == true) {
+      if (el.isFaulty()) {
         final Map<String, Object> map = el.getErrorProperties();
         for (final String key : map.keySet()) {
           final Object value = map.get(key);
           if (errorProperties == null) {
-            errorProperties = new HashMap<String, Set<Object>>();
+            errorProperties = new HashMap<>();
           }
           Set<Object> set = null;
-          if (errorProperties.containsKey(key) == true) {
+          if (errorProperties.containsKey(key)) {
             set = errorProperties.get(key);
           }
           if (set == null) {
-            set = new TreeSet<Object>();
+            set = new TreeSet<>();
             errorProperties.put(key, set);
           }
           set.add(value);
@@ -313,7 +308,7 @@ public class ImportedSheet<T> implements Serializable
   {
     boolean allowed = true;
     if (this.status == ImportStatus.NOT_RECONCILED || this.status == null) {
-      if (status.isIn(ImportStatus.IMPORTED, ImportStatus.NOTHING_TODO) == true) {
+      if (status.isIn(ImportStatus.IMPORTED, ImportStatus.NOTHING_TODO)) {
         // State change not allowed.
         allowed = false;
       }
@@ -322,7 +317,7 @@ public class ImportedSheet<T> implements Serializable
     } else {
       // Everything is allowed
     }
-    if (allowed == false) {
+    if (!allowed) {
       throw new UnsupportedOperationException("State change not allowed: '" + this.status + "' -> '" + status + "'");
     }
     this.status = status;
@@ -331,7 +326,7 @@ public class ImportedSheet<T> implements Serializable
     } else if (status == ImportStatus.NOT_RECONCILED) {
       reconciled = false;
     }
-    if (isFaulty() == true) {
+    if (isFaulty()) {
       this.status = ImportStatus.HAS_ERRORS;
     }
   }

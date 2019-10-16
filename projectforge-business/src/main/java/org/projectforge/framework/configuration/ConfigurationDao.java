@@ -23,12 +23,6 @@
 
 package org.projectforge.framework.configuration;
 
-import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
-
 import org.apache.commons.lang3.Validate;
 import org.projectforge.business.multitenancy.TenantDao;
 import org.projectforge.business.multitenancy.TenantRegistry;
@@ -49,6 +43,12 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
 
 /**
  * Configuration values persistet in the data base. Please access the configuration parameters via
@@ -80,7 +80,7 @@ public class ConfigurationDao extends BaseDao<ConfigurationDO>
   protected void afterSaveOrModify(final ConfigurationDO obj)
   {
     if (obj.getParameter().equals(ConfigurationParam.MULTI_TENANCY_ENABLED.getKey())
-        && obj.getBooleanValue() == true) {
+        && obj.getBooleanValue()) {
       // Enable current logged in user as super admin user.
       final Integer adminUserId = ThreadLocalUserContext.getUserId();
       final PFUserDO adminUser = userDao.getById(adminUserId);
@@ -89,7 +89,7 @@ public class ConfigurationDao extends BaseDao<ConfigurationDO>
       adminUser.setSuperAdmin(true);
       userDao.update(adminUser);
     }
-    if (obj.getGlobal() == true) {
+    if (obj.getGlobal()) {
       GlobalConfiguration.getInstance().setExpired();
     } else {
       final TenantDO tenant = obj.getTenant();
@@ -105,12 +105,12 @@ public class ConfigurationDao extends BaseDao<ConfigurationDO>
   public void checkAndUpdateDatabaseEntries()
   {
     final List<ConfigurationDO> list = internalLoadAll();
-    final Set<String> params = new HashSet<String>();
+    final Set<String> params = new HashSet<>();
     for (final ConfigurationParam param : ConfigurationParam.values()) {
       checkAndUpdateDatabaseEntry(param, list, params);
     }
     for (final ConfigurationDO entry : list) {
-      if (params.contains(entry.getParameter()) == false) {
+      if (!params.contains(entry.getParameter())) {
         log.error("Unknown configuration entry. Mark as deleted: " + entry.getParameter());
         internalMarkAsDeleted(entry);
       }
@@ -133,7 +133,7 @@ public class ConfigurationDao extends BaseDao<ConfigurationDO>
 
   public Object getValue(final IConfigurationParam parameter, final ConfigurationDO configurationDO)
   {
-    if (parameter.getType().isIn(ConfigurationType.STRING, ConfigurationType.TEXT) == true) {
+    if (parameter.getType().isIn(ConfigurationType.STRING, ConfigurationType.TEXT)) {
       if (configurationDO == null) {
         return parameter.getDefaultStringValue();
       }
@@ -143,7 +143,7 @@ public class ConfigurationDao extends BaseDao<ConfigurationDO>
       } else {
         return parameter.getDefaultStringValue();
       }
-    } else if (parameter.getType().isIn(ConfigurationType.FLOAT, ConfigurationType.PERCENT) == true) {
+    } else if (parameter.getType().isIn(ConfigurationType.FLOAT, ConfigurationType.PERCENT)) {
       if (configurationDO == null) {
         return BigDecimal.ZERO;
       }
@@ -208,7 +208,7 @@ public class ConfigurationDao extends BaseDao<ConfigurationDO>
 
     // find the entry and update it
     for (final ConfigurationDO configuration : list) {
-      if (param.getKey().equals(configuration.getParameter()) == true) {
+      if (param.getKey().equals(configuration.getParameter())) {
         boolean modified = false;
         if (configuration.getConfigurationType() != param.getType()) {
           log.info("Updating configuration type of configuration entry: " + param);
@@ -220,12 +220,12 @@ public class ConfigurationDao extends BaseDao<ConfigurationDO>
           configuration.setGlobal(param.isGlobal());
           modified = true;
         }
-        if (configuration.isDeleted() == true) {
+        if (configuration.isDeleted()) {
           log.info("Restore deleted configuration entry: " + param);
           configuration.setDeleted(false);
           modified = true;
         }
-        if (modified == true) {
+        if (modified) {
           internalUpdate(configuration);
         }
         return;
@@ -238,7 +238,7 @@ public class ConfigurationDao extends BaseDao<ConfigurationDO>
     configuration.setParameter(param.getKey());
     configuration.setConfigurationType(param.getType());
     configuration.setGlobal(param.isGlobal());
-    if (param.getType().isIn(ConfigurationType.STRING, ConfigurationType.TEXT) == true) {
+    if (param.getType().isIn(ConfigurationType.STRING, ConfigurationType.TEXT)) {
       configuration.setValue(param.getDefaultStringValue());
     }
     if (param.getType().isIn(ConfigurationType.INTEGER)) {

@@ -23,12 +23,6 @@
 
 package org.projectforge.framework.persistence.jpa.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.PredicateUtils;
 import org.hibernate.Criteria;
@@ -41,13 +35,7 @@ import org.projectforge.business.multitenancy.TenantChecker;
 import org.projectforge.framework.access.AccessChecker;
 import org.projectforge.framework.access.AccessException;
 import org.projectforge.framework.access.OperationType;
-import org.projectforge.framework.persistence.api.BaseDO;
-import org.projectforge.framework.persistence.api.BaseDao;
-import org.projectforge.framework.persistence.api.BaseSearchFilter;
-import org.projectforge.framework.persistence.api.ExtendedBaseDO;
-import org.projectforge.framework.persistence.api.FallbackBaseDaoService;
-import org.projectforge.framework.persistence.api.QueryFilter;
-import org.projectforge.framework.persistence.api.SearchService;
+import org.projectforge.framework.persistence.api.*;
 import org.projectforge.framework.persistence.jpa.PfEmgr;
 import org.projectforge.framework.persistence.jpa.PfEmgrFactory;
 import org.projectforge.framework.persistence.user.api.ThreadLocalUserContext;
@@ -55,6 +43,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
 
 /**
  * Implementation of SearchService.
@@ -96,7 +86,7 @@ public class SearchServiceImpl implements SearchService
     BaseDao<ENT> baseDao = fallbackBaseDaoService.getBaseDaoForEntity(entClazz);
 
     baseDao.checkLoggedInUserSelectAccess();
-    if (accessChecker.isRestrictedUser() == true) {
+    if (accessChecker.isRestrictedUser()) {
       return new ArrayList<>();
     }
 
@@ -108,12 +98,12 @@ public class SearchServiceImpl implements SearchService
   protected <ENT extends ExtendedBaseDO<Integer>> List<ENT> extractEntriesWithSelectAccess(List<ENT> origList,
       Class<ENT> entClazz, BaseDao<ENT> baseDao)
   {
-    final List<ENT> result = new ArrayList<ENT>();
+    final List<ENT> result = new ArrayList<>();
 
     for (final ENT obj : origList) {
-      if ((tenantChecker.isSuperAdmin(ThreadLocalUserContext.getUser()) == true
-          || tenantChecker.isPartOfCurrentTenant(obj) == true)
-          && baseDao.hasLoggedInUserSelectAccess(obj, false) == true) {
+      if ((tenantChecker.isSuperAdmin(ThreadLocalUserContext.getUser())
+          || tenantChecker.isPartOfCurrentTenant(obj))
+          && baseDao.hasLoggedInUserSelectAccess(obj, false)) {
         result.add(obj);
         baseDao.afterLoad(obj);
       }
@@ -134,7 +124,7 @@ public class SearchServiceImpl implements SearchService
   {
     final BaseSearchFilter searchFilter = filter.getFilter();
     filter.clearErrorMessage();
-    if (searchFilter.isIgnoreDeleted() == false) {
+    if (!searchFilter.isIgnoreDeleted()) {
       filter.add(Restrictions.eq("deleted", searchFilter.isDeleted()));
     }
     if (searchFilter.getModifiedSince() != null) {
@@ -146,13 +136,13 @@ public class SearchServiceImpl implements SearchService
     {
       final Criteria criteria = filter.buildCriteria(session, entClazz);
       //      TODO RK setCacheRegion(criteria);
-      if (searchFilter.isSearchNotEmpty() == true) {
+      if (searchFilter.isSearchNotEmpty()) {
         final String searchString = HibernateSearchFilterUtils.modifySearchString(searchFilter.getSearchString());
         String[] searchFields = HibernateSearchFilterUtils.determineSearchFields(entClazz);
         try {
           FullTextSession fullTextSession = Search.getFullTextSession(session);
           final org.apache.lucene.search.Query query = HibernateSearchFilterUtils.createFullTextQuery(fullTextSession,
-              searchFields, filter, searchString, entClazz);
+              searchFields, searchString, entClazz);
           final FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(query, entClazz);
           fullTextQuery.setCriteriaQuery(criteria);
           list = fullTextQuery.list(); // return a list of managed objects
@@ -176,9 +166,9 @@ public class SearchServiceImpl implements SearchService
         if (list.size() > 0 && searchFilter.applyModificationFilter()) {
           // Search now all history entries which were modified by the given user and/or in the given time period.
           Set<Integer> idSet = getHistoryEntries(session, searchFilter, entClazz);
-          List<ENT> result = new ArrayList<ENT>();
+          List<ENT> result = new ArrayList<>();
           for (final ENT entry : list) {
-            if (idSet.contains(entry.getId()) == true) {
+            if (idSet.contains(entry.getId())) {
               result.add(entry);
             }
           }
@@ -186,16 +176,16 @@ public class SearchServiceImpl implements SearchService
         }
       }
     }
-    if (searchFilter.isSearchHistory() == true && searchFilter.isSearchNotEmpty() == true) {
+    if (searchFilter.isSearchHistory() && searchFilter.isSearchNotEmpty()) {
       // Search now all history for the given search string.
       final Set<Integer> idSet = searchHistoryEntries(session, searchFilter, entClazz);
-      if (CollectionUtils.isNotEmpty(idSet) == true) {
+      if (CollectionUtils.isNotEmpty(idSet)) {
         for (final ENT entry : list) {
-          if (idSet.contains(entry.getId()) == true) {
+          if (idSet.contains(entry.getId())) {
             idSet.remove(entry.getId()); // Object does already exist in list.
           }
         }
-        if (idSet.isEmpty() == false) {
+        if (!idSet.isEmpty()) {
           final Criteria criteria = filter.buildCriteria(session, entClazz);
           // TODO RK setCacheRegion(criteria);
           criteria.add(Restrictions.in("id", idSet));
@@ -207,7 +197,7 @@ public class SearchServiceImpl implements SearchService
     }
     if (list == null) {
       // History search without search string.
-      list = new ArrayList<ENT>();
+      list = new ArrayList<>();
     }
     return list;
   }
@@ -216,12 +206,12 @@ public class SearchServiceImpl implements SearchService
       Class<? extends BaseDO<?>> entClass)
   {
 
-    if (accessChecker.hasLoggedInUserAccess(entClass, OperationType.SELECT) == false
-        || accessChecker.hasLoggedInUserHistoryAccess(entClass) == false) {
+    if (!accessChecker.hasLoggedInUserAccess(entClass, OperationType.SELECT)
+        || !accessChecker.hasLoggedInUserHistoryAccess(entClass)) {
       // User has in general no access to history entries of the given object type (clazz).
       return Collections.emptySet();
     }
-    final Set<Integer> idSet = new HashSet<Integer>();
+    final Set<Integer> idSet = new HashSet<>();
     HibernateSearchFilterUtils.getHistoryEntriesDirect(session, filter, idSet, entClass);
 
     return idSet;
@@ -231,12 +221,12 @@ public class SearchServiceImpl implements SearchService
       Class<? extends BaseDO<?>> entClass)
   {
 
-    if (accessChecker.hasLoggedInUserAccess(entClass, OperationType.SELECT) == false
-        || accessChecker.hasLoggedInUserHistoryAccess(entClass) == false) {
+    if (!accessChecker.hasLoggedInUserAccess(entClass, OperationType.SELECT)
+        || !accessChecker.hasLoggedInUserHistoryAccess(entClass)) {
       // User has in general no access to history entries of the given object type (clazz).
       return Collections.emptySet();
     }
-    final Set<Integer> idSet = new HashSet<Integer>();
+    final Set<Integer> idSet = new HashSet<>();
     HibernateSearchFilterUtils.getHistoryEntriesFromSearch(session, filter, idSet, entClass);
 
     return idSet;

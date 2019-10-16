@@ -52,7 +52,7 @@ public class TeamEventExternalSubscriptionCache {
 
   private static final long MAX_WAIT_MS_AFTER_FAILED_UPDATE = 1000 * 60 * 60 * 24; // 24 h
 
-  private final Map<Integer, TeamEventSubscription> subscriptions = new HashMap<Integer, TeamEventSubscription>();
+  private final Map<Integer, TeamEventSubscription> subscriptions = new HashMap<>();
 
   private static final Long SUBSCRIPTION_UPDATE_TIME = 5L * 60 * 1000; // 5 min
 
@@ -71,7 +71,7 @@ public class TeamEventExternalSubscriptionCache {
 
   // @PostConstruct doesn't work (it will be called to early before TenantRegistryMap is ready).
   private synchronized void init(){
-    if (initialized == false) {
+    if (!initialized) {
       updateCache();
       initialized = true;
     }
@@ -88,10 +88,10 @@ public class TeamEventExternalSubscriptionCache {
       updateCache(calendar);
     }
 
-    final List<Integer> idsToRemove = new ArrayList<Integer>();
+    final List<Integer> idsToRemove = new ArrayList<>();
     for (final Integer calendarId : subscriptions.keySet()) {
       // if calendar is not subscribed anymore, remove them
-      if (calendarListContainsId(subscribedCalendars, calendarId) == false) {
+      if (!calendarListContainsId(subscribedCalendars, calendarId)) {
         idsToRemove.add(calendarId);
       }
     }
@@ -137,9 +137,9 @@ public class TeamEventExternalSubscriptionCache {
       teamEventSubscription = new TeamEventSubscription();
       subscriptions.put(calendar.getId(), teamEventSubscription);
       teamEventSubscription.update(teamCalDao, calendar);
-    } else if (force == true || teamEventSubscription.getLastUpdated() == null
+    } else if (force || teamEventSubscription.getLastUpdated() == null
             || teamEventSubscription.getLastUpdated() + addedTime <= now) {
-      if (force == false && teamEventSubscription.getNumberOfFailedUpdates() > 0) {
+      if (!force && teamEventSubscription.getNumberOfFailedUpdates() > 0) {
         // Errors occurred and update not forced. Don't update e. g. every 5 minutes if a permanently error occurs.
         Long lastRun = teamEventSubscription.getLastUpdated();
         if (lastRun == null) {
@@ -167,7 +167,7 @@ public class TeamEventExternalSubscriptionCache {
 
   public boolean isExternalSubscribedCalendar(final Integer calendarId) {
     init();
-    return subscriptions.keySet().contains(calendarId) == true;
+    return subscriptions.keySet().contains(calendarId);
   }
 
   public List<TeamEventDO> getEvents(final Integer calendarId, final Long startTime, final Long endTime) {
@@ -206,11 +206,11 @@ public class TeamEventExternalSubscriptionCache {
 
   public List<TeamEventDO> getRecurrenceEvents(final TeamEventFilter filter) {
     init();
-    final List<TeamEventDO> result = new ArrayList<TeamEventDO>();
+    final List<TeamEventDO> result = new ArrayList<>();
     // precondition: existing teamcals ins filter
-    final Collection<Integer> teamCals = new LinkedList<Integer>();
+    final Collection<Integer> teamCals = new LinkedList<>();
     final Integer userId = ThreadLocalUserContext.getUserId();
-    if (CollectionUtils.isNotEmpty(filter.getTeamCals()) == true) {
+    if (CollectionUtils.isNotEmpty(filter.getTeamCals())) {
       for (final Integer calendarId : filter.getTeamCals()) {
         final TeamEventSubscription eventSubscription = subscriptions.get(calendarId);
         if (eventSubscription == null) {

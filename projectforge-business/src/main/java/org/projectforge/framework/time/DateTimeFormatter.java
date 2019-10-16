@@ -23,14 +23,14 @@
 
 package org.projectforge.framework.time;
 
+import org.projectforge.framework.i18n.AbstractFormatter;
+import org.projectforge.framework.persistence.user.api.ThreadLocalUserContext;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
-
-import org.projectforge.framework.i18n.AbstractFormatter;
-import org.projectforge.framework.persistence.user.api.ThreadLocalUserContext;
 
 /**
  * TODO DESGINBUG Wicket ueber HtmlHelper.
@@ -248,11 +248,11 @@ public class DateTimeFormatter extends AbstractFormatter
    */
   public String getPrettyFormattedDuration(final long millis, final int hoursOfDay, final int minHours4DaySeparation)
   {
-    final StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
     final String str1 = getFormattedDuration(millis, hoursOfDay, minHours4DaySeparation);
     final String str2 = getFormattedDuration(millis, hoursOfDay, -1);
     buf.append(str1);
-    if (str1.equals(str2) == false) {
+    if (!str1.equals(str2)) {
       buf.append(" (").append(str2).append(")");
     }
     return buf.toString();

@@ -23,10 +23,10 @@
 
 package org.projectforge.business.teamcal.filter;
 
-import java.io.Serializable;
-
 import org.apache.commons.lang3.StringUtils;
 import org.projectforge.framework.utils.NumberHelper;
+
+import java.io.Serializable;
 
 /**
  * Persist the settings of one calendar entry in the filter.
@@ -184,10 +184,10 @@ public class TemplateCalendarProperties implements Serializable, Comparable<Temp
    */
   public boolean isModified(final TemplateCalendarProperties other)
   {
-    if (NumberHelper.isEqual(this.calId, other.calId) == false) {
+    if (!NumberHelper.isEqual(this.calId, other.calId)) {
       return true;
     }
-    if (StringUtils.equals(this.colorCode, other.colorCode) == false) {
+    if (!StringUtils.equals(this.colorCode, other.colorCode)) {
       return true;
     }
     if (this.millisOfLastChange != other.millisOfLastChange) {

@@ -23,6 +23,7 @@
 
 package org.projectforge.framework.persistence.api
 
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.projectforge.business.user.UserPrefDao
 
@@ -35,5 +36,8 @@ class MagicFilterTest {
         val om = UserPrefDao.createObjectMapper()
         var json = om.writeValueAsString(filter)
         var obj = om.readValue(json, MagicFilter::class.java) as MagicFilter
+        Assertions.assertEquals(1, obj.entries.size)
+        Assertions.assertEquals("zipCode", obj.entries[0].field)
+        Assertions.assertEquals("12345", obj.entries[0].value)
     }
 }

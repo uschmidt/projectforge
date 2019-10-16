@@ -100,29 +100,29 @@ public class AddressDaoRest
     final List<AddressDO> list = addressDao.getList(filter);
 
     boolean exportAll = false;
-    if (BooleanUtils.isTrue(all) == true
+    if (BooleanUtils.isTrue(all)
         && accessChecker.isLoggedInUserMemberOfGroup(ProjectForgeGroup.FINANCE_GROUP,
-        ProjectForgeGroup.MARKETING_GROUP) == true) {
+        ProjectForgeGroup.MARKETING_GROUP)) {
       exportAll = true;
     }
 
     List<PersonalAddressDO> favorites = null;
     Set<Integer> favoritesSet = null;
-    if (exportAll == false) {
+    if (!exportAll) {
       favorites = personalAddressDao.getList();
-      favoritesSet = new HashSet<Integer>();
+      favoritesSet = new HashSet<>();
       if (favorites != null) {
         for (final PersonalAddressDO personalAddress : favorites) {
-          if (personalAddress.isFavoriteCard() == true && personalAddress.isDeleted() == false) {
+          if (personalAddress.isFavoriteCard() && !personalAddress.isDeleted()) {
             favoritesSet.add(personalAddress.getAddressId());
           }
         }
       }
     }
-    final List<AddressObject> result = new LinkedList<AddressObject>();
+    final List<AddressObject> result = new LinkedList<>();
     if (list != null) {
       for (final AddressDO addressDO : list) {
-        if (exportAll == false && favoritesSet.contains(addressDO.getId()) == false) {
+        if (!exportAll && !favoritesSet.contains(addressDO.getId())) {
           // Export only personal favorites due to data-protection.
           continue;
         }
@@ -131,15 +131,15 @@ public class AddressDaoRest
         result.add(address);
       }
     }
-    if (exportAll == false && modifiedSinceDate != null) {
+    if (!exportAll && modifiedSinceDate != null) {
       // Add now personal address entries which were modified since the given date (deleted or added):
       for (final PersonalAddressDO personalAddress : favorites) {
         if (personalAddress.getLastUpdate() != null
-            && personalAddress.getLastUpdate().before(modifiedSinceDate) == false) {
+            && !personalAddress.getLastUpdate().before(modifiedSinceDate)) {
           final AddressDO addressDO = addressDao.getById(personalAddress.getAddressId());
           final AddressObject address = AddressDOConverter.getAddressObject(addressDao, addressDO,
               BooleanUtils.isTrue(disableImageData), BooleanUtils.isTrue(disableVCardData));
-          if (personalAddress.isFavorite() == false) {
+          if (!personalAddress.isFavorite()) {
             // This address was may-be removed by the user from the personal address book, so add this address as deleted to the result
             // list.
             address.setDeleted(true);
@@ -212,7 +212,7 @@ public class AddressDaoRest
     AddressDO dbAddress = addressDao.findByUid(uid);
 
     if (isNew) {
-      PersonalAddressDO personalAddress = null;
+      PersonalAddressDO personalAddress;
       personalAddress = new PersonalAddressDO();
       personalAddress.setAddress(dbAddress);
       personalAddress.setFavoriteCard(true);

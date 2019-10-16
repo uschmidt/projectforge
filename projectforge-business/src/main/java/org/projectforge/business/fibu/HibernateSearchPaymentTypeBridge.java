@@ -23,13 +23,13 @@
 
 package org.projectforge.business.fibu;
 
-import java.util.Locale;
-
 import org.apache.lucene.document.Document;
 import org.hibernate.search.bridge.FieldBridge;
 import org.hibernate.search.bridge.LuceneOptions;
 import org.projectforge.Const;
 import org.projectforge.framework.i18n.I18nHelper;
+
+import java.util.Locale;
 
 /**
  * Bridge for hibernate search to search for payment type of incomming invoices.
@@ -54,7 +54,7 @@ public class HibernateSearchPaymentTypeBridge implements FieldBridge
       return;
     }
 
-    final StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
 
     for (final Locale locale : Const.I18NSERVICE_LANGUAGES) {
       final String localized = I18nHelper.getLocalizedMessage(locale, paymentType.getI18nKey());
@@ -66,7 +66,7 @@ public class HibernateSearchPaymentTypeBridge implements FieldBridge
       buf.append(localized + " ");
     }
 
-    if (log.isDebugEnabled() == true) {
+    if (log.isDebugEnabled()) {
       log.debug(buf.toString());
     }
 

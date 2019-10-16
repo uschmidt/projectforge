@@ -23,17 +23,13 @@
 
 package org.projectforge.continuousdb;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderColumn;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.projectforge.framework.persistence.database.DatabaseService;
+
+import javax.persistence.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * 
@@ -46,7 +42,7 @@ public class SchemaGenerator
 
   private final DatabaseService dao;
 
-  private final List<Table> tables = new LinkedList<Table>();
+  private final List<Table> tables = new LinkedList<>();
 
   public SchemaGenerator(final DatabaseService dao)
   {
@@ -60,9 +56,7 @@ public class SchemaGenerator
   public SchemaGenerator add(final Table... tables)
   {
     if (tables != null) {
-      for (final Table table : tables) {
-        this.tables.add(table);
-      }
+      this.tables.addAll(Arrays.asList(tables));
     }
     return this;
   }
@@ -75,11 +69,11 @@ public class SchemaGenerator
     for (final Table table : tables) {
       final Table superTable = table.getSuperTable();
       if (superTable != null) {
-        if (dao.doExist(superTable) == true) {
+        if (dao.doExist(superTable)) {
           continue;
         }
         dao.createTable(superTable);
-      } else if (dao.doExist(table) == false) {
+      } else if (!dao.doExist(table)) {
         dao.createTable(table);
       }
     }
@@ -94,7 +88,7 @@ public class SchemaGenerator
         continue;
       }
       // Add additional attributes:
-      if (CollectionUtils.isEmpty(table.getAttributes()) == true) {
+      if (CollectionUtils.isEmpty(table.getAttributes())) {
         continue;
       }
       for (final TableAttribute attr : table.getAttributes()) {
@@ -110,9 +104,9 @@ public class SchemaGenerator
   void prepareOneToMany()
   {
     for (final Table table : tables) {
-      final List<TableAttribute> newAttrs = new LinkedList<TableAttribute>();
+      final List<TableAttribute> newAttrs = new LinkedList<>();
       for (final TableAttribute attr : table.getAttributes()) {
-        if (attr.getType().isIn(TableAttributeType.SET, TableAttributeType.LIST) == true) {
+        if (attr.getType().isIn(TableAttributeType.SET, TableAttributeType.LIST)) {
           final OrderColumn orderColumn = attr.getAnnotation(OrderColumn.class);
           if (orderColumn != null) {
             final String name = orderColumn.name().length() > 0 ? orderColumn.name() : attr.getName() + "_ORDER";
@@ -133,7 +127,7 @@ public class SchemaGenerator
             continue;
           }
           Class<?> targetEntity = oneToMany.targetEntity();
-          if (targetEntity.equals(void.class) == true) {
+          if (targetEntity.equals(void.class)) {
             targetEntity = attr.getGenericType();
           }
           if (targetEntity == null) {
@@ -180,10 +174,10 @@ public class SchemaGenerator
 
   void prepareManyToMany()
   {
-    final List<Table> joinTables = new LinkedList<Table>();
+    final List<Table> joinTables = new LinkedList<>();
     for (final Table table : tables) {
       for (final TableAttribute attr : table.getAttributes()) {
-        if (attr.getType().isIn(TableAttributeType.SET, TableAttributeType.LIST) == true) {
+        if (attr.getType().isIn(TableAttributeType.SET, TableAttributeType.LIST)) {
           final ManyToMany manyToMany = attr.getAnnotation(ManyToMany.class);
           if (manyToMany == null) {
             continue;
@@ -196,7 +190,7 @@ public class SchemaGenerator
             continue;
           }
           Class<?> targetEntity = manyToMany.targetEntity();
-          if (targetEntity.equals(void.class) == true) {
+          if (targetEntity.equals(void.class)) {
             targetEntity = attr.getGenericType();
           }
           if (targetEntity == null) {
@@ -286,7 +280,7 @@ public class SchemaGenerator
   public Table getTable(final Class<?> entityClass)
   {
     for (final Table table : tables) {
-      if (table.getEntityClass().equals(entityClass) == true) {
+      if (table.getEntityClass().equals(entityClass)) {
         return table;
       }
     }
@@ -304,7 +298,7 @@ public class SchemaGenerator
     }
     final String lowercase = name.toLowerCase();
     for (final Table table : tables) {
-      if (lowercase.equals(table.getName().toLowerCase()) == true) {
+      if (lowercase.equals(table.getName().toLowerCase())) {
         return table;
       }
     }

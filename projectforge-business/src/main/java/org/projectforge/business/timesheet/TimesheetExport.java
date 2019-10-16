@@ -23,21 +23,9 @@
 
 package org.projectforge.business.timesheet;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.List;
-
 import org.apache.poi.hssf.util.HSSFColor;
 import org.projectforge.business.common.OutputType;
-import org.projectforge.business.excel.CellFormat;
-import org.projectforge.business.excel.ContentProvider;
-import org.projectforge.business.excel.ExportCell;
-import org.projectforge.business.excel.ExportColumn;
-import org.projectforge.business.excel.ExportRow;
-import org.projectforge.business.excel.ExportSheet;
-import org.projectforge.business.excel.ExportWorkbook;
-import org.projectforge.business.excel.I18nExportColumn;
-import org.projectforge.business.excel.PropertyMapping;
+import org.projectforge.business.excel.*;
 import org.projectforge.business.fibu.KundeDO;
 import org.projectforge.business.fibu.ProjektDO;
 import org.projectforge.business.fibu.kost.Kost2DO;
@@ -56,6 +44,10 @@ import org.projectforge.framework.time.DateHolder;
 import org.projectforge.framework.time.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.List;
 
 /**
  * For excel export.
@@ -83,7 +75,7 @@ public class TimesheetExport
     {
       for (final ExportCell cell : row.getCells()) {
         final CellFormat format = cell.ensureAndGetCellFormat();
-        format.setFillForegroundColor(HSSFColor.WHITE.index);
+        format.setFillForegroundColor(HSSFColor.HSSFColorPredefined.WHITE.getIndex());
         switch (row.getRowNum()) {
           case 0:
             format.setFont(FONT_HEADER);
@@ -95,7 +87,7 @@ public class TimesheetExport
           default:
             format.setFont(FONT_NORMAL);
             if (row.getRowNum() % 2 == 0) {
-              format.setFillForegroundColor(HSSFColor.GREY_25_PERCENT.index);
+              format.setFillForegroundColor(HSSFColor.HSSFColorPredefined.GREY_25_PERCENT.getIndex());
             }
             break;
         }
@@ -206,7 +198,7 @@ public class TimesheetExport
       mapping.add(Col.ID, timesheet.getId());
       sheet.addRow(mapping.getMapping(), 0);
     }
-    sheet.setZoom(3, 4); // 75%
+    sheet.setZoom(75); // 75%
 
     return xls.getAsByteArray();
   }

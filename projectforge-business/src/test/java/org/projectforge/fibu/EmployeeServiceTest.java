@@ -39,7 +39,10 @@ import org.projectforge.test.AbstractTestBase;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.NoResultException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -146,22 +149,22 @@ public class EmployeeServiceTest extends AbstractTestBase
     when(vacationService.getVacationCount(2016, Calendar.JULY, 2017, Calendar.OCTOBER, new PFUserDO())).thenReturn("TestCase 2");
     when(vacationService.getVacationCount(2017, Calendar.JULY, 2017, Calendar.OCTOBER, new PFUserDO())).thenReturn("TestCase 3");
 
-    Calendar testCase1 = new GregorianCalendar(ThreadLocalUserContext.getTimeZone());
+    GregorianCalendar testCase1 = new GregorianCalendar(ThreadLocalUserContext.getTimeZone());
     testCase1.set(Calendar.YEAR, 2017);
     testCase1.set(Calendar.MONTH, Calendar.OCTOBER);
-    when(new GregorianCalendar(ThreadLocalUserContext.getTimeZone())).thenReturn((GregorianCalendar) testCase1);
+    when(new GregorianCalendar(ThreadLocalUserContext.getTimeZone())).thenReturn(testCase1);
     Assertions.assertEquals("TestCase 1", employeeService.getStudentVacationCountPerDay(new EmployeeDO()));
 
-    Calendar testCase2 = new GregorianCalendar(ThreadLocalUserContext.getTimeZone());
+    GregorianCalendar testCase2 = new GregorianCalendar(ThreadLocalUserContext.getTimeZone());
     testCase2.set(Calendar.YEAR, 2017);
     testCase2.set(Calendar.MONTH, Calendar.FEBRUARY);
-    when(new GregorianCalendar(ThreadLocalUserContext.getTimeZone())).thenReturn((GregorianCalendar) testCase2);
+    when(new GregorianCalendar(ThreadLocalUserContext.getTimeZone())).thenReturn(testCase2);
 
-    Date testCase3 = new Date();
-    testCase3.setMonth(7);
-    testCase3.setYear(2017);
-    when(new GregorianCalendar(ThreadLocalUserContext.getTimeZone())).thenReturn((GregorianCalendar) testCase1);
-    when(new EmployeeDO().getEintrittsDatum()).thenReturn(testCase3);
+    Calendar testCase3 = new GregorianCalendar(ThreadLocalUserContext.getTimeZone());
+    testCase3.set(Calendar.MONTH, Calendar.AUGUST);
+    testCase3.set(Calendar.YEAR, 2017);
+    when(new GregorianCalendar(ThreadLocalUserContext.getTimeZone())).thenReturn(testCase1);
+    //when(new EmployeeDO().getEintrittsDatum()).thenReturn(testCase3);
   }
 
 }

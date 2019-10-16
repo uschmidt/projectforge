@@ -23,9 +23,9 @@
 
 package org.projectforge.business.user;
 
-import java.io.Serializable;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import java.io.Serializable;
 
 /**
  * Only used e. g. for editing the user rights (especially for the case if the user has no UserRightDO entry in the data base but this right
@@ -53,7 +53,7 @@ public class UserRightVO implements Serializable
 
   public UserRightVO setBooleanValue(boolean booleanValue)
   {
-    if (booleanValue == true) {
+    if (booleanValue) {
       this.value = UserRightValue.TRUE;
     } else {
       this.value = UserRightValue.FALSE;

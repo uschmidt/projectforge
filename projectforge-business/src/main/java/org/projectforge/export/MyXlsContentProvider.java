@@ -24,18 +24,8 @@
 package org.projectforge.export;
 
 import org.apache.commons.lang3.BooleanUtils;
-import org.projectforge.business.excel.CellFormat;
-import org.projectforge.business.excel.ContentProvider;
-import org.projectforge.business.excel.ExportCell;
-import org.projectforge.business.excel.ExportWorkbook;
-import org.projectforge.business.excel.XlsContentProvider;
-import org.projectforge.business.fibu.EmployeeDO;
-import org.projectforge.business.fibu.KontoDO;
-import org.projectforge.business.fibu.KostFormatter;
-import org.projectforge.business.fibu.KundeDO;
-import org.projectforge.business.fibu.KundeFormatter;
-import org.projectforge.business.fibu.ProjektDO;
-import org.projectforge.business.fibu.ProjektFormatter;
+import org.projectforge.business.excel.*;
+import org.projectforge.business.fibu.*;
 import org.projectforge.business.fibu.kost.Kost1DO;
 import org.projectforge.business.fibu.kost.Kost2DO;
 import org.projectforge.common.DateFormatType;
@@ -108,10 +98,10 @@ public class MyXlsContentProvider extends XlsContentProvider
   @Override
   protected CellFormat getCustomizedCellFormat(final CellFormat format, final Object value)
   {
-    if (value == null || DateHolder.class.isAssignableFrom(value.getClass()) == false) {
+    if (value == null || !DateHolder.class.isAssignableFrom(value.getClass())) {
       return null;
     }
-    if (format != null && BooleanUtils.isTrue(format.getAutoDatePrecision()) == false) {
+    if (format != null && !BooleanUtils.isTrue(format.getAutoDatePrecision())) {
       return null;
     }
     // Find a format dependent on the precision:

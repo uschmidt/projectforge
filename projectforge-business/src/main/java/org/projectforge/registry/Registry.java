@@ -73,13 +73,13 @@ public class Registry
 
   public static final Registry instance = new Registry();
 
-  private static final Map<String, RegistryEntry> mapByName = new HashMap<String, RegistryEntry>();
+  private static final Map<String, RegistryEntry> mapByName = new HashMap<>();
 
-  private static final Map<Class<? extends BaseDao<?>>, RegistryEntry> mapByDao = new HashMap<Class<? extends BaseDao<?>>, RegistryEntry>();
+  private static final Map<Class<? extends BaseDao<?>>, RegistryEntry> mapByDao = new HashMap<>();
 
-  private static final Map<Class<? extends BaseDO<?>>, RegistryEntry> mapByDO = new HashMap<Class<? extends BaseDO<?>>, RegistryEntry>();
+  private static final Map<Class<? extends BaseDO<?>>, RegistryEntry> mapByDO = new HashMap<>();
 
-  private static final List<RegistryEntry> orderedList = new ArrayList<RegistryEntry>();
+  private static final List<RegistryEntry> orderedList = new ArrayList<>();
 
   public static Registry getInstance()
   {
@@ -223,7 +223,7 @@ public class Registry
     if (idx < 0) {
       log.error("Registry entry '" + existingEntry.getId() + "' not found. Appending the given entry to the list.");
       orderedList.add(entry);
-    } else if (insertBefore == true) {
+    } else if (insertBefore) {
       orderedList.add(idx, entry);
     } else {
       orderedList.add(idx + 1, entry);

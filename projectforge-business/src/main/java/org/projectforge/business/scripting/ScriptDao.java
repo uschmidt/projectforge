@@ -23,11 +23,6 @@
 
 package org.projectforge.business.scripting;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.projectforge.AppVersion;
 import org.projectforge.business.fibu.kost.reporting.ReportGeneratorList;
@@ -41,6 +36,11 @@ import org.projectforge.registry.Registry;
 import org.projectforge.registry.RegistryEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Kai Reinhard (k.reinhard@micromata.de)
@@ -67,7 +67,7 @@ public class ScriptDao extends BaseDao<ScriptDO>
   @Override
   protected void onChange(final ScriptDO obj, final ScriptDO dbObj)
   {
-    if (Arrays.equals(dbObj.getScript(), obj.getScript()) == false) {
+    if (!Arrays.equals(dbObj.getScript(), obj.getScript())) {
       obj.setScriptBackup(dbObj.getScript());
     }
   }
@@ -96,7 +96,7 @@ public class ScriptDao extends BaseDao<ScriptDO>
   {
     hasLoggedInUserSelectAccess(script, true);
     final ReportGeneratorList reportGeneratorList = new ReportGeneratorList();
-    final Map<String, Object> scriptVariables = new HashMap<String, Object>();
+    final Map<String, Object> scriptVariables = new HashMap<>();
 
     addScriptVariables(scriptVariables);
     scriptVariables.put("reportList", reportGeneratorList);
@@ -106,7 +106,7 @@ public class ScriptDao extends BaseDao<ScriptDO>
       }
     }
     if (script.getFile() != null) {
-      final Map<String, Object> scriptVars = new HashMap<String, Object>();
+      final Map<String, Object> scriptVars = new HashMap<>();
       scriptVariables.put("script", scriptVars);
       scriptVars.put("file", script.getFile());
       scriptVars.put("filename", script.getFilename());

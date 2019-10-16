@@ -23,15 +23,6 @@
 
 package org.projectforge.business.user;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ServiceLoader;
-
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.collections.list.UnmodifiableList;
 import org.jfree.util.Log;
 import org.projectforge.business.address.AddressbookRight;
@@ -52,6 +43,10 @@ import org.projectforge.framework.persistence.api.UserRightService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import java.io.Serializable;
+import java.util.*;
+
 @Service
 public class UserRightServiceImpl implements UserRightService, Serializable
 {
@@ -65,11 +60,11 @@ public class UserRightServiceImpl implements UserRightService, Serializable
   @Autowired
   TenantChecker tenantChecker;
 
-  private final Map<IUserRightId, UserRight> rights = new HashMap<IUserRightId, UserRight>();
+  private final Map<IUserRightId, UserRight> rights = new HashMap<>();
 
-  private final Map<String, IUserRightId> rightIds = new HashMap<String, IUserRightId>();
+  private final Map<String, IUserRightId> rightIds = new HashMap<>();
 
-  private final List<UserRight> orderedRights = new ArrayList<UserRight>();
+  private final List<UserRight> orderedRights = new ArrayList<>();
   /**
    * The user rights ids.
    */
@@ -160,7 +155,7 @@ public class UserRightServiceImpl implements UserRightService, Serializable
     for (RightRightIdProviderService service : serviceLoader) {
       String cname = service.getClass().getName();
       for (IUserRightId uid : service.getUserRightIds()) {
-        if (userRightIds.containsKey(uid.getId()) == true) {
+        if (userRightIds.containsKey(uid.getId())) {
           Log.error("Duplicated UserId: " + uid.getId());
         }
         userRightIds.put(uid.getId(), uid);

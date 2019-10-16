@@ -29,6 +29,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.sql.JoinType;
 import org.projectforge.business.multitenancy.TenantService;
 import org.projectforge.framework.configuration.ApplicationContextProvider;
 import org.projectforge.framework.persistence.user.api.ThreadLocalUserContext;
@@ -48,7 +49,7 @@ import java.util.Locale;
  * @author Kai Reinhard (k.reinhard@micromata.de)
  */
 public class QueryFilter {
-  private final List<Object> filterSettings = new ArrayList<Object>();
+  private final List<Object> filterSettings = new ArrayList<>();
 
   private String alias;
 
@@ -82,11 +83,11 @@ public class QueryFilter {
       this.filter = filter;
     }
     TenantService tenantService = ApplicationContextProvider.getApplicationContext().getBean(TenantService.class);
-    if (ignoreTenant == false && tenantService.isMultiTenancyAvailable() == true) {
+    if (!ignoreTenant && tenantService.isMultiTenancyAvailable()) {
       final UserContext userContext = ThreadLocalUserContext.getUserContext();
       final TenantDO currentTenant = userContext.getCurrentTenant();
       if (currentTenant != null) {
-        if (currentTenant.isDefault() == true) {
+        if (currentTenant.isDefault()) {
           this.add(Restrictions.or(Restrictions.eq("tenant", userContext.getCurrentTenant()),
                   Restrictions.isNull("tenant")));
         } else {
@@ -177,8 +178,8 @@ public class QueryFilter {
     if (year > 0) {
       final Calendar cal = DateHelper.getUTCCalendar();
       cal.set(Calendar.YEAR, year);
-      java.sql.Date lo = null;
-      java.sql.Date hi = null;
+      java.sql.Date lo;
+      java.sql.Date hi;
       if (month >= 0) {
         cal.set(Calendar.MONTH, month);
         cal.set(Calendar.DAY_OF_MONTH, 1);
@@ -239,26 +240,24 @@ public class QueryFilter {
   }
 
   /**
-   * @see org.hibernate.Criteria#createAlias(String, String, int)
+   * @see org.hibernate.Criteria#createAlias(String, String, JoinType)
    */
-  public QueryFilter createAlias(final String arg0, final String arg1, final int joinType) {
+  public QueryFilter createAlias(final String arg0, final String arg1, final JoinType joinType) {
     filterSettings.add(new Alias(arg0, arg1, joinType));
     return this;
   }
 
   class Alias {
     String arg0;
-
     String arg1;
-
-    int joinType = Criteria.INNER_JOIN;
+    JoinType joinType = JoinType.INNER_JOIN;
 
     Alias(final String arg0, final String arg1) {
       this.arg0 = arg0;
       this.arg1 = arg1;
     }
 
-    Alias(final String arg0, final String arg1, final int joinType) {
+    Alias(final String arg0, final String arg1, final JoinType joinType) {
       this.arg0 = arg0;
       this.arg1 = arg1;
       this.joinType = joinType;

@@ -23,9 +23,8 @@
 
 package org.projectforge.business.scripting.xstream;
 
-import org.projectforge.framework.utils.RecentQueue;
-
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import org.projectforge.framework.utils.RecentQueue;
 
 
 @XStreamAlias("RecentScriptCalls")
@@ -35,7 +34,7 @@ public class RecentScriptCalls
 
   public RecentScriptCalls()
   {
-    recentQueue = new RecentQueue<ScriptCallData>();
+    recentQueue = new RecentQueue<>();
   }
 
   public void append(final ScriptCallData data)
@@ -49,7 +48,7 @@ public class RecentScriptCalls
       return null;
     }
     for (final ScriptCallData data : recentQueue.getRecents()) {
-      if (scriptName.equals(data.getScriptName()) == true) {
+      if (scriptName.equals(data.getScriptName())) {
         return data;
       }
     }

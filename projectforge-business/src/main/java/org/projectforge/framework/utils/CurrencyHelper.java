@@ -24,7 +24,6 @@
 package org.projectforge.framework.utils;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 public class CurrencyHelper
 {
@@ -38,7 +37,7 @@ public class CurrencyHelper
     if (net == null) {
       return BigDecimal.ZERO;
     }
-    if (NumberHelper.isZeroOrNull(vat) == true) {
+    if (NumberHelper.isZeroOrNull(vat)) {
       return net;
     }
     return net.multiply(BigDecimal.ONE.add(vat));

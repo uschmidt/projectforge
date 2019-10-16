@@ -23,8 +23,6 @@
 
 package org.projectforge.business.fibu;
 
-import java.util.List;
-
 import org.hibernate.criterion.Order;
 import org.projectforge.business.user.ProjectForgeGroup;
 import org.projectforge.framework.access.OperationType;
@@ -34,6 +32,8 @@ import org.projectforge.framework.persistence.api.BaseSearchFilter;
 import org.projectforge.framework.persistence.api.QueryFilter;
 import org.projectforge.framework.persistence.user.entities.PFUserDO;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public class KundeDao extends BaseDao<KundeDO>
@@ -74,19 +74,19 @@ public class KundeDao extends BaseDao<KundeDO>
       return true;
     }
     if (accessChecker.isUserMemberOfGroup(user, ProjectForgeGroup.FINANCE_GROUP,
-        ProjectForgeGroup.CONTROLLING_GROUP) == true) {
+        ProjectForgeGroup.CONTROLLING_GROUP)) {
       return true;
     }
     if (accessChecker.isUserMemberOfGroup(user, ProjectForgeGroup.PROJECT_MANAGER,
-        ProjectForgeGroup.PROJECT_ASSISTANT) == true) {
+        ProjectForgeGroup.PROJECT_ASSISTANT)) {
       if (obj.getStatus() != null
-          && obj.getStatus().isIn(KundeStatus.ENDED, KundeStatus.NONACTIVE, KundeStatus.NONEXISTENT) == false
-          && obj.isDeleted() == false) {
+          && !obj.getStatus().isIn(KundeStatus.ENDED, KundeStatus.NONACTIVE, KundeStatus.NONEXISTENT)
+          && !obj.isDeleted()) {
         // Ein Projektleiter sieht keine nicht mehr aktiven oder gelöschten Kunden.
         return true;
       }
     }
-    if (throwException == true) {
+    if (throwException) {
       accessChecker.checkIsUserMemberOfGroup(user, ProjectForgeGroup.FINANCE_GROUP);
       log.error("Should not occur! An exception should be thrown.");
     }

@@ -23,16 +23,16 @@
 
 package org.projectforge.framework.xstream.converter;
 
-import java.util.Locale;
-
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.Locale;
 
 public class LocaleConverter extends AbstractValueConverter<Locale>
 {
   @Override
   public Locale fromString(final String str)
   {
-    if (StringUtils.isBlank(str) == true) {
+    if (StringUtils.isBlank(str)) {
       return null;
     }
     return new Locale(str);

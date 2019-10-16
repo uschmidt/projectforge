@@ -23,10 +23,10 @@
 
 package org.projectforge.business.address;
 
-import java.util.List;
-
 import org.hibernate.search.bridge.StringBridge;
 import org.projectforge.framework.utils.LabelValueBean;
+
+import java.util.List;
 
 
 /**
@@ -39,7 +39,7 @@ public class HibernateSearchInstantMessagingBridge implements StringBridge
   @SuppressWarnings("unchecked")
   public String objectToString(Object object)
   {
-    if (object == null || object instanceof List<?> == false) {
+    if (object == null || !(object instanceof List<?>)) {
       return "";
     }
     List<LabelValueBean<InstantMessagingType, String>> list = (List<LabelValueBean<InstantMessagingType, String>>)object;

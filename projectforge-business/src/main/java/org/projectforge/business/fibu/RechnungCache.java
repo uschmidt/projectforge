@@ -23,18 +23,14 @@
 
 package org.projectforge.business.fibu;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
 import org.projectforge.framework.cache.AbstractCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate5.HibernateTemplate;
 import org.springframework.stereotype.Component;
+
+import java.util.*;
 
 /**
  * Caches the order positions assigned to invoice positions.
@@ -76,8 +72,8 @@ public class RechnungCache extends AbstractCache
   {
     log.info("Initializing RechnungCache ...");
     // This method must not be synchronized because it works with a new copy of maps.
-    final Map<Integer, Set<RechnungsPositionVO>> mapByAuftragId = new HashMap<Integer, Set<RechnungsPositionVO>>();
-    final Map<Integer, Set<RechnungsPositionVO>> mapByAuftragsPositionId = new HashMap<Integer, Set<RechnungsPositionVO>>();
+    final Map<Integer, Set<RechnungsPositionVO>> mapByAuftragId = new HashMap<>();
+    final Map<Integer, Set<RechnungsPositionVO>> mapByAuftragsPositionId = new HashMap<>();
     final List<RechnungsPositionDO> list = (List<RechnungsPositionDO>) hibernateTemplate.find(
         "from RechnungsPositionDO t left join fetch t.auftragsPosition left join fetch t.auftragsPosition.auftrag where t.auftragsPosition is not null");
     for (final RechnungsPositionDO pos : list) {
@@ -85,7 +81,7 @@ public class RechnungCache extends AbstractCache
       if (pos.getAuftragsPosition() == null || pos.getAuftragsPosition().getAuftrag() == null) {
         log.error("Assigned order position expected: " + pos);
         continue;
-      } else if (pos.isDeleted() == true || rechnung == null || rechnung.isDeleted() == true
+      } else if (pos.isDeleted() || rechnung == null || rechnung.isDeleted()
           || rechnung.getNummer() == null) {
         // Invoice position or invoice is deleted.
         continue;
@@ -94,19 +90,19 @@ public class RechnungCache extends AbstractCache
       final AuftragDO auftrag = auftragsPosition.getAuftrag();
       Set<RechnungsPositionVO> setByAuftragId = mapByAuftragId.get(auftrag.getId());
       if (setByAuftragId == null) {
-        setByAuftragId = new TreeSet<RechnungsPositionVO>();
+        setByAuftragId = new TreeSet<>();
         mapByAuftragId.put(auftrag.getId(), setByAuftragId);
       }
       Set<RechnungsPositionVO> setByAuftragsPositionId = mapByAuftragsPositionId.get(auftragsPosition.getId());
       if (setByAuftragsPositionId == null) {
-        setByAuftragsPositionId = new TreeSet<RechnungsPositionVO>();
+        setByAuftragsPositionId = new TreeSet<>();
         mapByAuftragsPositionId.put(auftragsPosition.getId(), setByAuftragsPositionId);
       }
       final RechnungsPositionVO vo = new RechnungsPositionVO(pos);
-      if (setByAuftragId.contains(vo) == false) {
+      if (!setByAuftragId.contains(vo)) {
         setByAuftragId.add(vo);
       }
-      if (setByAuftragsPositionId.contains(vo) == false) {
+      if (!setByAuftragsPositionId.contains(vo)) {
         setByAuftragsPositionId.add(vo);
       }
     }

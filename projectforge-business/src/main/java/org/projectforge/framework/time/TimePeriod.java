@@ -23,10 +23,10 @@
 
 package org.projectforge.framework.time;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import java.io.Serializable;
 import java.util.Date;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * 
@@ -45,7 +45,7 @@ public class TimePeriod implements Serializable
 
   public static long getDuration(final Date fromDate, final Date toDate)
   {
-    if (fromDate == null || toDate == null || toDate.before(fromDate) == true) {
+    if (fromDate == null || toDate == null || toDate.before(fromDate)) {
       return 0;
     }
     long millis = toDate.getTime() - fromDate.getTime();

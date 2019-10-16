@@ -132,9 +132,9 @@ public class RechnungsPositionVO implements Comparable<RechnungsPositionVO>, Ser
   {
     if (o instanceof RechnungsPositionVO) {
       final RechnungsPositionVO other = (RechnungsPositionVO) o;
-      if (Objects.equals(this.getNumber(), other.getNumber()) == false)
+      if (!Objects.equals(this.getNumber(), other.getNumber()))
         return false;
-      if (Objects.equals(this.getRechnungId(), other.getRechnungId()) == false)
+      if (!Objects.equals(this.getRechnungId(), other.getRechnungId()))
         return false;
       return true;
     }
@@ -153,15 +153,9 @@ public class RechnungsPositionVO implements Comparable<RechnungsPositionVO>, Ser
   @Override
   public int compareTo(final RechnungsPositionVO o)
   {
-    if (this.rechnungNummer.equals(o.rechnungNummer) == false) {
+    if (!this.rechnungNummer.equals(o.rechnungNummer)) {
       return this.rechnungNummer.compareTo(o.rechnungNummer);
     }
-    if (this.number < o.number) {
-      return -1;
-    } else if (this.number == o.number) {
-      return 0;
-    } else {
-      return +1;
-    }
+    return Short.compare(this.number, o.number);
   }
 }

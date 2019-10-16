@@ -23,11 +23,6 @@
 
 package org.projectforge.business.fibu;
 
-import java.math.BigDecimal;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Optional;
-
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.projectforge.framework.i18n.RequiredFieldIsEmptyException;
@@ -35,6 +30,11 @@ import org.projectforge.framework.i18n.UserException;
 import org.projectforge.framework.persistence.api.QueryFilter;
 import org.projectforge.framework.time.DateHelper;
 import org.projectforge.framework.time.DayHolder;
+
+import java.math.BigDecimal;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Optional;
 
 public class AuftragAndRechnungDaoHelper
 {
@@ -140,10 +140,10 @@ public class AuftragAndRechnungDaoHelper
     final BigDecimal zahlBetrag = rechnung.getZahlBetrag();
     final boolean zahlBetragExists = (zahlBetrag != null && zahlBetrag.compareTo(BigDecimal.ZERO) != 0);
 
-    if (bezahlDatum != null && zahlBetragExists == false) {
+    if (bezahlDatum != null && !zahlBetragExists) {
       throw new UserException("fibu.rechnung.error.zahlbetragRequired");
     }
-    if (bezahlDatum == null && zahlBetragExists == true) {
+    if (bezahlDatum == null && zahlBetragExists) {
       throw new UserException("fibu.rechnung.error.bezahlDatumRequired");
     }
   }

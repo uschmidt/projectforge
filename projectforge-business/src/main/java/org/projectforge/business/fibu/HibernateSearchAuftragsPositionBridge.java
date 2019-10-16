@@ -52,13 +52,13 @@ public class HibernateSearchAuftragsPositionBridge implements FieldBridge
       return;
     }
     final AuftragDO auftrag = position.getAuftrag();
-    final StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
     if (auftrag == null || auftrag.getNummer() == null) {
       log.error("AuftragDO for AuftragsPositionDO: " + position.getId() + "  is null.");
       return;
     }
     buf.append(auftrag.getNummer()).append(".").append(position.getNumber());
-    if (log.isDebugEnabled() == true) {
+    if (log.isDebugEnabled()) {
       log.debug(buf.toString());
     }
     luceneOptions.addFieldToDocument(name, buf.toString(), document);

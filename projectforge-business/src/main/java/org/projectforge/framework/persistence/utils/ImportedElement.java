@@ -23,26 +23,18 @@
 
 package org.projectforge.framework.persistence.utils;
 
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
+import de.micromata.hibernate.history.delta.PropertyDelta;
+import de.micromata.hibernate.history.delta.SimplePropertyDelta;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import java.util.Objects;
 import org.projectforge.common.BeanHelper;
 import org.projectforge.framework.persistence.api.ShortDisplayNameCapable;
 import org.projectforge.framework.utils.NumberHelper;
 
-import de.micromata.hibernate.history.delta.PropertyDelta;
-import de.micromata.hibernate.history.delta.SimplePropertyDelta;
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * Stores one imported object (e. g. MS Excel row as bean object). It also contains information about the status: New object or modified
@@ -156,10 +148,10 @@ public class ImportedElement<T> implements Serializable
   {
     boolean modified = false;
     if (type == BigDecimal.class) {
-      if (NumberHelper.isEqual((BigDecimal) newValue, (BigDecimal) origValue) == false) {
+      if (!NumberHelper.isEqual((BigDecimal) newValue, (BigDecimal) origValue)) {
         modified = true;
       }
-    } else if (Objects.equals(newValue, origValue) == false) {
+    } else if (!Objects.equals(newValue, origValue)) {
       modified = true;
     }
     if (modified) {
@@ -196,7 +188,7 @@ public class ImportedElement<T> implements Serializable
    */
   public boolean isModified()
   {
-    return reconciled == true && oldValue != null && CollectionUtils.isEmpty(getPropertyChanges()) == false;
+    return reconciled && oldValue != null && !CollectionUtils.isEmpty(getPropertyChanges());
   }
 
   /**
@@ -204,7 +196,7 @@ public class ImportedElement<T> implements Serializable
    */
   public boolean isUnmodified()
   {
-    return reconciled == true && oldValue != null && oldValue.equals(value) == true;
+    return reconciled && oldValue != null && oldValue.equals(value);
   }
 
   /**
@@ -212,7 +204,7 @@ public class ImportedElement<T> implements Serializable
    */
   public boolean isNew()
   {
-    return reconciled == true && oldValue == null;
+    return reconciled && oldValue == null;
   }
 
   /**
@@ -241,7 +233,7 @@ public class ImportedElement<T> implements Serializable
    */
   public boolean isSelected()
   {
-    return isFaulty() == false && selected;
+    return !isFaulty() && selected;
   }
 
   /**
@@ -250,7 +242,7 @@ public class ImportedElement<T> implements Serializable
    */
   public void setSelected(boolean selected)
   {
-    if (isFaulty() == false) {
+    if (!isFaulty()) {
       this.selected = selected;
     } else {
       this.selected = false;

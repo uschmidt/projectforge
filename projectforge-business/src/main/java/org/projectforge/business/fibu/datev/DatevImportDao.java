@@ -23,22 +23,13 @@
 
 package org.projectforge.business.fibu.datev;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-
 import org.apache.commons.lang3.Validate;
 import org.hibernate.LockMode;
 import org.projectforge.business.excel.ExcelImportException;
 import org.projectforge.business.fibu.KontoDO;
 import org.projectforge.business.fibu.KontoDao;
 import org.projectforge.business.fibu.KostFormatter;
-import org.projectforge.business.fibu.kost.BuchungssatzDO;
-import org.projectforge.business.fibu.kost.BuchungssatzDao;
-import org.projectforge.business.fibu.kost.Kost1DO;
-import org.projectforge.business.fibu.kost.Kost1Dao;
-import org.projectforge.business.fibu.kost.Kost2DO;
-import org.projectforge.business.fibu.kost.Kost2Dao;
+import org.projectforge.business.fibu.kost.*;
 import org.projectforge.business.user.UserRightId;
 import org.projectforge.business.user.UserRightValue;
 import org.projectforge.framework.access.AccessChecker;
@@ -55,6 +46,10 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 
 @Repository
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
@@ -149,7 +144,7 @@ public class DatevImportDao
   {
     checkLoggeinUserRight(accessChecker);
     log.info("importKontenplan called");
-    final ImportStorage<KontoDO> storage = new ImportStorage<KontoDO>(Type.KONTENPLAN);
+    final ImportStorage<KontoDO> storage = new ImportStorage<>(Type.KONTENPLAN);
     storage.setFilename(filename);
     final KontenplanExcelImporter imp = new KontenplanExcelImporter();
     imp.doImport(storage, is, actionLog);
@@ -171,7 +166,7 @@ public class DatevImportDao
   {
     checkLoggeinUserRight(accessChecker);
     log.info("importBuchungsdaten called");
-    final ImportStorage<BuchungssatzDO> storage = new ImportStorage<BuchungssatzDO>(Type.BUCHUNGSSAETZE);
+    final ImportStorage<BuchungssatzDO> storage = new ImportStorage<>(Type.BUCHUNGSSAETZE);
     storage.setFilename(filename);
     final BuchungssatzExcelImporter imp = new BuchungssatzExcelImporter(storage, kontoDao, kost1Dao, kost2Dao,
         actionLog);
@@ -246,7 +241,7 @@ public class DatevImportDao
     log.info("Reconcile Buchungsdaten called");
     for (final ImportedElement<BuchungssatzDO> el : sheet.getElements()) {
       final BuchungssatzDO satz = el.getValue();
-      if (el.isFaulty() == true) {
+      if (el.isFaulty()) {
         String kost = (String) el.getErrorProperty("kost1");
         if (kost != null) {
           final int[] vals = KostFormatter.splitKost(kost);
@@ -278,16 +273,16 @@ public class DatevImportDao
   private int commitKontenplan(final ImportedSheet<KontoDO> sheet)
   {
     log.info("Commit Kontenplan called");
-    final Collection<KontoDO> col = new ArrayList<KontoDO>();
+    final Collection<KontoDO> col = new ArrayList<>();
     for (final ImportedElement<KontoDO> el : sheet.getElements()) {
       final KontoDO konto = el.getValue();
       final KontoDO dbKonto = kontoDao.getKonto(konto.getNummer());
       if (dbKonto != null) {
         konto.setId(dbKonto.getId());
-        if (el.isSelected() == true) {
+        if (el.isSelected()) {
           col.add(konto);
         }
-      } else if (el.isSelected() == true) {
+      } else if (el.isSelected()) {
         col.add(konto);
       }
     }
@@ -306,20 +301,20 @@ public class DatevImportDao
   private int commitBuchungsdaten(final ImportedSheet<BuchungssatzDO> sheet)
   {
     log.info("Commit Buchungsdaten called");
-    final Collection<BuchungssatzDO> col = new ArrayList<BuchungssatzDO>();
+    final Collection<BuchungssatzDO> col = new ArrayList<>();
     for (final ImportedElement<BuchungssatzDO> el : sheet.getElements()) {
       final BuchungssatzDO satz = el.getValue();
       final BuchungssatzDO dbSatz = buchungssatzDao.getBuchungssatz(satz.getYear(), satz.getMonth(), satz.getSatznr());
       boolean addSatz = false;
       if (dbSatz != null) {
         satz.setId(dbSatz.getId());
-        if (el.isSelected() == true) {
+        if (el.isSelected()) {
           addSatz = true;
         }
-      } else if (el.isSelected() == true) {
+      } else if (el.isSelected()) {
         addSatz = true;
       }
-      if (addSatz == true) {
+      if (addSatz) {
         final BuchungssatzDO newSatz = new BuchungssatzDO();
         newSatz.copyValuesFrom(satz, "konto", "gegenKonto", "kost1", "kost2");
         newSatz.setKonto((KontoDO) get(KontoDO.class, satz.getKontoId()));

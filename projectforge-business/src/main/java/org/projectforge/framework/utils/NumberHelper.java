@@ -134,7 +134,7 @@ public class NumberHelper
    */
   public static boolean greaterZero(final Integer value)
   {
-    return value != null && value.intValue() > 0;
+    return value != null && value > 0;
   }
 
   /**
@@ -375,14 +375,14 @@ public class NumberHelper
     }
     str = str.trim();
     str = str.replaceAll("\\p{C}", ""); // Replace UTF controls chars, such as UTF-202C or UTF-202D (from Apple contacts app).
-    final StringBuffer buf = new StringBuffer();
-    if (StringUtils.isNotEmpty(countryPrefix) == true && str.startsWith(countryPrefix) == true) {
+    final StringBuilder buf = new StringBuilder();
+    if (StringUtils.isNotEmpty(countryPrefix) && str.startsWith(countryPrefix)) {
       buf.append('0');
       str = str.substring(countryPrefix.length());
     } else if (str.length() > 3
         && str.charAt(0) == '+'
-        && Character.isDigit(str.charAt(1)) == true
-        && Character.isDigit(str.charAt(2)) == true) {
+        && Character.isDigit(str.charAt(1))
+        && Character.isDigit(str.charAt(2))) {
       buf.append("00");
       buf.append(str.charAt(1));
       buf.append(str.charAt(2));
@@ -390,7 +390,7 @@ public class NumberHelper
     }
     for (int i = 0; i < str.length(); i++) {
       final char ch = str.charAt(i);
-      if (Character.isDigit(str.charAt(i)) == true) {
+      if (Character.isDigit(str.charAt(i))) {
         buf.append(ch);
       }
     }
@@ -483,13 +483,13 @@ public class NumberHelper
    *
    * @param str
    * @return Converted string if number, otherwise the origin string.
-   * @see NumberUtils#isNumber(String)
+   * @see NumberUtils#isCreatable(String)
    * @see NumberUtils#createBigDecimal(String)
    * @see BigDecimal#toPlainString()
    */
   public static String toPlainString(final String str)
   {
-    if (NumberUtils.isNumber(str) == true) {
+    if (NumberUtils.isCreatable(str)) {
       final BigDecimal bd = NumberUtils.createBigDecimal(str);
       return bd.toPlainString();
     } else {

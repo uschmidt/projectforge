@@ -167,6 +167,7 @@ class IndexPage extends React.Component {
                         </ol>
                         <h1>Done</h1>
                         <ol style={todoDone}>
+                            <li>Update React-Select (fixes warning)</li>
                             <li>
                                 TaskSelect panel: collapse search fields to have more a feeling
                                 of a bread crumb...

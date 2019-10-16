@@ -23,14 +23,14 @@
 
 package org.projectforge.calendar;
 
+import org.projectforge.framework.time.DateFormats;
+import org.projectforge.framework.time.DateHelper;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
-
-import org.projectforge.framework.time.DateFormats;
-import org.projectforge.framework.time.DateHelper;
 
 /**
  * Some date and calender helper methods for test cases.
@@ -59,7 +59,7 @@ public class CalendarTestUtils
     } else if (colonsCount == 1) {
       // yyyy-MM-dd HH:mm
       df = new SimpleDateFormat(DateFormats.ISO_TIMESTAMP_MINUTES);
-    } else if (isoDateString.contains(".") == false) {
+    } else if (!isoDateString.contains(".")) {
       // yyyy-MM-dd HH:mm:ss
       df = new SimpleDateFormat(DateFormats.ISO_TIMESTAMP_SECONDS);
     } else {

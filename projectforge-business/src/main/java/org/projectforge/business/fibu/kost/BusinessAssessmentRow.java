@@ -83,8 +83,8 @@ public class BusinessAssessmentRow implements Serializable
    */
   public void setStoreAccountRecords(final boolean value)
   {
-    if (value == true) {
-      this.accountRecords = new ArrayList<BuchungssatzDO>();
+    if (value) {
+      this.accountRecords = new ArrayList<>();
     } else {
       this.accountRecords = null;
     }
@@ -202,7 +202,7 @@ public class BusinessAssessmentRow implements Serializable
 
   void recalculate()
   {
-    if (accountRecordsExist == true) {
+    if (accountRecordsExist) {
       // Nothing to do.
       return;
     }
@@ -212,7 +212,7 @@ public class BusinessAssessmentRow implements Serializable
       return;
     }
     amount = BigDecimal.ZERO;
-    final Map<String, Object> vars = new HashMap<String, Object>();
+    final Map<String, Object> vars = new HashMap<>();
     BusinessAssessment.putBusinessAssessmentRows(vars, businessAssessment);
     final GroovyResult result = new GroovyExecutor().execute(groovyScript, vars);
     final Object rval = result.getResult();

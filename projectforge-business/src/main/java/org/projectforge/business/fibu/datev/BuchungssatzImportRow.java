@@ -23,17 +23,17 @@
 
 package org.projectforge.business.fibu.datev;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.Date;
-import java.util.Locale;
-
 import org.apache.commons.lang3.StringUtils;
 import org.projectforge.framework.time.DayHolder;
 import org.projectforge.framework.utils.ActionLog;
 import org.projectforge.framework.utils.NumberHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Date;
+import java.util.Locale;
 
 public class BuchungssatzImportRow
 {
@@ -255,7 +255,7 @@ public class BuchungssatzImportRow
           + day.isoFormat()
           + " "
           + NumberHelper.getAsString(betrag, NumberHelper.getCurrencyFormat(Locale.GERMAN)));
-      kost1 = new Double(10000000);
+      kost1 = 10000000d;
       betrag = BigDecimal.ZERO;
     } else if (kost1 == null || kost2 == null) {
       final String msg = "Oups: Kost1 oder Kost2 ist null für Beleg Nr. " + this.satzNr;

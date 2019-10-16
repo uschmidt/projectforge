@@ -23,18 +23,18 @@
 
 package org.projectforge.business.gantt;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.projectforge.framework.time.DateHolder;
+import org.projectforge.framework.utils.NumberHelper;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.projectforge.framework.time.DateHolder;
-import org.projectforge.framework.utils.NumberHelper;
 
 public class GanttTaskImpl implements GanttTask, Serializable
 {
@@ -297,7 +297,7 @@ public class GanttTaskImpl implements GanttTask, Serializable
     if (this.children == null) {
       return;
     }
-    Collections.sort(this.children, GanttUtils.GANTT_OBJECT_COMPARATOR);
+    this.children.sort(GanttUtils.GANTT_OBJECT_COMPARATOR);
     for (final GanttTask child : this.children) {
       child.sortChildren();
     }
@@ -311,7 +311,7 @@ public class GanttTaskImpl implements GanttTask, Serializable
   public GanttTaskImpl addChild(final GanttTask child)
   {
     if (this.children == null) {
-      this.children = new ArrayList<GanttTask>();
+      this.children = new ArrayList<>();
     }
     this.children.add(child);
     return this;
@@ -325,7 +325,7 @@ public class GanttTaskImpl implements GanttTask, Serializable
   {
     if (this.children == null) {
       log.error("Can't remove child object because current Gantt activity has no children: " + this);
-    } else if (this.children.remove(ganttObject) == false) {
+    } else if (!this.children.remove(ganttObject)) {
       log.error("Can't remove child object: " + ganttObject + " because it's not a child of the given activity: " + this);
     }
   }
@@ -338,7 +338,7 @@ public class GanttTaskImpl implements GanttTask, Serializable
   {
     if (getCalculatedStartDate() != null && getCalculatedEndDate() != null) {
       final DateHolder dh = new DateHolder(this.calculatedStartDate);
-      return dh.isSameDay(getCalculatedEndDate()) == false;
+      return !dh.isSameDay(getCalculatedEndDate());
     }
     return !NumberHelper.isZeroOrNull(this.duration);
   }
@@ -349,7 +349,7 @@ public class GanttTaskImpl implements GanttTask, Serializable
   @Override
   public Date getCalculatedStartDate()
   {
-    if (startDateCalculated == false) {
+    if (!startDateCalculated) {
       calculatedStartDate = GanttUtils.getCalculatedStartDate(this);
       startDateCalculated = true;
     }
@@ -373,7 +373,7 @@ public class GanttTaskImpl implements GanttTask, Serializable
   @Override
   public Date getCalculatedEndDate()
   {
-    if (endDateCalculated == false) {
+    if (!endDateCalculated) {
       calculatedEndDate = GanttUtils.getCalculatedEndDate(this);
       endDateCalculated = true;
     }
@@ -396,7 +396,7 @@ public class GanttTaskImpl implements GanttTask, Serializable
   @Override
   public boolean isStartDateCalculated()
   {
-    return this.startDateCalculated == true;
+    return this.startDateCalculated;
   }
 
   /**
@@ -514,7 +514,7 @@ public class GanttTaskImpl implements GanttTask, Serializable
       return true;
     }
     for (final GanttTask child : this.children) {
-      if (((GanttTaskImpl) child).checkCyclicReferences(depth + 1) == false) {
+      if (!((GanttTaskImpl) child).checkCyclicReferences(depth + 1)) {
         return false;
       }
     }
@@ -536,7 +536,7 @@ public class GanttTaskImpl implements GanttTask, Serializable
   @Override
   public GanttTask findBy(final Matcher<GanttTask> matcher, final Object expression)
   {
-    if (matcher.match(this, expression) == true) {
+    if (matcher.match(this, expression)) {
       return this;
     }
     if (this.children != null) {
@@ -557,7 +557,7 @@ public class GanttTaskImpl implements GanttTask, Serializable
       @Override
       public boolean match(GanttTask object, Object expression)
       {
-        return (object.getId() != null && object.getId().equals(expression) == true);
+        return (object.getId() != null && object.getId().equals(expression));
       }
     }, id);
   }
@@ -569,7 +569,7 @@ public class GanttTaskImpl implements GanttTask, Serializable
       @Override
       public boolean match(GanttTask object, Object expression)
       {
-        return (StringUtils.equals(object.getTitle(), (String) expression) == true);
+        return (StringUtils.equals(object.getTitle(), (String) expression));
       }
     }, title);
   }
@@ -581,7 +581,7 @@ public class GanttTaskImpl implements GanttTask, Serializable
       @Override
       public boolean match(GanttTask object, Object expression)
       {
-        return (StringUtils.equals(object.getWorkpackageCode(), (String) expression) == true);
+        return (StringUtils.equals(object.getWorkpackageCode(), (String) expression));
       }
     }, workpackageCode);
   }
@@ -593,11 +593,11 @@ public class GanttTaskImpl implements GanttTask, Serializable
       @Override
       public boolean match(GanttTask object, Object expression)
       {
-        if (CollectionUtils.isEmpty(object.getChildren()) == true) {
+        if (CollectionUtils.isEmpty(object.getChildren())) {
           return false;
         }
         for (final GanttTask child : object.getChildren()) {
-          if (child.getId() != null && child.getId().equals(expression) == true) {
+          if (child.getId() != null && child.getId().equals(expression)) {
             return true;
           }
         }

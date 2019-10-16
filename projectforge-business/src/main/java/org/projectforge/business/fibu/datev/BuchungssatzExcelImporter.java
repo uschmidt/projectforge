@@ -23,11 +23,6 @@
 
 package org.projectforge.business.fibu.datev;
 
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -36,11 +31,7 @@ import org.projectforge.business.excel.ExcelImport;
 import org.projectforge.business.fibu.KontoDO;
 import org.projectforge.business.fibu.KontoDao;
 import org.projectforge.business.fibu.KostFormatter;
-import org.projectforge.business.fibu.kost.BuchungssatzDO;
-import org.projectforge.business.fibu.kost.Kost1DO;
-import org.projectforge.business.fibu.kost.Kost1Dao;
-import org.projectforge.business.fibu.kost.Kost2DO;
-import org.projectforge.business.fibu.kost.Kost2Dao;
+import org.projectforge.business.fibu.kost.*;
 import org.projectforge.framework.i18n.UserException;
 import org.projectforge.framework.persistence.user.api.ThreadLocalUserContext;
 import org.projectforge.framework.persistence.utils.ImportStorage;
@@ -51,6 +42,11 @@ import org.projectforge.framework.time.DatePrecision;
 import org.projectforge.framework.utils.ActionLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 public class BuchungssatzExcelImporter
 {
@@ -89,7 +85,7 @@ public class BuchungssatzExcelImporter
 
   public void doImport(final InputStream is) throws Exception
   {
-    final ExcelImport<BuchungssatzImportRow> imp = new ExcelImport<BuchungssatzImportRow>(is);
+    final ExcelImport<BuchungssatzImportRow> imp = new ExcelImport<>(is);
     for (short idx = 0; idx < imp.getWorkbook().getNumberOfSheets(); idx++) {
       final ImportedSheet<BuchungssatzDO> sheet = importBuchungssaetze(imp, idx);
       if (sheet != null) {
@@ -122,12 +118,12 @@ public class BuchungssatzExcelImporter
   private ImportedSheet<BuchungssatzDO> importBuchungssaetze(final ExcelImport<BuchungssatzImportRow> imp, final HSSFSheet sheet,
       final int month) throws Exception
   {
-    final ImportedSheet<BuchungssatzDO> importedSheet = new ImportedSheet<BuchungssatzDO>();
+    final ImportedSheet<BuchungssatzDO> importedSheet = new ImportedSheet<>();
     imp.setNameRowIndex(ROW_COLUMNNAMES);
     imp.setStartingRowIndex(ROW_COLUMNNAMES + 1);
     imp.setRowClass(BuchungssatzImportRow.class);
 
-    final Map<String, String> map = new HashMap<String, String>();
+    final Map<String, String> map = new HashMap<>();
     map.put("SatzNr.", "satzNr");
     map.put("Satz-Nr.", "satzNr");
     map.put("Betrag", "betrag");
@@ -222,7 +218,7 @@ public class BuchungssatzExcelImporter
         }
         final String name = cell.getStringCellValue();
         log.debug("Processing column '" + name + "'");
-        if ("SH".equals(cell.getStringCellValue()) == true) {
+        if ("SH".equals(cell.getStringCellValue())) {
           numberOfSH++;
           if (numberOfSH == 2) {
             log.debug("Renaming 2nd column 'SH' to 'SH2' (column no. " + col + ").");
@@ -238,10 +234,10 @@ public class BuchungssatzExcelImporter
 
   private ImportedElement<BuchungssatzDO> convertBuchungssatz(final BuchungssatzImportRow row) throws Exception
   {
-    if (row.isEmpty() == true) {
+    if (row.isEmpty()) {
       return null;
     }
-    final ImportedElement<BuchungssatzDO> element = new ImportedElement<BuchungssatzDO>(storage.nextVal(), BuchungssatzDO.class,
+    final ImportedElement<BuchungssatzDO> element = new ImportedElement<>(storage.nextVal(), BuchungssatzDO.class,
         DatevImportDao.BUCHUNGSSATZ_DIFF_PROPERTIES);
     final BuchungssatzDO satz = new BuchungssatzDO();
     element.setValue(satz);
