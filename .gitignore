@@ -37,3 +37,5 @@ test-output
 #Node
 /projectforge-webapp/node_modules
 /ProjectForge
+projectforge-webapp/react/node_modules
+projectforge-webapp/react/build

@@ -96,9 +96,8 @@
                     </execution>
                 </executions-->
                 <configuration>
-                    <installDirectory>${project.build.directory}</installDirectory>
-                    <workingDirectory>${project.basedir}</workingDirectory>
-                    <!--workingDirectory>${pom.parent.basedir}</workingDirectory-->
+                    <installDirectory>${project.build.directory}/react</installDirectory>
+                    <workingDirectory>${project.basedir}/react</workingDirectory>
                 </configuration>
             </plugin>
             <plugin>
