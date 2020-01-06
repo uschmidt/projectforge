@@ -25,6 +25,7 @@ package org.projectforge.config;
 
 import org.apache.wicket.protocol.http.WicketFilter;
 import org.apache.wicket.spring.SpringWebApplicationFactory;
+import org.keycloak.adapters.servlet.KeycloakOIDCFilter;
 import org.projectforge.Const;
 import org.projectforge.business.user.filter.UserFilter;
 import org.projectforge.common.EmphasizedLogSupport;
@@ -59,10 +60,21 @@ public class WebXMLInitializer implements ServletContextInitializer {
   @Value("${projectforge.web.development.enableCORSFilter:false}")
   private boolean webDevelopmentEnableCORSFilter;
 
+  @Value("${projectforge.web.development.enableKeycloakFilter:false}")
+  private boolean webDevelopmentEnableKeycloakFilter;
+
   private static final String PARAM_APP_BEAN = "applicationBean";
 
   @Override
   public void onStartup(ServletContext sc) throws ServletException {
+
+    if(webDevelopmentEnableKeycloakFilter) {
+      final FilterRegistration keycloakOIDCFilter = sc.addFilter("KeycloakOIDCFilter", KeycloakOIDCFilter.class);
+      keycloakOIDCFilter.addMappingForUrlPatterns(null, false, "/*");
+      keycloakOIDCFilter.setInitParameter("keycloak.config.skipPattern", "/(register/|path2|path3).*");
+    }
+
+
     final FilterRegistration securityHeaderFilter = sc.addFilter("SecurityHeaderFilter", SecurityHeaderFilter.class);
     securityHeaderFilter.addMappingForUrlPatterns(null, false, "/*");
     securityHeaderFilter.setInitParameter(SecurityHeaderFilter.PARAM_CSP_HEADER_VALUE, cspHeaderValue);

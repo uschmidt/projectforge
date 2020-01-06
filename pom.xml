@@ -294,6 +294,14 @@
   </properties>
 
   <dependencies>
+
+    <!-- Keycloak Servlet Filter -->
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-servlet-filter-adapter</artifactId>
+      <version>8.0.0</version>
+    </dependency>
+
     <!-- Needed for spring.datasource.dbcp2.* properties -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
