@@ -61,14 +61,14 @@ public class WebXMLInitializer implements ServletContextInitializer {
   private boolean webDevelopmentEnableCORSFilter;
 
   @Value("${projectforge.web.development.enableKeycloakFilter:false}")
-  private boolean webDevelopmentEnableKeycloakFilter;
+  private boolean enableKeycloakFilter;
 
   private static final String PARAM_APP_BEAN = "applicationBean";
 
   @Override
   public void onStartup(ServletContext sc) throws ServletException {
 
-    if(webDevelopmentEnableKeycloakFilter) {
+    if(enableKeycloakFilter) {
       final FilterRegistration keycloakOIDCFilter = sc.addFilter("KeycloakOIDCFilter", KeycloakOIDCFilter.class);
       keycloakOIDCFilter.addMappingForUrlPatterns(null, false, "/*");
       keycloakOIDCFilter.setInitParameter("keycloak.config.skipPattern", "/(register/|path2|path3).*");
@@ -76,7 +76,9 @@ public class WebXMLInitializer implements ServletContextInitializer {
 
 
     final FilterRegistration securityHeaderFilter = sc.addFilter("SecurityHeaderFilter", SecurityHeaderFilter.class);
-    securityHeaderFilter.addMappingForUrlPatterns(null, false, "/*");
+    securityHeaderFilter.addMappingForUrlPatterns(null, false, "/secure/*");
+    securityHeaderFilter.addMappingForUrlPatterns(null, false, "/wa/*");
+    securityHeaderFilter.addMappingForUrlPatterns(null, false, "/" + Const.REACT_APP_PATH + "*");
     securityHeaderFilter.setInitParameter(SecurityHeaderFilter.PARAM_CSP_HEADER_VALUE, cspHeaderValue);
 
     final FilterRegistration userFilter = sc.addFilter("UserFilter", UserFilter.class);
