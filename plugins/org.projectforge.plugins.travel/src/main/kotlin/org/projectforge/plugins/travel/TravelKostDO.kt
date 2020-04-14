@@ -70,14 +70,19 @@ open class TravelKostDO: DefaultBaseWithAttrDO<TravelKostDO>() {
 
     open var catering: List<CateringDay>? = null
 
+    @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption.hotel")
     open var hotel: Boolean = false
 
+    @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption.rentalCar")
     open var rentalCar: Boolean = false
 
+    @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption.train")
     open var train: Boolean = false
 
+    @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption.flight")
     open var flight: Boolean = false
 
+    @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption.kilometers")
     open var kilometers: Int? = null
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption")
