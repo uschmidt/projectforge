@@ -23,22 +23,25 @@
 
 package org.projectforge.plugins.travel
 
+import de.micromata.genome.db.jpa.tabattr.entities.JpaTabAttrBaseDO
+import de.micromata.genome.db.jpa.tabattr.entities.JpaTabAttrDataBaseDO
 import org.hibernate.search.annotations.Indexed
 import org.projectforge.business.fibu.kost.Kost2DO
 import org.projectforge.common.anots.PropertyInfo
 import org.projectforge.framework.persistence.api.Constants
-import org.projectforge.framework.persistence.entities.DefaultBaseDO
+import org.projectforge.framework.persistence.attr.entities.DefaultBaseWithAttrDO
 import org.projectforge.framework.persistence.user.entities.PFUserDO
 import java.time.LocalDate
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.Transient
 
 /**
  * @author Jan Brümmer (j.bruemmer@micromata.de)
  */
 @Entity
 @Indexed
-open class TravelKostDO: DefaultBaseDO() {
+open class TravelKostDO: DefaultBaseWithAttrDO<TravelKostDO>() {
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.user")
     open var user: PFUserDO? = null
@@ -82,4 +85,29 @@ open class TravelKostDO: DefaultBaseDO() {
 
     @get:Column(length = Constants.LENGTH_TEXT)
     open var otherAssumptionsOfCosts: String? = null
+
+    @Transient
+    override fun getAttrEntityClass(): Class<out JpaTabAttrBaseDO<TravelKostDO, Int>> {
+        return TravelKostAttrDO::class.java
+    }
+
+    @Transient
+    override fun getAttrEntityWithDataClass(): Class<out JpaTabAttrBaseDO<TravelKostDO, Int>> {
+        return TravelKostAttrWithDataDO::class.java
+    }
+
+    @Transient
+    override fun getAttrDataEntityClass(): Class<out JpaTabAttrDataBaseDO<out JpaTabAttrBaseDO<TravelKostDO, Int>, Int>> {
+        return TravelKostAttrDataDO::class.java
+    }
+
+    override fun createAttrEntity(key: String, type: Char, value: String): JpaTabAttrBaseDO<TravelKostDO, Int> {
+        return TravelKostAttrDO(this, key, type, value)
+    }
+
+    override fun createAttrEntityWithData(key: String, type: Char, value: String): JpaTabAttrBaseDO<TravelKostDO, Int> {
+        return TravelKostAttrWithDataDO(this, key, type, value)
+    }
+
+
 }
