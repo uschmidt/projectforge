@@ -36,6 +36,7 @@ import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Transient
 
+// TODO: jcr support (see ContractDO / attachment*)
 /**
  * @author Jan Brümmer (j.bruemmer@micromata.de)
  */

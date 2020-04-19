@@ -27,10 +27,12 @@ import org.projectforge.framework.persistence.user.entities.PFUserDO
 import org.projectforge.plugins.travel.TravelKostDO
 import org.projectforge.rest.dto.BaseDTO
 
+// TODO Rename all TravelKost* -> TravelCost*
+// TODO: Add jcr (see Contract.kt/attachment*)
+
 /**
  * @author Jan Brümmer (j.bruemmer@micromata.de)
  */
-
 class TravelKost(id: Int? = null,
                  displayName: String? = null,
                  var user: PFUserDO? = null): BaseDTO<TravelKostDO>()

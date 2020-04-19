@@ -26,6 +26,7 @@ package org.projectforge.plugins.travel;
 import org.projectforge.framework.persistence.api.BaseDao;
 import org.springframework.stereotype.Repository;
 
+// TODO: Migration to Kotlin and renaming to TravelCostDao
 /**
  * @author Jan Brümmer (j.bruemmer@micromata.de)
  */
