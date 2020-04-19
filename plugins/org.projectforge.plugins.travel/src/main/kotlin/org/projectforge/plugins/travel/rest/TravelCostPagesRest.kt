@@ -34,10 +34,10 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import javax.servlet.http.HttpServletRequest
 
+// TODO: Add jcr support (see ContractPagesRest/jcr and attachment*)
 /**
  * @author Jan Brümmer (j.bruemmer@micromata.de)
  */
-
 @RestController
 @RequestMapping("${Rest.URL}/travelCost")
 class TravelCostPagesRest : AbstractDTOPagesRest<TravelKostDO, TravelKost, TravelKostDao>(TravelKostDao::class.java, "plugins.TravelKost.title") {
