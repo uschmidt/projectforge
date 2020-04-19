@@ -21,19 +21,44 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-package org.projectforge.rest.dto
+package org.projectforge.jcr
 
-import org.projectforge.business.fibu.KundeDO
-import org.projectforge.business.fibu.KundeStatus
+import mu.KotlinLogging
+import org.apache.jackrabbit.oak.plugins.document.DocumentNodeStore
+import javax.jcr.Node
+import javax.jcr.Session
+import javax.jcr.SimpleCredentials
+import javax.jcr.ValueFactory
 
-class Kunde(id: Int? = null,
-            displayName: String? = null,
-            var name: String? = null,
-            var identifier: String? = null,
-            var division: String? = null,
-            var status: KundeStatus? = null,
-            var description: String? = null,
-            var konto: Konto? = null
-) : BaseDTODisplayObject<KundeDO>(id, displayName = displayName) {
-    var nummer: Int? = id
+
+private val log = KotlinLogging.logger {}
+
+/**
+ * Handles close and clean-up. Thin wrapper for [Session]
+ */
+open class SessionWrapper(private val repoService: RepoService) {
+    val session: Session = repoService.repository.login(credentials)
+
+    val valueFactory: ValueFactory
+        get() = session.valueFactory
+
+    val rootNode: Node
+        get() = session.rootNode
+
+    fun getNode(absPath: String): Node {
+        return session.getNode(absPath)
+    }
+
+    fun save() {
+        session.save()
+    }
+
+    fun logout() {
+        repoService.fileStore?.flush()
+        session.save()
+    }
+
+    companion object {
+        private val credentials = SimpleCredentials("admin", "admin".toCharArray())
+    }
 }

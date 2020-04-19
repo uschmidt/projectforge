@@ -37,14 +37,18 @@ class LeaveAccountEntry(var employee: Employee? = null,
                         var amountFormatted: String? = null,
                         var description: String? = null
 ) : BaseDTO<LeaveAccountEntryDO>() {
+
+    /**
+     * @see copyFrom
+     */
     constructor(src: LeaveAccountEntryDO) : this() {
         this.copyFrom(src)
     }
 
     override fun copyFrom(src: LeaveAccountEntryDO) {
         super.copyFrom(src)
-        date?.let {
-            dateFormatted = PFDayUtils.format(it, DateFormatType.DATE)
+        dateFormatted = date?.let {
+            PFDayUtils.format(it, DateFormatType.DATE)
         }
         amountFormatted = VacationStats.format(amount)
     }

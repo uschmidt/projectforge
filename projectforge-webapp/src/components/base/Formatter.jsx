@@ -15,6 +15,7 @@ const KONTO_FORMATTER = 'KONTO';
 const PROJECT_FORMATTER = 'PROJECT';
 const USER_FORMATTER = 'USER';
 const TASK_FORMATTER = 'TASK_PATH';
+const TIMESTAMP_FORMATTER = 'TIMESTAMP';
 const TIMESTAMP_MINUTES_FORMATTER = 'TIMESTAMP_MINUTES';
 const GROUP_FORMATTER = 'GROUP';
 
@@ -25,6 +26,7 @@ function Formatter(
         id,
         dataType,
         dateFormat,
+        timestampFormatSeconds,
         timestampFormatMinutes,
         valueIconMap,
     },
@@ -35,31 +37,32 @@ function Formatter(
     }
 
     let result = value;
+    const valueIconsPresent = valueIconMap && valueIconMap.length !== 0;
+    const useFormatter = !valueIconsPresent && (formatter || dataType);
 
     // TODO FORMAT NUMBERS RIGHT ALIGNED
-    if (formatter) {
-        switch (formatter) {
+    if (useFormatter) {
+        switch (useFormatter) {
             case COST1_FORMATTER:
-                result = value.formattedNumber;
-                break;
             case COST2_FORMATTER:
                 result = value.formattedNumber;
                 break;
             case CUSTOMER_FORMATTER:
-                result = value.displayName;
-                break;
             case KONTO_FORMATTER:
-                result = `${value.nummer} - ${value.bezeichnung}`;
+            case PROJECT_FORMATTER:
+            case EMPLOYEE_FORMATTER:
+                result = value.displayName;
                 break;
             case DATE_FORMATTER:
                 result = moment(value)
                     .format(dateFormat);
                 break;
-            case PROJECT_FORMATTER:
-                result = value.displayName;
-                break;
             case TASK_FORMATTER:
                 result = value.title;
+                break;
+            case TIMESTAMP_FORMATTER:
+                result = moment(value)
+                    .format(timestampFormatSeconds);
                 break;
             case TIMESTAMP_MINUTES_FORMATTER:
                 result = moment(value)
@@ -67,9 +70,6 @@ function Formatter(
                 break;
             case USER_FORMATTER:
                 result = value.displayName || value.fullname || value.username;
-                break;
-            case EMPLOYEE_FORMATTER:
-                result = value.displayName;
                 break;
             case AUFTRAGPOSITION_FORMATTER:
                 result = value.number;
@@ -87,7 +87,7 @@ function Formatter(
     } else if (dataType === 'DATE') {
         result = moment(value)
             .format(timestampFormatMinutes);
-    } else if (valueIconMap && valueIconMap.length !== 0) {
+    } else if (valueIconsPresent) {
         const valueIcon = valueIconMap[value];
 
         if (valueIcon) {
@@ -104,6 +104,7 @@ Formatter.propTypes = {
     dateFormat: PropTypes.string,
     id: PropTypes.string,
     formatter: PropTypes.string,
+    timestampFormatSeconds: PropTypes.string,
     timestampFormatMinutes: PropTypes.string,
     valueIconMap: PropTypes.shape({}),
 };
@@ -114,12 +115,14 @@ Formatter.defaultProps = {
     formatter: undefined,
     dataType: undefined,
     dateFormat: 'DD/MM/YYYY',
+    timestampFormatSeconds: 'DD.MM.YYYY HH:mm:ss',
     timestampFormatMinutes: 'DD.MM.YYYY HH:mm',
     valueIconMap: undefined,
 };
 
 const mapStateToProps = ({ authentication }) => ({
     dateFormat: authentication.user.jsDateFormat,
+    timestampFormatSeconds: authentication.user.jsTimestampFormatSeconds,
     timestampFormatMinutes: authentication.user.jsTimestampFormatMinutes,
 });
 

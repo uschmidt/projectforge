@@ -21,13 +21,30 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-package org.projectforge.rest.dto
+package org.projectforge.framework.jcr
 
-import org.projectforge.business.fibu.ProjektDO
+/**
+ * Used by [AttachmentsService] for adding filenames of attachments to search index.
+ * Data objects such as [org.projectforge.framework.persistence.api.ExtendedBaseDO] should implement this interface for indexing attachments.
+ */
+interface AttachmentsInfo {
+    /**
+     * Field for adding filenames of attachments to search index.
+     */
+    var attachmentsNames: String?
 
-class Projekt(id: Int? = null,
-              displayName: String? = null,
-              var name: String? = null)
-    : BaseDTODisplayObject<ProjektDO>(id, displayName = displayName) {
-    var kunde: Kunde? = null
+    /**
+     * Field for adding file ids of attachments to search index.
+     */
+    var attachmentsIds: String?
+
+    /**
+     * The number of attachments attached to this data object.
+     */
+    var attachmentsSize: Int?
+
+    /**
+     * You may add here the action done by the user for creating history entries, if data object is historizable.
+     */
+    var attachmentsLastUserAction: String?
 }

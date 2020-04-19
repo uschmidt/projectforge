@@ -27,10 +27,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.PropertyAccessor
 import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.JsonDeserializer
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.*
+import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
@@ -45,6 +43,7 @@ import org.projectforge.business.task.TaskDO
 import org.projectforge.business.teamcal.admin.model.TeamCalDO
 import org.projectforge.business.timesheet.TimesheetDO
 import org.projectforge.common.BeanHelper
+import org.projectforge.framework.jcr.Attachment
 import org.projectforge.framework.json.*
 import org.projectforge.framework.persistence.user.entities.GroupDO
 import org.projectforge.framework.persistence.user.entities.PFUserDO
@@ -53,9 +52,7 @@ import org.projectforge.framework.time.PFDateTime
 import org.projectforge.rest.calendar.ICalendarEventDeserializer
 import org.projectforge.rest.calendar.TeamCalDOSerializer
 import org.projectforge.rest.config.JacksonConfiguration.Companion.registerAllowedUnknownProperties
-import org.projectforge.rest.dto.CalEvent
-import org.projectforge.rest.dto.Kost2
-import org.projectforge.rest.dto.TeamEvent
+import org.projectforge.rest.dto.*
 import org.projectforge.rest.json.*
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -63,6 +60,7 @@ import org.springframework.context.annotation.Configuration
 import java.math.BigDecimal
 import java.sql.Timestamp
 import java.time.LocalDate
+import java.time.LocalTime
 
 /**
  * Base configuration of all Spring rest calls. Unknown properties not avoidable by the client might be registered through
@@ -80,10 +78,44 @@ open class JacksonConfiguration {
 
         private val globalPropertiesBlackList = mutableMapOf<Class<*>, MutableSet<String>>()
 
+        private val registeredSerializers = mutableListOf<Pair<Class<Any>, JsonSerializer<Any>>>()
+
+        private val registeredDeserializers = mutableListOf<Pair<Class<Any>, JsonDeserializer<Any>>>()
+
+        private val registeredDelegatingDeserializers = mutableListOf<Class<*>>()
+
+        /**
+         * Plugins may register your own serializers on startup.
+         */
+        @JvmStatic
+        fun register(cls: Class<Any>, serializer: JsonSerializer<Any>) {
+            registeredSerializers.add(Pair(cls, serializer))
+        }
+
+        /**
+         * Plugins may register your own deserializers on startup.
+         */
+        @JvmStatic
+        fun register(cls: Class<Any>, deserializer: JsonDeserializer<Any>) {
+            registeredDeserializers.add(Pair(cls, deserializer))
+        }
+
+        /**
+         * Plugins may register your own deserializers on startup.
+         * @see [IdObjectDeserializer.create] for restriction of supported bean classes.
+         */
+        @JvmStatic
+        fun registeredDelegatingDeserializer(vararg classes: Class<*>) {
+            classes.forEach { cls ->
+                registeredDelegatingDeserializers.add(cls)
+            }
+        }
+
         /**
          * Properties (field) sent by any client and unknown by the server will result in an exception and BAD_REQUEST.
          * In special cases you may add properties, which should be simply ignored.
          */
+        @JvmStatic
         fun registerAllowedUnknownProperties(clazz: Class<*>, vararg properties: String) {
             synchronized(allowedUnknownProperties) {
                 val set = allowedUnknownProperties[clazz]
@@ -99,6 +131,7 @@ open class JacksonConfiguration {
          * Properties (field) sent by any client and unknown by the server will result in an exception and BAD_REQUEST.
          * In special cases you may add properties, which should be simply ignored.
          */
+        @JvmStatic
         fun registerAllowedUnknownGlobalProperties(vararg properties: String) {
             synchronized(allowedUnknownGlobalProperties) {
                 allowedUnknownGlobalProperties.addAll(properties)
@@ -107,13 +140,21 @@ open class JacksonConfiguration {
 
         init {
             registerAllowedUnknownGlobalProperties("displayName")
+            registerAllowedUnknownProperties(Attachment::class.java, "sizeHumanReadable", "createdFormatted", "lastUpdateFormatted")
             registerAllowedUnknownProperties(PFUserDO::class.java, "fullname")
             registerAllowedUnknownProperties(KundeDO::class.java, "id")
             // reminderDuration* will be there after function switchToTimesheet is used:
             registerAllowedUnknownProperties(TimesheetDO::class.java, "reminderDuration", "reminderDurationUnit")
-            registerAllowedUnknownProperties(Kost2DO::class.java,  "nummernkreis", "teilbereich", "bereich", "endziffer", "formattedNumber")
-            registerAllowedUnknownProperties(TeamEvent::class.java,  "task") // Switch from time sheet.
-            registerAllowedUnknownProperties(CalEvent::class.java,  "task") // Switch from time sheet.
+            registerAllowedUnknownProperties(Kost2DO::class.java, "nummernkreis", "teilbereich", "bereich", "endziffer", "formattedNumber")
+            registerAllowedUnknownProperties(TeamEvent::class.java, "task") // Switch from time sheet.
+            registerAllowedUnknownProperties(CalEvent::class.java, "task") // Switch from time sheet.
+
+            registeredDelegatingDeserializer(
+                    Customer::class.java,
+                    Konto::class.java,
+                    Kost1::class.java,
+                    Kost2::class.java,
+                    Project::class.java)
         }
     }
 
@@ -156,8 +197,21 @@ open class JacksonConfiguration {
                 })
             }
         }
+        module.setDeserializerModifier(object : BeanDeserializerModifier() {
+            override fun modifyDeserializer(config: DeserializationConfig, beanDesc: BeanDescription, deserializer: JsonDeserializer<*>): JsonDeserializer<*>? {
+                registeredDelegatingDeserializers.forEach {
+                    if (beanDesc.beanClass == it) {
+                        return IdObjectDeserializer(deserializer, it)
+                    }
+                }
+                return deserializer
+            }
+        })
         module.addSerializer(LocalDate::class.java, LocalDateSerializer())
         module.addDeserializer(LocalDate::class.java, LocalDateDeserializer())
+
+        module.addSerializer(LocalTime::class.java, LocalTimeSerializer())
+        module.addDeserializer(LocalTime::class.java, LocalTimeDeserializer())
 
         module.addSerializer(PFDateTime::class.java, PFDateTimeSerializer())
         module.addDeserializer(PFDateTime::class.java, PFDateTimeDeserializer())
@@ -182,8 +236,6 @@ open class JacksonConfiguration {
         module.addSerializer(PFUserDO::class.java, PFUserDOSerializer())
         module.addDeserializer(PFUserDO::class.java, PFUserDODeserializer())
 
-        module.addDeserializer(Kost2::class.java, Kost2Deserializer())
-
         module.addSerializer(GroupDO::class.java, GroupDOSerializer())
         module.addSerializer(TaskDO::class.java, TaskDOSerializer())
         module.addSerializer(TenantDO::class.java, TenantDOSerializer())
@@ -196,6 +248,12 @@ open class JacksonConfiguration {
 
         module.addSerializer(AbstractLazyInitializer::class.java, HibernateProxySerializer())
 
+        registeredSerializers.forEach {
+            module.addSerializer(it.first, it.second)
+        }
+        registeredDeserializers.forEach {
+            module.addDeserializer(it.first, it.second)
+        }
         mapper.registerModule(module)
         objectMapper = mapper
         return mapper

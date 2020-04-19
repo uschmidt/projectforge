@@ -162,7 +162,7 @@ class AddressPagesRest
         }
     }
 
-    override fun beforeSaveOrUpdate(request: HttpServletRequest, obj: AddressDO, postData: PostData<Address>) {
+    override fun onBeforeSaveOrUpdate(request: HttpServletRequest, obj: AddressDO, postData: PostData<Address>) {
         val session = request.session
         val bytes = ExpiringSessionAttributes.getAttribute(session, SESSION_IMAGE_ATTR)
         if (bytes != null && bytes is ByteArray) {
@@ -180,7 +180,7 @@ class AddressPagesRest
         }
     }
 
-    override fun afterSaveOrUpdate(obj: AddressDO, postData: PostData<Address>) {
+    override fun onAfterSaveOrUpdate(obj: AddressDO, postData: PostData<Address>) {
         val dto = postData.data
         val address = baseDao.getOrLoad(obj.id)
         val personalAddress = PersonalAddressDO()
@@ -209,9 +209,9 @@ class AddressPagesRest
         layout.getTableColumnById("address.lastUpdate").formatter = Formatter.DATE
         layout.getTableColumnById("address.addressbookList").set(formatter = Formatter.ADDRESS_BOOK, sortable = false)
         layout.getTableColumnById("address.isFavoriteCard").set(
-                        sortable = false,
-                        title = "address.columnHead.myFavorites",
-                        tooltip = "address.filter.myFavorites")
+                sortable = false,
+                title = "address.columnHead.myFavorites",
+                tooltip = "address.filter.myFavorites")
                 .valueIconMap = mapOf(true to UIIconType.STAR_REGULAR)
         var menuIndex = 0
         if (configurationService.isTelephoneSystemUrlConfigured) {
