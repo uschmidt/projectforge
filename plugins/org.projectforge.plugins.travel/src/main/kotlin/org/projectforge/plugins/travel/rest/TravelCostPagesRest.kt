@@ -44,7 +44,7 @@ import javax.servlet.http.HttpServletRequest
  */
 @RestController
 @RequestMapping("${Rest.URL}/travelCost")
-class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, TravelCostDao>(TravelCostDao::class.java, "plugins.TravelCost.title") {
+class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, TravelCostDao>(TravelCostDao::class.java, "plugins.travel.entry.title") {
 
     @Autowired
     private lateinit var attachmentsService: AttachmentsService
