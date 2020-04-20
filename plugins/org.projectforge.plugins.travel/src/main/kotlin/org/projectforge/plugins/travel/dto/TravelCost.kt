@@ -21,26 +21,19 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-package org.projectforge.rest.dto
+package org.projectforge.plugins.travel.dto
 
-import org.projectforge.business.scripting.ScriptDO
-import org.projectforge.business.scripting.ScriptParameterType
+import org.projectforge.framework.jcr.Attachment
+import org.projectforge.framework.persistence.user.entities.PFUserDO
+import org.projectforge.plugins.travel.TravelCostDO
+import org.projectforge.rest.dto.AttachmentsSupport
+import org.projectforge.rest.dto.BaseDTO
 
-class Script(
-        var name: String? = null,
-        var description: String? = null,
-        var parameter1Name: String? = null,
-        var parameter1Type: ScriptParameterType? = null,
-        var parameter2Name: String? = null,
-        var parameter2Type: ScriptParameterType? = null,
-        var parameter3Name: String? = null,
-        var parameter3Type: ScriptParameterType? = null,
-        var parameter4Name: String? = null,
-        var parameter4Type: ScriptParameterType? = null,
-        var parameter5Name: String? = null,
-        var parameter5Type: ScriptParameterType? = null,
-        var parameter6Name: String? = null,
-        var parameter6Type: ScriptParameterType? = null
-) : BaseDTO<ScriptDO>() {
-    var parameter: String? = null
+/**
+ * @author Jan Brümmer (j.bruemmer@micromata.de)
+ */
+class TravelCost(id: Int? = null,
+                 displayName: String? = null,
+                 var user: PFUserDO? = null,
+                 override var attachments: List<Attachment>? = null): BaseDTO<TravelCostDO>(), AttachmentsSupport {
 }

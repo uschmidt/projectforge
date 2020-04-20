@@ -23,15 +23,19 @@
 
 package org.projectforge.plugins.travel.rest
 
+import org.projectforge.framework.jcr.AttachmentsService
 import org.projectforge.framework.persistence.user.api.ThreadLocalUserContext
-import org.projectforge.plugins.travel.TravelKostDO
-import org.projectforge.plugins.travel.TravelKostDao
-import org.projectforge.plugins.travel.dto.TravelKost
+import org.projectforge.plugins.travel.TravelCostDO
+import org.projectforge.plugins.travel.TravelCostDao
+import org.projectforge.plugins.travel.dto.TravelCost
+import org.projectforge.rest.config.JacksonConfiguration
 import org.projectforge.rest.config.Rest
 import org.projectforge.rest.core.AbstractDTOPagesRest
 import org.projectforge.ui.*
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import javax.annotation.PostConstruct
 import javax.servlet.http.HttpServletRequest
 
 // TODO: Add jcr support (see ContractPagesRest/jcr and attachment*)
@@ -40,20 +44,36 @@ import javax.servlet.http.HttpServletRequest
  */
 @RestController
 @RequestMapping("${Rest.URL}/travelCost")
-class TravelCostPagesRest : AbstractDTOPagesRest<TravelKostDO, TravelKost, TravelKostDao>(TravelKostDao::class.java, "plugins.TravelKost.title") {
+class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, TravelCostDao>(TravelCostDao::class.java, "plugins.TravelCost.title") {
 
-    override fun transformFromDB(obj: TravelKostDO, editMode: Boolean): TravelKost {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    @Autowired
+    private lateinit var attachmentsService: AttachmentsService
+
+    override fun transformFromDB(obj: TravelCostDO, editMode: Boolean): TravelCost {
+        val travelCost = TravelCost()
+        travelCost.copyFrom(obj)
+        return travelCost
     }
 
-    override fun transformForDB(dto: TravelKost): TravelKostDO {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun transformForDB(dto: TravelCost): TravelCostDO {
+        val travelCostDO = TravelCostDO()
+        dto.copyTo(travelCostDO)
+        return travelCostDO
+    }
+
+    @PostConstruct
+    private fun postConstruct() {
+        /**
+         * Enable attachments for this entity.
+         */
+        enableJcr()
+        JacksonConfiguration.registerAllowedUnknownProperties(TravelCost::class.java, "statusAsString")
     }
 
     /**
      * Initializes new TravelKosts for adding.
      */
-    override fun newBaseDO(request: HttpServletRequest?): TravelKostDO {
+    override fun newBaseDO(request: HttpServletRequest?): TravelCostDO {
         val travelKost = super.newBaseDO(request)
         travelKost.user = ThreadLocalUserContext.getUser()
         return travelKost
@@ -72,7 +92,7 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelKostDO, TravelKost, Trave
     /**
      * LAYOUT Edit page
      */
-    override fun createEditLayout(dto: TravelKost, userAccess: UILayout.UserAccess): UILayout {
+    override fun createEditLayout(dto: TravelCost, userAccess: UILayout.UserAccess): UILayout {
         val location = UIInput("location", lc).enableAutoCompletion(this)
         val layout = super.createEditLayout(dto, userAccess)
                 .add(UISelect.createUserSelect(lc, "user", false, "plugins.travel.entry.user"))

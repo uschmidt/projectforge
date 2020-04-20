@@ -21,35 +21,20 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-package org.projectforge.plugins.travel;
+package org.projectforge.plugins.travel
 
-import org.projectforge.framework.persistence.api.BaseDao;
-import org.springframework.stereotype.Repository;
+import org.projectforge.plugins.core.AbstractPlugin
 
-// TODO: Migration to Kotlin and renaming to TravelCostDao
 /**
  * @author Jan Brümmer (j.bruemmer@micromata.de)
  */
-@Repository
-public class TravelKostDao extends BaseDao<TravelKostDO> {
-  private static final String[] ADDITIONAL_SEARCH_FIELDS = new String[]{"user.username", "user.firstname",
-          "user.lastname"};
+class TravelCostPlugin : AbstractPlugin("travelcost", "TravelCost", "") {
 
-  protected TravelKostDao() {
-    super(TravelKostDO.class);
-  }
+    override fun initialize() {
 
-  @Override
-  public String[] getAdditionalSearchFields() {
-    return ADDITIONAL_SEARCH_FIELDS;
-  }
+    }
 
-  /**
-   * @see BaseDao#newInstance()
-   */
-  @Override
-  public TravelKostDO newInstance() {
-    return new TravelKostDO();
-  }
-
+    companion object {
+        val RESOURCE_BUNDLE_NAME = "TravelI18nResources"
+    }
 }

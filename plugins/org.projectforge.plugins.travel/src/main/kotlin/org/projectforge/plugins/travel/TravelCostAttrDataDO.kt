@@ -21,26 +21,30 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-package org.projectforge.rest.dto
+package org.projectforge.plugins.travel
 
-import org.projectforge.business.scripting.ScriptDO
-import org.projectforge.business.scripting.ScriptParameterType
+import de.micromata.genome.db.jpa.tabattr.entities.JpaTabAttrDataBaseDO
+import javax.persistence.*
 
-class Script(
-        var name: String? = null,
-        var description: String? = null,
-        var parameter1Name: String? = null,
-        var parameter1Type: ScriptParameterType? = null,
-        var parameter2Name: String? = null,
-        var parameter2Type: ScriptParameterType? = null,
-        var parameter3Name: String? = null,
-        var parameter3Type: ScriptParameterType? = null,
-        var parameter4Name: String? = null,
-        var parameter4Type: ScriptParameterType? = null,
-        var parameter5Name: String? = null,
-        var parameter5Type: ScriptParameterType? = null,
-        var parameter6Name: String? = null,
-        var parameter6Type: ScriptParameterType? = null
-) : BaseDTO<ScriptDO>() {
-    var parameter: String? = null
+/**
+ * @author Jan Brümmer (j.bruemmer@micromata.de)
+ */
+@Entity
+class TravelCostAttrDataDO : JpaTabAttrDataBaseDO<TravelCostAttrDO, Int> {
+    constructor() : super()
+
+    constructor(parent: TravelCostAttrDO, value: String): super(parent, value)
+
+    @Id
+    @GeneratedValue
+    @Column(name = "pk")
+    override fun getPk(): Int? {
+        return pk
+    }
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "parent_id", referencedColumnName = "pk")
+    override fun getParent(): TravelCostAttrDO {
+        return super.getParent()
+    }
 }

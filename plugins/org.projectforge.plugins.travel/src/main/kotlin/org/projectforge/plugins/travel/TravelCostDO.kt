@@ -23,11 +23,15 @@
 
 package org.projectforge.plugins.travel
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+import de.micromata.genome.db.jpa.history.api.NoHistory
 import de.micromata.genome.db.jpa.tabattr.entities.JpaTabAttrBaseDO
 import de.micromata.genome.db.jpa.tabattr.entities.JpaTabAttrDataBaseDO
+import org.hibernate.search.annotations.Field
 import org.hibernate.search.annotations.Indexed
 import org.projectforge.business.fibu.kost.Kost2DO
 import org.projectforge.common.anots.PropertyInfo
+import org.projectforge.framework.jcr.AttachmentsInfo
 import org.projectforge.framework.persistence.api.Constants
 import org.projectforge.framework.persistence.attr.entities.DefaultBaseWithAttrDO
 import org.projectforge.framework.persistence.user.entities.PFUserDO
@@ -36,13 +40,12 @@ import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Transient
 
-// TODO: jcr support (see ContractDO / attachment*)
 /**
  * @author Jan Brümmer (j.bruemmer@micromata.de)
  */
 @Entity
 @Indexed
-open class TravelKostDO: DefaultBaseWithAttrDO<TravelKostDO>() {
+open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo {
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.user")
     open var user: PFUserDO? = null
@@ -92,27 +95,49 @@ open class TravelKostDO: DefaultBaseWithAttrDO<TravelKostDO>() {
     @get:Column(length = Constants.LENGTH_TEXT)
     open var otherAssumptionsOfCosts: String? = null
 
-    @Transient
-    override fun getAttrEntityClass(): Class<out JpaTabAttrBaseDO<TravelKostDO, Int>> {
-        return TravelKostAttrDO::class.java
-    }
+    @JsonIgnore
+    @Field
+    @field:NoHistory
+    @get:Column(length = 10000, name = "attachments_names")
+    override var attachmentsNames: String? = null
+
+    @JsonIgnore
+    @Field
+    @field:NoHistory
+    @get:Column(length = 10000, name = "attachments_ids")
+    override var attachmentsIds: String? = null
+
+    @JsonIgnore
+    @field:NoHistory
+    @get:Column(length = 10000, name = "attachments_size")
+    override var attachmentsSize: Int? = null
+
+    @PropertyInfo(i18nKey = "attachment")
+    @JsonIgnore
+    @get:Column(length = 10000, name = "attachments_last_user_action")
+    override var attachmentsLastUserAction: String? = null
 
     @Transient
-    override fun getAttrEntityWithDataClass(): Class<out JpaTabAttrBaseDO<TravelKostDO, Int>> {
-        return TravelKostAttrWithDataDO::class.java
+    override fun getAttrEntityClass(): Class<out JpaTabAttrBaseDO<TravelCostDO, Int>> {
+        return TravelCostAttrDO::class.java
     }
 
     @Transient
-    override fun getAttrDataEntityClass(): Class<out JpaTabAttrDataBaseDO<out JpaTabAttrBaseDO<TravelKostDO, Int>, Int>> {
-        return TravelKostAttrDataDO::class.java
+    override fun getAttrEntityWithDataClass(): Class<out JpaTabAttrBaseDO<TravelCostDO, Int>> {
+        return TravelCostAttrWithDataDO::class.java
     }
 
-    override fun createAttrEntity(key: String, type: Char, value: String): JpaTabAttrBaseDO<TravelKostDO, Int> {
-        return TravelKostAttrDO(this, key, type, value)
+    @Transient
+    override fun getAttrDataEntityClass(): Class<out JpaTabAttrDataBaseDO<out JpaTabAttrBaseDO<TravelCostDO, Int>, Int>> {
+        return TravelCostAttrDataDO::class.java
     }
 
-    override fun createAttrEntityWithData(key: String, type: Char, value: String): JpaTabAttrBaseDO<TravelKostDO, Int> {
-        return TravelKostAttrWithDataDO(this, key, type, value)
+    override fun createAttrEntity(key: String, type: Char, value: String): JpaTabAttrBaseDO<TravelCostDO, Int> {
+        return TravelCostAttrDO(this, key, type, value)
+    }
+
+    override fun createAttrEntityWithData(key: String, type: Char, value: String): JpaTabAttrBaseDO<TravelCostDO, Int> {
+        return TravelCostAttrWithDataDO(this, key, type, value)
     }
 
 

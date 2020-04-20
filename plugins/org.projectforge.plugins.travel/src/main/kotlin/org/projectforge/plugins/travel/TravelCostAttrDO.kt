@@ -21,26 +21,35 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-package org.projectforge.rest.dto
+package org.projectforge.plugins.travel
 
-import org.projectforge.business.scripting.ScriptDO
-import org.projectforge.business.scripting.ScriptParameterType
+import de.micromata.genome.db.jpa.tabattr.entities.JpaTabAttrBaseDO
+import de.micromata.genome.db.jpa.tabattr.entities.JpaTabAttrDataBaseDO
+import javax.persistence.*
 
-class Script(
-        var name: String? = null,
-        var description: String? = null,
-        var parameter1Name: String? = null,
-        var parameter1Type: ScriptParameterType? = null,
-        var parameter2Name: String? = null,
-        var parameter2Type: ScriptParameterType? = null,
-        var parameter3Name: String? = null,
-        var parameter3Type: ScriptParameterType? = null,
-        var parameter4Name: String? = null,
-        var parameter4Type: ScriptParameterType? = null,
-        var parameter5Name: String? = null,
-        var parameter5Type: ScriptParameterType? = null,
-        var parameter6Name: String? = null,
-        var parameter6Type: ScriptParameterType? = null
-) : BaseDTO<ScriptDO>() {
-    var parameter: String? = null
+/**
+ * @author Jan Brümmer (j.bruemmer@micromata.de)
+ */
+@Entity
+open class TravelCostAttrDO : JpaTabAttrBaseDO<TravelCostDO, Int> {
+    constructor() : super() {}
+
+    constructor(parent: TravelCostDO, propertyName: String, type: Char, value: String) : super(parent, propertyName, type, value) {}
+
+    override fun createData(data: String): JpaTabAttrDataBaseDO<*, Int> {
+        return TravelCostAttrDataDO(this, data)
+    }
+
+    @Id
+    @GeneratedValue
+    @Column(name = "pk")
+    override fun getPk(): Int? {
+        return pk
+    }
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "parent", referencedColumnName = "pk")
+    override fun getParent(): TravelCostDO? {
+        return super.getParent()
+    }
 }

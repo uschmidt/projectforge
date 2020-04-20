@@ -21,18 +21,25 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-package org.projectforge.plugins.travel.dto
+package org.projectforge.plugins.travel
 
-import org.projectforge.framework.persistence.user.entities.PFUserDO
-import org.projectforge.plugins.travel.TravelKostDO
-import org.projectforge.rest.dto.BaseDTO
-
-// TODO Rename all TravelKost* -> TravelCost*
-// TODO: Add jcr (see Contract.kt/attachment*)
+import de.micromata.genome.db.jpa.tabattr.entities.JpaTabAttrDataBaseDO
+import org.projectforge.business.fibu.EmployeeAttrDataDO
+import javax.persistence.*
 
 /**
  * @author Jan Brümmer (j.bruemmer@micromata.de)
  */
-class TravelKost(id: Int? = null,
-                 displayName: String? = null,
-                 var user: PFUserDO? = null): BaseDTO<TravelKostDO>()
+@Entity
+@DiscriminatorValue("1")
+class TravelCostAttrWithDataDO : TravelCostAttrDO {
+    constructor() : super()
+
+    constructor(parent: TravelCostDO, propertyName: String, type: Char, value: String) : super(parent, propertyName, type, value)
+
+    @OneToMany(cascade = [CascadeType.ALL], mappedBy = "parent", targetEntity = EmployeeAttrDataDO::class, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OrderColumn(name = "datarow")
+    override fun getData(): List<JpaTabAttrDataBaseDO<*, Int>> {
+        return super.getData()
+    }
+}

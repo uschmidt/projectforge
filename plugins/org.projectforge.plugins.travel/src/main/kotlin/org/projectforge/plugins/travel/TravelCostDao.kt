@@ -21,26 +21,30 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-package org.projectforge.rest.dto
+package org.projectforge.plugins.travel
 
-import org.projectforge.business.scripting.ScriptDO
-import org.projectforge.business.scripting.ScriptParameterType
+import org.projectforge.framework.persistence.api.BaseDao
+import org.springframework.stereotype.Repository
 
-class Script(
-        var name: String? = null,
-        var description: String? = null,
-        var parameter1Name: String? = null,
-        var parameter1Type: ScriptParameterType? = null,
-        var parameter2Name: String? = null,
-        var parameter2Type: ScriptParameterType? = null,
-        var parameter3Name: String? = null,
-        var parameter3Type: ScriptParameterType? = null,
-        var parameter4Name: String? = null,
-        var parameter4Type: ScriptParameterType? = null,
-        var parameter5Name: String? = null,
-        var parameter5Type: ScriptParameterType? = null,
-        var parameter6Name: String? = null,
-        var parameter6Type: ScriptParameterType? = null
-) : BaseDTO<ScriptDO>() {
-    var parameter: String? = null
+/**
+ * @author Jan Brümmer (j.bruemmer@micromata.de)
+ */
+@Repository
+class TravelCostDao protected constructor() : BaseDao<TravelCostDO>(TravelCostDO::class.java) {
+
+    override fun getAdditionalSearchFields(): Array<String>? {
+        return ADDITIONAL_SEARCH_FIELDS
+    }
+
+    /**
+     * @see BaseDao.newInstance
+     */
+    override fun newInstance(): TravelCostDO {
+        return TravelCostDO()
+    }
+
+    companion object {
+        private val ADDITIONAL_SEARCH_FIELDS = arrayOf("user.username", "user.firstname", "user.lastname")
+    }
+
 }
