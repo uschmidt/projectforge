@@ -43,7 +43,7 @@ class TravelCostPlugin : AbstractPlugin("travelcost", "Travel Cost Plugin", "Plu
 
     override fun initialize() {
         // Register it:
-        register(id, travelCostDao::class.java, travelCostDao, "plugins.ktmemo")
+        register(id, travelCostDao::class.java, travelCostDao, "plugins.travel")
 
         // Define the access management:
         registerRight(TravelCostRight(accessChecker))

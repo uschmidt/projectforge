@@ -7,9 +7,7 @@ import org.projectforge.framework.access.AccessChecker
 import org.projectforge.framework.access.OperationType
 import org.projectforge.framework.persistence.user.entities.PFUserDO
 
-class TravelCostRight: UserRightAccessCheck<TravelCostDO> {
-
-    constructor(accessChecker: AccessChecker) : super(accessChecker, TravelPluginUserRightId.PLUGIN_TRAVEL, UserRightCategory.PLUGINS, UserRightValue.TRUE)
+class TravelCostRight(accessChecker: AccessChecker?) : UserRightAccessCheck<TravelCostDO>(accessChecker, TravelPluginUserRightId.PLUGIN_TRAVEL, UserRightCategory.PLUGINS, UserRightValue.TRUE) {
 
     /**
      * @return true if the owner is equals to the logged-in user, otherwise false.

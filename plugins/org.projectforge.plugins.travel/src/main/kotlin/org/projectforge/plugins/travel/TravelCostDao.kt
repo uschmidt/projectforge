@@ -24,6 +24,10 @@
 package org.projectforge.plugins.travel
 
 import org.projectforge.framework.persistence.api.BaseDao
+import org.projectforge.framework.persistence.api.BaseSearchFilter
+import org.projectforge.framework.persistence.api.QueryFilter
+import org.projectforge.framework.persistence.user.api.ThreadLocalUserContext
+import org.projectforge.framework.persistence.user.entities.PFUserDO
 import org.springframework.stereotype.Repository
 
 /**
@@ -32,19 +36,31 @@ import org.springframework.stereotype.Repository
 @Repository
 open class TravelCostDao protected constructor() : BaseDao<TravelCostDO>(TravelCostDO::class.java) {
 
-    override fun getAdditionalSearchFields(): Array<String>? {
-        return ADDITIONAL_SEARCH_FIELDS
+    init {
+        userRightId = TravelPluginUserRightId.PLUGIN_TRAVEL
     }
 
     /**
-     * @see BaseDao.newInstance
+     * Load only memo's of current logged-in user.
+     *
+     * @param filter
+     * @return
      */
-    override fun newInstance(): TravelCostDO {
-        return TravelCostDO()
+    override fun createQueryFilter(filter: BaseSearchFilter): QueryFilter {
+        val queryFilter = super.createQueryFilter(filter)
+        val user = PFUserDO()
+        user.id = ThreadLocalUserContext.getUserId()
+        queryFilter.add(QueryFilter.eq("user", user))
+        return queryFilter
     }
 
-    companion object {
-        private val ADDITIONAL_SEARCH_FIELDS = arrayOf("user.username", "user.firstname", "user.lastname")
+    override fun onSaveOrModify(obj: TravelCostDO) {
+        super.onSaveOrModify(obj)
+        obj.user = ThreadLocalUserContext.getUser() // Set always the logged-in user as owner.
+    }
+
+    override fun newInstance(): TravelCostDO {
+        return TravelCostDO()
     }
 
 }

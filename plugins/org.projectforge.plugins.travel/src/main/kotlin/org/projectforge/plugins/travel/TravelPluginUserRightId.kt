@@ -10,9 +10,9 @@ import org.projectforge.framework.persistence.api.RightRightIdProviderService
  */
 enum class TravelPluginUserRightId
             (override val id: String,
-             override val orderString: String,
-             override val i18nKey: String) : IUserRightId {
-    PLUGIN_TRAVEL("PLUGIN_TRAVEL", "travel20", "plugins.travel.entry");
+             override val orderString: String?,
+             override val i18nKey: String?) : IUserRightId {
+    PLUGIN_TRAVEL("PLUGIN_TRAVEL", null, "plugins.travel.entry");
 
     class ProviderService : RightRightIdProviderService {
         override fun getUserRightIds(): Collection<IUserRightId> {
