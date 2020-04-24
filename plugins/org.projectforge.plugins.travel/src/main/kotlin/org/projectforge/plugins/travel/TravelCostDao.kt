@@ -30,7 +30,7 @@ import org.springframework.stereotype.Repository
  * @author Jan Brümmer (j.bruemmer@micromata.de)
  */
 @Repository
-class TravelCostDao protected constructor() : BaseDao<TravelCostDO>(TravelCostDO::class.java) {
+open class TravelCostDao protected constructor() : BaseDao<TravelCostDO>(TravelCostDO::class.java) {
 
     override fun getAdditionalSearchFields(): Array<String>? {
         return ADDITIONAL_SEARCH_FIELDS

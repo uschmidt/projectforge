@@ -23,18 +23,38 @@
 
 package org.projectforge.plugins.travel
 
+import org.projectforge.Const
+import org.projectforge.menu.builder.MenuCreator
+import org.projectforge.menu.builder.MenuItemDef
+import org.projectforge.menu.builder.MenuItemDefId
 import org.projectforge.plugins.core.AbstractPlugin
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * @author Jan Brümmer (j.bruemmer@micromata.de)
  */
-class TravelCostPlugin : AbstractPlugin("travelcost", "TravelCost", "") {
+class TravelCostPlugin : AbstractPlugin("travelcost", "Travel Cost Plugin", "Plugin to manage travel costs") {
+
+    @Autowired
+    private lateinit var travelCostDao: TravelCostDao
+
+    @Autowired
+    private lateinit var menuCreator: MenuCreator
 
     override fun initialize() {
+        // Register it:
+        register(id, travelCostDao::class.java, travelCostDao, "plugins.ktmemo")
 
+        // Define the access management:
+        registerRight(TravelCostRight(accessChecker))
+
+        menuCreator.add(MenuItemDefId.MISC, MenuItemDef(info.id, "plugins.travel.menu", "${Const.REACT_APP_PATH}travelCost"))
+
+        // All the i18n stuff:
+        addResourceBundle(RESOURCE_BUNDLE_NAME)
     }
 
     companion object {
-        val RESOURCE_BUNDLE_NAME = "TravelI18nResources"
+        const val RESOURCE_BUNDLE_NAME = "TravelI18nResources"
     }
 }
