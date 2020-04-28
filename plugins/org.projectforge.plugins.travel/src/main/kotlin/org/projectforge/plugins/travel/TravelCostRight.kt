@@ -14,8 +14,8 @@ class TravelCostRight(accessChecker: AccessChecker?) : UserRightAccessCheck<Trav
      */
     override fun hasAccess(user: PFUserDO, obj: TravelCostDO, oldObj: TravelCostDO?,
                            operationType: OperationType): Boolean {
-        val memo = (oldObj?: obj)
+        val travelCost = (oldObj?: obj)
                 ?: return true // General insert and select access given by default.
-        return user.id == memo.user!!.id
+        return user.id == travelCost.user!!.id
     }
 }

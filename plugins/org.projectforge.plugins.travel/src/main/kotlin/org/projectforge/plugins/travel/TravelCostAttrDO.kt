@@ -31,6 +31,10 @@ import javax.persistence.*
  * @author Jan Brümmer (j.bruemmer@micromata.de)
  */
 @Entity
+@Table(name = "T_PLUGIN_TRAVEL_ATTR")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "withdata", discriminatorType = DiscriminatorType.CHAR)
+@DiscriminatorValue("0")
 open class TravelCostAttrDO : JpaTabAttrBaseDO<TravelCostDO, Int> {
     constructor() : super() {}
 

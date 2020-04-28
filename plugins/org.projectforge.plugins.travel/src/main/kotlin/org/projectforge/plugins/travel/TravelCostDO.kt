@@ -38,6 +38,7 @@ import org.projectforge.framework.persistence.user.entities.PFUserDO
 import java.time.LocalDate
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.Table
 import javax.persistence.Transient
 
 /**
@@ -45,6 +46,7 @@ import javax.persistence.Transient
  */
 @Entity
 @Indexed
+@Table(name = "T_PLUGIN_TRAVEL")
 open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo {
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.user")

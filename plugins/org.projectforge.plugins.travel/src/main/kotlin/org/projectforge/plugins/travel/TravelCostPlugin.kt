@@ -33,7 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired
 /**
  * @author Jan Brümmer (j.bruemmer@micromata.de)
  */
-class TravelCostPlugin : AbstractPlugin("travelcost", "Travel Cost Plugin", "Plugin to manage travel costs") {
+class TravelCostPlugin : AbstractPlugin(ID,"Travel Cost Plugin", "Plugin to manage travel costs") {
 
     @Autowired
     private lateinit var travelCostDao: TravelCostDao
@@ -43,7 +43,7 @@ class TravelCostPlugin : AbstractPlugin("travelcost", "Travel Cost Plugin", "Plu
 
     override fun initialize() {
         // Register it:
-        register(id, travelCostDao::class.java, travelCostDao, "plugins.travel")
+        register(ID, travelCostDao::class.java, travelCostDao, "plugins.travel")
 
         // Define the access management:
         registerRight(TravelCostRight(accessChecker))
@@ -55,6 +55,7 @@ class TravelCostPlugin : AbstractPlugin("travelcost", "Travel Cost Plugin", "Plu
     }
 
     companion object {
+        const val ID = "travel"
         const val RESOURCE_BUNDLE_NAME = "TravelI18nResources"
     }
 }

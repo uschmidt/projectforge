@@ -30,6 +30,7 @@ import javax.persistence.*
  * @author Jan Brümmer (j.bruemmer@micromata.de)
  */
 @Entity
+@Table(name = "T_PLUGIN_TRAVEL_ATTRDATA")
 class TravelCostAttrDataDO : JpaTabAttrDataBaseDO<TravelCostAttrDO, Int> {
     constructor() : super()
 
