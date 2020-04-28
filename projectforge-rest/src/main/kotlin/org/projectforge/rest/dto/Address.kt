@@ -32,7 +32,12 @@ class Address(var contactStatus: ContactStatus? = null,
               var addressStatus: AddressStatus? = null,
               var uid: String? = null,
               var name: String? = null,
+              /**
+               * Including formerly name (maiden name) if exists.
+               */
+              var fullLastName: String? = null,
               var firstName: String? = null,
+              var birthName: String? = null,
               var form: FormOfAddress? = null,
               var title: String? = null,
               var positionText: String? = null,
@@ -42,11 +47,13 @@ class Address(var contactStatus: ContactStatus? = null,
               var mobilePhone: String? = null,
               var fax: String? = null,
               var addressText: String? = null,
+              var addressText2: String? = null,
               var zipCode: String? = null,
               var city: String? = null,
               var country: String? = null,
               var state: String? = null,
               var postalAddressText: String? = null,
+              var postalAddressText2: String? = null,
               var postalZipCode: String? = null,
               var postalCity: String? = null,
               var postalCountry: String? = null,
@@ -57,6 +64,7 @@ class Address(var contactStatus: ContactStatus? = null,
               var privatePhone: String? = null,
               var privateMobilePhone: String? = null,
               var privateAddressText: String? = null,
+              var privateAddressText2: String? = null,
               var privateZipCode: String? = null,
               var privateCity: String? = null,
               var privateCountry: String? = null,
@@ -90,6 +98,7 @@ class Address(var contactStatus: ContactStatus? = null,
                 addressbookList!!.add(addressbook)
             }
         }
+        fullLastName = src.fullLastName
     }
 
     override fun copyTo(dest: AddressDO) {
