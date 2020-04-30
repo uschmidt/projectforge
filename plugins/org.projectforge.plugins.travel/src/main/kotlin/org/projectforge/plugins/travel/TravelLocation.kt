@@ -23,9 +23,14 @@
 
 package org.projectforge.plugins.travel
 
+import org.projectforge.common.i18n.I18nEnum
+
 /**
  * @author Jan Brümmer (j.bruemmer@micromata.de)
  */
-enum class TravelLocation  {
-    NONE, APARTMENT, WORKPLACE;
+enum class TravelLocation(private val key: String?) : I18nEnum {
+    NONE("none"), APARTMENT("apartment"), WORKPLACE("workplace");
+
+    override val i18nKey: String?
+        get() = "plugins.travel.entry.location.$key"
 }

@@ -93,9 +93,17 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
      * LAYOUT Edit page
      */
     override fun createEditLayout(dto: TravelCost, userAccess: UILayout.UserAccess): UILayout {
-        val location = UIInput("location", lc).enableAutoCompletion(this)
+        //val location = UIInput("location", lc).enableAutoCompletion(this)
         val layout = super.createEditLayout(dto, userAccess)
                 .add(UISelect.createUserSelect(lc, "user", false, "plugins.travel.entry.user"))
+                .add(lc, "reasonOfTravel", "destination")
+                // TODO: Implement Kost2 here
+                .add(lc, "beginOfTravel", "startLocation", "endOfTravel", "returnLocation", "kilometers")
+                .add(UICheckbox("hotel", lc))
+                .add(UICheckbox("rentalCar", lc))
+                .add(UICheckbox("train", lc))
+                .add(UICheckbox("flight", lc))
+                .add(lc, "assumptionOfCosts")
         //additionalLabel = "access.users",
         return LayoutUtils.processEditPage(layout, dto, this)
     }

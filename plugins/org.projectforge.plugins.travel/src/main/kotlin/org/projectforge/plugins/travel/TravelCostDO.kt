@@ -89,6 +89,7 @@ open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo 
     open var kilometers: Int? = null
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption")
+    @get:Column(length = Constants.LENGTH_TEXT)
     open var assumptionOfCosts: String? = null
 
     @get:Column(length = Constants.LENGTH_TEXT)
