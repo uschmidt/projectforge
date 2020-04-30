@@ -36,10 +36,7 @@ import org.projectforge.framework.persistence.api.Constants
 import org.projectforge.framework.persistence.attr.entities.DefaultBaseWithAttrDO
 import org.projectforge.framework.persistence.user.entities.PFUserDO
 import java.time.LocalDate
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.Table
-import javax.persistence.Transient
+import javax.persistence.*
 
 /**
  * @author Jan Brümmer (j.bruemmer@micromata.de)
@@ -74,7 +71,7 @@ open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo 
     @PropertyInfo(i18nKey = "plugins.travel.entry.endOfTravel")
     open var endOfTravel: LocalDate? = null
 
-    open var catering: List<CateringDay>? = null
+    //open var catering: MutableList<CateringDay>? = null
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption.hotel")
     open var hotel: Boolean = false

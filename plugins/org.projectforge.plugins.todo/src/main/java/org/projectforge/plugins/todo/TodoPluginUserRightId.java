@@ -35,7 +35,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 @Indexed
-@ClassBridge(index = Index.YES /* TOKENIZED */, store = Store.NO, impl = HibernateSearchUserRightIdBridge.class)
+@ClassBridge(impl = HibernateSearchUserRightIdBridge.class)
 public enum TodoPluginUserRightId implements IUserRightId
 {
   PLUGIN_TODO("PLUGIN_TODO", "plugin10", "plugins.todo.todo");
