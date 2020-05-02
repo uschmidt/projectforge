@@ -24,6 +24,7 @@
 package org.projectforge.jcr
 
 import mu.KotlinLogging
+import org.projectforge.common.BackupFilesPurging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -34,7 +35,7 @@ import java.util.zip.ZipOutputStream
 private val log = KotlinLogging.logger {}
 
 @Component
-class BackupJob {
+class JCRBackupJob {
     @Autowired
     private lateinit var repoBackupService: RepoBackupService
 
@@ -44,10 +45,15 @@ class BackupJob {
         log.info("JCR backup job started.")
         val time = System.currentTimeMillis()
         val backupFile = RepoBackupService.backupFilename
-        val zipFile = File(repoBackupService.backupDirectory, backupFile)
+        val backupDirectory = repoBackupService.backupDirectory!!
+        val zipFile = File(backupDirectory, backupFile)
         ZipOutputStream(FileOutputStream(zipFile)).use {
             repoBackupService.backupAsZipArchive(zipFile.name, it)
         }
-        log.info("JCR backup job finished after ${(System.currentTimeMillis() - time)/1000} seconds.")
+        log.info("JCR backup job finished after ${(System.currentTimeMillis() - time) / 1000} seconds.")
+        BackupFilesPurging.purgeDirectory(
+                backupDirectory,
+                filePrefix = RepoBackupService.backupFilenamePrefix
+        )
     }
 }
