@@ -29,6 +29,7 @@ import de.micromata.genome.db.jpa.tabattr.entities.JpaTabAttrBaseDO
 import de.micromata.genome.db.jpa.tabattr.entities.JpaTabAttrDataBaseDO
 import org.hibernate.search.annotations.Field
 import org.hibernate.search.annotations.Indexed
+import org.hibernate.search.annotations.IndexedEmbedded
 import org.projectforge.business.fibu.kost.Kost2DO
 import org.projectforge.common.anots.PropertyInfo
 import org.projectforge.framework.jcr.AttachmentsInfo
@@ -43,32 +44,39 @@ import javax.persistence.*
  */
 @Entity
 @Indexed
-@Table(name = "T_PLUGIN_TRAVEL")
+@Table(name = "T_PLUGIN_TRAVEL", indexes = [javax.persistence.Index(name = "idx_fk_t_plugin_travel_kost2_id", columnList = "kost2_id"), javax.persistence.Index(name = "idx_fk_t_plugin_travel_user_id", columnList = "user_id")])
 open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo {
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.user")
+    @get:JoinColumn(name = "user_id", nullable = false)
     open var user: PFUserDO? = null
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.reasonOfTravel")
-    @get:Column(length = Constants.LENGTH_TEXT)
+    @get:Column(name = "reason_of_travel", length = Constants.LENGTH_TEXT)
     open var reasonOfTravel: String? = null
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.startLocation")
+    @get:Column(name = "start_location")
     open var startLocation: TravelLocation? = null
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.returnLocation")
+    @get:Column(name = "return_location")
     open var returnLocation: TravelLocation? = null
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.destination")
+    @get:Column(name = "destination")
     open var destination: String? = null
 
     @PropertyInfo(i18nKey = "fibu.kost2")
+    @get:JoinColumn(name = "kost2_id", nullable = true)
     open var kost2: Kost2DO? = null
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.beginOfTravel")
+    @get:Column(name = "begin_of_travel")
     open var beginOfTravel: LocalDate? = null
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.endOfTravel")
+    @get:Column(name = "end_of_travel")
     open var endOfTravel: LocalDate? = null
 
     //open var catering: MutableList<CateringDay>? = null
@@ -77,6 +85,7 @@ open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo 
     open var hotel: Boolean = false
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption.rentalCar")
+    @get:Column(name = "rental_car")
     open var rentalCar: Boolean = false
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption.train")
@@ -86,6 +95,7 @@ open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo 
     open var flight: Boolean = false
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption.kilometers")
+    @get:Column(name = "kilometers")
     open var kilometers: Int? = null
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption")
