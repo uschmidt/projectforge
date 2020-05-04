@@ -45,6 +45,7 @@ import org.springframework.stereotype.Service
 import java.io.IOException
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 /**
@@ -98,8 +99,16 @@ open class ForecastExport { // open needed by Wicket.
         MONTH7("Month 7"), MONTH8("Month 8"), MONTH9("Month 9"), MONTH10("Month 10"), MONTH11("Month 11"), MONTH12("Month 12")
     }
 
-    private class Context(workbook: ExcelWorkbook, val forecastSheet: ExcelSheet, val invoicesSheet: ExcelSheet, val invoicesPriorYearSheet: ExcelSheet,
-                          val baseDate: PFDay, val invoices: List<RechnungDO>) {
+    private class Context(workbook: ExcelWorkbook,
+                          val forecastSheet: ExcelSheet,
+                          val invoicesSheet: ExcelSheet,
+                          val invoicesPriorYearSheet: ExcelSheet,
+                          val startDate: PFDay,
+                          val invoices: List<RechnungDO>,
+                          /**
+                           * Normally today, but for checks in the past, baseDate may differ.
+                           */
+                          val baseDate: PFDay) {
         val excelDateFormat = ThreadLocalUserContext.getUser()?.excelDateFormat ?: ExcelDateFormats.EXCEL_DEFAULT_DATE
         val dateFormat = DateTimeFormatter.ofPattern(DateFormats.getFormatString(DateFormatType.DATE_SHORT))!!
         val currencyFormat = NumberHelper.getCurrencyFormat(ThreadLocalUserContext.getLocale())
@@ -108,8 +117,7 @@ open class ForecastExport { // open needed by Wicket.
         val writerContext = ExcelWriterContext(I18n(Const.RESOURCE_BUNDLE_NAME, ThreadLocalUserContext.getLocale()), workbook)
         val orderMap = mutableMapOf<Int, AuftragDO>()
         val orderPositionMap = mutableMapOf<Int, AuftragsPositionDO>()
-        val today = PFDay.now()
-        val thisMonth = today.beginOfMonth
+        val thisMonth = baseDate.beginOfMonth
 
         init {
             currencyCellStyle.dataFormat = workbook.getDataFormat(XlsContentProvider.FORMAT_CURRENCY)
@@ -120,28 +128,29 @@ open class ForecastExport { // open needed by Wicket.
     // Vergangene Auftragspositionen anzeigen, die nicht vollständig fakturiert bzw. abgelehnt sind.
 
     @Throws(IOException::class)
-    open fun export(origFilter: AuftragFilter): ByteArray? {
-        val baseDateParam = origFilter.periodOfPerformanceStartDate
-        val baseDate = if (baseDateParam != null) PFDay.from(baseDateParam).beginOfMonth else PFDay.now().beginOfYear
-        val prioYearBaseDate = baseDate.plusYears(-1) // One day back for getting all invoices.
+    @JvmOverloads
+    open fun export(origFilter: AuftragFilter, baseDate: LocalDate? = null): ByteArray? {
+        val startDateParam = origFilter.periodOfPerformanceStartDate
+        val startDate = if (startDateParam != null) PFDay.from(startDateParam).beginOfMonth else PFDay.fromOrNow(baseDate).beginOfYear
+        val prioYearStartDate = startDate.plusYears(-1) // One day back for getting all invoices.
 
         val filter = AuftragFilter()
         filter.searchString = origFilter.searchString
         //filter.auftragFakturiertFilterStatus = origFilter.auftragFakturiertFilterStatus
         //filter.auftragsPositionsPaymentType = origFilter.auftragsPositionsPaymentType
-        filter.periodOfPerformanceStartDate = baseDate.plusYears(-2).localDate // Go 2 years back for getting all orders referred by invoices of prior year.
+        filter.periodOfPerformanceStartDate = startDate.plusYears(-2).localDate // Go 2 years back for getting all orders referred by invoices of prior year.
         filter.user = origFilter.user
         val orderList = orderBookDao.getList(filter)
         if (orderList.isNullOrEmpty()) {
             return null
         }
         val invoiceFilter = RechnungFilter()
-        invoiceFilter.fromDate = prioYearBaseDate.plusDays(-1).localDate // Go 1 day back, paranoia setting for getting all invoices of time period.
+        invoiceFilter.fromDate = prioYearStartDate.plusDays(-1).localDate // Go 1 day back, paranoia setting for getting all invoices of time period.
         val queryFilter = AuftragAndRechnungDaoHelper.createQueryFilterWithDateRestriction(invoiceFilter)
         queryFilter.addOrder(desc("datum"))
         queryFilter.addOrder(desc("nummer"))
         val invoices = rechnungDao.internalGetList(queryFilter)
-        log.info("Exporting forecast script for date ${baseDate.isoString}")
+        log.info("Exporting forecast script for date ${startDate.isoString}")
         val forecastTemplate = applicationContext.getResource("classpath:officeTemplates/ForecastTemplate.xlsx")
 
         val workbook = ExcelWorkbook(forecastTemplate.inputStream, "ForecastTemplate.xlsx")
@@ -157,7 +166,7 @@ open class ForecastExport { // open needed by Wicket.
         InvoicesCol.values().forEach { invoicesPriorYearSheet.registerColumn(it.header) }
         MonthCol.values().forEach { invoicesPriorYearSheet.registerColumn(it.header) }
 
-        val ctx = Context(workbook, forecastSheet, invoicesSheet, invoicesPriorYearSheet, baseDate, invoices)
+        val ctx = Context(workbook, forecastSheet, invoicesSheet, invoicesPriorYearSheet, startDate, invoices, PFDay.fromOrNow(baseDate))
 
         var currentRow = 9
         for (order in orderList) {
@@ -178,9 +187,9 @@ open class ForecastExport { // open needed by Wicket.
             }
         }
         fillInvoices(ctx)
-        replaceMonthDatesInHeaderRow(forecastSheet, baseDate)
-        replaceMonthDatesInHeaderRow(invoicesSheet, baseDate)
-        replaceMonthDatesInHeaderRow(invoicesPriorYearSheet, prioYearBaseDate)
+        replaceMonthDatesInHeaderRow(forecastSheet, startDate)
+        replaceMonthDatesInHeaderRow(invoicesSheet, startDate)
+        replaceMonthDatesInHeaderRow(invoicesPriorYearSheet, prioYearStartDate)
         forecastSheet.setAutoFilter()
         invoicesSheet.setAutoFilter()
         invoicesPriorYearSheet.setAutoFilter()
@@ -253,8 +262,8 @@ open class ForecastExport { // open needed by Wicket.
         }
     }
 
-    private fun replaceMonthDatesInHeaderRow(sheet: ExcelSheet, baseDate: PFDay) { // Adding month columns
-        var currentMonth = baseDate
+    private fun replaceMonthDatesInHeaderRow(sheet: ExcelSheet, startDate: PFDay) { // Adding month columns
+        var currentMonth = startDate
         MonthCol.values().forEach {
             val cell = sheet.headRow!!.getCell(sheet.getColumnDef(it.header)!!)
             cell?.setCellValue(formatMonthHeader(currentMonth))
@@ -379,10 +388,10 @@ open class ForecastExport { // open needed by Wicket.
     private fun fillByPaymentSchedule(paymentSchedules: List<PaymentScheduleDO>, ctx: Context, row: Int,
                                       order: AuftragDO, pos: AuftragsPositionDO) { // payment values
         val probability = ForecastUtils.getProbabilityOfAccurence(order, pos)
-        var currentMonth = ctx.baseDate.plusMonths(-1).beginOfMonth
+        var currentMonth = ctx.startDate.plusMonths(-1).beginOfMonth
         MonthCol.values().forEach {
             currentMonth = currentMonth.plusMonths(1)
-            if (checkAfterMonthBefore(currentMonth)) {
+            if (checkAfterMonthBefore(ctx, currentMonth)) {
                 var sum = BigDecimal.ZERO
                 for (schedule in paymentSchedules) {
                     if (schedule.vollstaendigFakturiert) {
@@ -415,8 +424,8 @@ open class ForecastExport { // open needed by Wicket.
 
     private fun getMonthIndex(ctx: Context, date: PFDay): Int {
         val monthDate = date.year * 12 + date.monthValue
-        val monthBaseDate = ctx.baseDate.year * 12 + ctx.baseDate.monthValue
-        return monthDate - monthBaseDate // index from 0 to 11
+        val monthStartDate = ctx.startDate.year * 12 + ctx.startDate.monthValue
+        return monthDate - monthStartDate // index from 0 to 11
     }
 
     /**
@@ -425,9 +434,9 @@ open class ForecastExport { // open needed by Wicket.
      * @param toCheck
      * @return
      */
-    private fun checkAfterMonthBefore(toCheck: PFDay): Boolean {
-        val oneMonthBeforeNow = PFDay.now().plusMonths(-1)
-        return toCheck.isAfter(oneMonthBeforeNow)
+    private fun checkAfterMonthBefore( ctx: Context, toCheck: PFDay): Boolean {
+        val oneMonthBeforeBaseDate = ctx.baseDate.plusMonths(-1)
+        return toCheck.isAfter(oneMonthBeforeBaseDate)
     }
 
     private fun fillMonthColumnsDistributed(value: BigDecimal, ctx: Context, row: Int, order: AuftragDO, pos: AuftragsPositionDO,
