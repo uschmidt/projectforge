@@ -30,9 +30,30 @@ open class CateringDay {
 
     open var dayNumber: Int? = null
 
+    // Worth 1 point
     open var breakfast: Boolean = false
 
+    // Worth 2 points
     open var lunch: Boolean = false
 
+    // Worth 2 points
     open var dinner: Boolean = false
+
+    fun getNumber(): Int {
+        var number = 0
+
+        if(breakfast){
+            number += 1
+        }
+
+        if(lunch){
+            number += 2
+        }
+
+        if(dinner){
+            number += 2
+        }
+
+        return number
+    }
 }
