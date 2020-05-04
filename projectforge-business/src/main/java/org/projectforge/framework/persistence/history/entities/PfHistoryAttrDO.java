@@ -23,6 +23,7 @@
 
 package org.projectforge.framework.persistence.history.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import de.micromata.genome.db.jpa.history.entities.HistoryAttrBaseDO;
 import de.micromata.genome.db.jpa.tabattr.entities.JpaTabAttrDataBaseDO;
 import de.micromata.genome.db.jpa.xmldump.api.JpaXmlPersist;
@@ -110,6 +111,7 @@ public class PfHistoryAttrDO extends HistoryAttrBaseDO<PfHistoryMasterDO, Long>
   @Override
   @ManyToOne(optional = false)
   @JoinColumn(name = "MASTER_FK", referencedColumnName = "pk")
+  @JsonManagedReference
   public PfHistoryMasterDO getParent()
   {
     return super.getParent();

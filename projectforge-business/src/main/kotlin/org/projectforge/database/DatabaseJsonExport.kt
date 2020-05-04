@@ -24,12 +24,10 @@
 package org.projectforge.database
 
 import mu.KotlinLogging
+import org.hibernate.Session
 import org.projectforge.framework.ToStringUtil
-import org.projectforge.jcr.NodeInfo
-import org.projectforge.jcr.PFJcrUtils
 import org.springframework.stereotype.Service
 import java.io.PrintWriter
-import java.nio.charset.StandardCharsets
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import javax.persistence.EntityManager
@@ -43,14 +41,23 @@ private val log = KotlinLogging.logger {}
  * @author Kai Reinhard (k.reinhard@micromata.de)
  */
 @Service
-open class DatabaseExport {
+open class DatabaseJsonExport {
     @PersistenceContext
     private lateinit var em: EntityManager
+
+    open fun export(archiveName: String, zipOut: ZipOutputStream, vararg skipEntities: Class<out Any>) {
+        val entityManager = em.entityManagerFactory.createEntityManager()
+        val sessionFactory = entityManager.unwrap(Session::class.java).sessionFactory
+        val entities = sessionFactory.metamodel.entities
+        entities.filter { !skipEntities.contains(it.javaType) }.forEach { entityClass ->
+            exportEntity(archiveName, zipOut, entityClass.javaType)
+        }
+    }
 
     /**
      * Checks also the select access of the logged in user.
      */
-    open fun export(archiveName: String, zipOut: ZipOutputStream, entity: Class<out Any>) {
+    open fun exportEntity(archiveName: String, zipOut: ZipOutputStream, entity: Class<out Any>) {
         val archivNameWithoutExtension = if (archiveName.contains('.')) {
             archiveName.substring(0, archiveName.indexOf('.'))
         } else {
@@ -69,7 +76,9 @@ open class DatabaseExport {
     open fun export(writer: PrintWriter, entity: Class<out Any>) {
         var first = true
         writer.println("[")
-        em.createQuery("SELECT a FROM ${entity.simpleName} a", entity).resultList.forEach { obj ->
+        val resultList = em.createQuery("SELECT a FROM ${entity.simpleName} a", entity).resultList
+        log.info { "Exporting ${resultList.size} items of entity ${entity.simpleName}..." }
+        resultList.forEach { obj ->
             if (first) {
                 first = false
             } else {

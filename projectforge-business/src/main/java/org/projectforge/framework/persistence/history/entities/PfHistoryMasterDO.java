@@ -23,6 +23,7 @@
 
 package org.projectforge.framework.persistence.history.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import de.micromata.genome.db.jpa.history.entities.HistoryMasterBaseDO;
 import de.micromata.genome.db.jpa.tabattr.entities.JpaTabAttrBaseDO;
 import de.micromata.genome.db.jpa.tabattr.entities.JpaTabAttrDataBaseDO;
@@ -39,7 +40,7 @@ import java.util.Map;
 
 /**
  * Stores history.
- * 
+ *
  * @author Roger Rene Kommer (r.kommer.extern@micromata.de)
  *
  */
@@ -99,7 +100,7 @@ public class PfHistoryMasterDO extends HistoryMasterBaseDO<PfHistoryMasterDO, Lo
 
   /**
    * Used to mark for full text search
-   * 
+   *
    * @return
    */
   @Transient
@@ -113,6 +114,7 @@ public class PfHistoryMasterDO extends HistoryMasterBaseDO<PfHistoryMasterDO, Lo
       fetch = FetchType.EAGER)
   @MapKey(name = "propertyName")
   @Override
+  @JsonBackReference
   public Map<String, JpaTabAttrBaseDO<PfHistoryMasterDO, Long>> getAttributes()
   {
     return super.getAttributes();

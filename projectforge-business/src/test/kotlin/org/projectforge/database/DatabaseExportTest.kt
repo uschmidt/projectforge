@@ -28,23 +28,30 @@ import org.projectforge.business.fibu.AuftragDO
 import org.projectforge.business.fibu.AuftragDao
 import org.projectforge.business.fibu.AuftragsPositionDO
 import org.projectforge.business.fibu.AuftragsPositionsStatus
+import org.projectforge.framework.persistence.history.entities.PfHistoryAttrDO
+import org.projectforge.framework.persistence.history.entities.PfHistoryAttrDataDO
+import org.projectforge.framework.persistence.history.entities.PfHistoryMasterDO
 import org.projectforge.framework.persistence.user.entities.PFUserDO
 import org.projectforge.test.AbstractTestBase
 import org.springframework.beans.factory.annotation.Autowired
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.io.PrintWriter
-import java.io.StringWriter
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
+import javax.persistence.metamodel.EntityType
 
 class DatabaseExportTest : AbstractTestBase() {
     @Autowired
     private lateinit var auftragDao: AuftragDao
 
     @Autowired
-    private lateinit var databaseExport: DatabaseExport
+    private lateinit var databaseJsonExport: DatabaseJsonExport
+
+    @Autowired
+    private lateinit var databaseJsonImport: DatabaseJsonImport
 
     @Test
     fun exportTest() {
@@ -60,8 +67,35 @@ class DatabaseExportTest : AbstractTestBase() {
 
         val file = File("target/test-export.zip")
         ZipOutputStream(FileOutputStream(file)).use { zipOut ->
-            databaseExport.export(file.name, zipOut, PFUserDO::class.java)
-            databaseExport.export(file.name, zipOut, AuftragDO::class.java)
+            databaseJsonExport.exportEntity(file.name, zipOut, PFUserDO::class.java)
+            databaseJsonExport.exportEntity(file.name, zipOut, AuftragDO::class.java)
+        }
+    }
+
+    @Test
+    fun exportAllTest() {
+        val file = File("target/test-export-all.zip")
+        ZipOutputStream(FileOutputStream(file)).use { zipOut ->
+            databaseJsonExport.export(file.name, zipOut, PfHistoryAttrDO::class.java, PFUserDO::class.java)
+        }
+
+        ZipInputStream(FileInputStream(file)).use { zipIn ->
+            databaseJsonImport.import(zipIn, object : DatabaseImporter() {
+                override fun accept(entityType: EntityType<*>): Boolean {
+                    log.info("Processing ${entityType.name}...")
+                    if (entityType.javaType == PfHistoryAttrDataDO::class.java) {
+                        return false
+                    }
+                    if (entityType.javaType == PfHistoryMasterDO::class.java) {
+                        return false
+                    }
+                    return true
+                }
+
+                override fun import(list: List<out Any>, entityType: EntityType<*>) {
+                    log.info("Importing ${list.size} items of type ${entityType.name}...")
+                }
+            })
         }
     }
 }
