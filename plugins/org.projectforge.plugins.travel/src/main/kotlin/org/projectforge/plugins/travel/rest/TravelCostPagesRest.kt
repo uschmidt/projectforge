@@ -71,12 +71,12 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
     }
 
     /**
-     * Initializes new TravelKosts for adding.
+     * Initializes new TravelCosts for adding.
      */
     override fun newBaseDO(request: HttpServletRequest?): TravelCostDO {
-        val travelKost = super.newBaseDO(request)
-        travelKost.user = ThreadLocalUserContext.getUser()
-        return travelKost
+        val travelCost = super.newBaseDO(request)
+        travelCost.user = ThreadLocalUserContext.getUser()
+        return travelCost
     }
 
     /**
@@ -85,7 +85,8 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
     override fun createListLayout(): UILayout {
         val layout = super.createListLayout()
                 .add(UITable.createUIResultSetTable()
-                        .add(lc, "user.name"))
+                        .add(UITableColumn("user.name", "plugins.travel.entry.user"))
+                        .add(lc, "beginOfTravel", "endOfTravel", "destination", "kilometers"))
         return LayoutUtils.processListPage(layout, this)
     }
 
