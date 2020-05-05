@@ -30,6 +30,7 @@ import org.projectforge.business.orga.ContractDO
 import org.projectforge.business.orga.ContractDao
 import org.projectforge.framework.i18n.translate
 import org.projectforge.framework.jcr.AttachmentsService
+import org.projectforge.framework.json.JacksonBaseConfiguration
 import org.projectforge.framework.persistence.api.MagicFilter
 import org.projectforge.framework.persistence.api.QueryFilter
 import org.projectforge.framework.persistence.api.impl.CustomResultFilter
@@ -68,7 +69,7 @@ class ContractPagesRest
          * Enable attachments for this entity.
          */
         enableJcr()
-        JacksonConfiguration.registerAllowedUnknownProperties(Contract::class.java, "statusAsString")
+        JacksonBaseConfiguration.registerAllowedUnknownProperties(Contract::class.java, "statusAsString")
     }
 
     /**

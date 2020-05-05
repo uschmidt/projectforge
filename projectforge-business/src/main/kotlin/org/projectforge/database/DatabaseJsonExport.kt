@@ -25,7 +25,7 @@ package org.projectforge.database
 
 import mu.KotlinLogging
 import org.hibernate.Session
-import org.projectforge.framework.ToStringUtil
+import org.projectforge.framework.json.JacksonBaseConfiguration
 import org.springframework.stereotype.Service
 import java.io.PrintWriter
 import java.util.zip.ZipEntry
@@ -44,6 +44,8 @@ private val log = KotlinLogging.logger {}
 open class DatabaseJsonExport {
     @PersistenceContext
     private lateinit var em: EntityManager
+
+    private val objectMapper = JacksonBaseConfiguration().objectMapper()
 
     open fun export(archiveName: String, zipOut: ZipOutputStream, vararg skipEntities: Class<out Any>) {
         val entityManager = em.entityManagerFactory.createEntityManager()
@@ -84,7 +86,7 @@ open class DatabaseJsonExport {
             } else {
                 writer.println(",")
             }
-            writer.print(ToStringUtil.toJsonString(obj))
+            objectMapper.writeValue(writer, obj)
         }
         writer.println()
         writer.print("]")

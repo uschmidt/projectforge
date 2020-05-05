@@ -26,6 +26,7 @@ package org.projectforge.rest.fibu
 import org.projectforge.business.fibu.KundeDO
 import org.projectforge.business.fibu.KundeDao
 import org.projectforge.framework.i18n.translate
+import org.projectforge.framework.json.JacksonBaseConfiguration
 import org.projectforge.rest.config.JacksonConfiguration
 import org.projectforge.rest.config.Rest
 import org.projectforge.rest.core.AbstractDTOPagesRest
@@ -48,7 +49,7 @@ class CustomerPagesRest
 
     @PostConstruct
     private fun postConstruct() {
-        JacksonConfiguration.registerAllowedUnknownProperties(Customer::class.java, "statusAsString")
+        JacksonBaseConfiguration.registerAllowedUnknownProperties(Customer::class.java, "statusAsString")
     }
 
 

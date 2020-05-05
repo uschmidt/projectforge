@@ -29,6 +29,7 @@ import org.apache.commons.io.FilenameUtils
 import org.hibernate.Session
 import org.hsqldb.types.Charset
 import org.projectforge.framework.ToStringUtil
+import org.projectforge.framework.json.JacksonBaseConfiguration
 import org.projectforge.framework.persistence.user.entities.PFUserDO
 import org.springframework.stereotype.Service
 import java.nio.charset.StandardCharsets
@@ -48,6 +49,8 @@ open class DatabaseJsonImport {
     @PersistenceContext
     private lateinit var em: EntityManager
 
+    private val objectMapper = JacksonBaseConfiguration().objectMapper()
+
     open fun import(zipIn: ZipInputStream, importer: DatabaseImporter) {
         val entityManager = em.entityManagerFactory.createEntityManager()
         val sessionFactory = entityManager.unwrap(Session::class.java).sessionFactory
@@ -63,12 +66,11 @@ open class DatabaseJsonImport {
             val entityType = entities.find { it.name == fileName } ?: continue
             if (importer.accept(entityType)) {
                 val cls = entityType.javaType
-               /* val mapper = JacksonCon.getObjectMapper(cls, null, null)
                 val jsonArray = zipIn.readBytes().toString(StandardCharsets.UTF_8)
-                val array = mapper.readerFor(cls).readValues<Any>(jsonArray)
+                val array = objectMapper.readerFor(cls).readValues<Any>(jsonArray)
                 array.forEach {
                     println(ToStringUtil.toJsonString(it))
-                }*/
+                }
             }
             zipEntry = zipIn.nextEntry
         }
