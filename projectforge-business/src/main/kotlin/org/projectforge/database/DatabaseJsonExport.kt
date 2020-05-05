@@ -23,9 +23,11 @@
 
 package org.projectforge.database
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import mu.KotlinLogging
 import org.hibernate.Session
 import org.projectforge.framework.json.JacksonBaseConfiguration
+import org.projectforge.framework.persistence.user.entities.TenantDO
 import org.springframework.stereotype.Service
 import java.io.PrintWriter
 import java.util.zip.ZipEntry
@@ -45,7 +47,13 @@ open class DatabaseJsonExport {
     @PersistenceContext
     private lateinit var em: EntityManager
 
-    private val objectMapper = JacksonBaseConfiguration().objectMapper()
+    private val objectMapper: ObjectMapper
+
+    init {
+        val configuration = JacksonBaseConfiguration()
+        objectMapper = configuration.objectMapper()
+        configuration.addSerializer(TenantDO::class.java, TenantDOSerializer())
+    }
 
     open fun export(archiveName: String, zipOut: ZipOutputStream, vararg skipEntities: Class<out Any>) {
         val entityManager = em.entityManagerFactory.createEntityManager()
@@ -86,7 +94,7 @@ open class DatabaseJsonExport {
             } else {
                 writer.println(",")
             }
-            objectMapper.writeValue(writer, obj)
+            writer.println(objectMapper.writeValueAsString(obj))
         }
         writer.println()
         writer.print("]")

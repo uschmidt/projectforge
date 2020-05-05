@@ -134,12 +134,23 @@ open class JacksonBaseConfiguration {
         return registeredDelegatingDeserializers
     }
 
+    fun <T> addSerializer(cls: Class<T>, serializer: JsonSerializer<T>) {
+        objectMapper() // Force initialization.
+        module?.addSerializer(cls, serializer)
+    }
+
+    fun <T> addDeserializer(cls: Class<T>, deserializer: JsonDeserializer<T>) {
+        objectMapper() // Force initialization.
+        module?.addDeserializer(cls, deserializer)
+    }
+
     open fun objectMapper(): ObjectMapper {
         objectMapper?.let { return it }
         val mapper = ObjectMapper()
         mapper.registerModule(KotlinModule())
         mapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true)
         mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false)
+        mapper.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false)
         mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
         mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
@@ -197,7 +208,8 @@ open class JacksonBaseConfiguration {
             module.addDeserializer(it.first, it.second)
         }
         mapper.registerModule(module)
-        objectMapper = mapper
+        this.objectMapper = mapper
+        this.module = module
         return mapper
     }
 }

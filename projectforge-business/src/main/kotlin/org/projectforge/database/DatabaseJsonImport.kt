@@ -67,9 +67,13 @@ open class DatabaseJsonImport {
             if (importer.accept(entityType)) {
                 val cls = entityType.javaType
                 val jsonArray = zipIn.readBytes().toString(StandardCharsets.UTF_8)
-                val array = objectMapper.readerFor(cls).readValues<Any>(jsonArray)
-                array.forEach {
-                    println(ToStringUtil.toJsonString(it))
+                try {
+                    val array = objectMapper.readerFor(cls).readValues<Any>(jsonArray)
+                    array.forEach {
+                        println(ToStringUtil.toJsonString(it))
+                    }
+                } catch(ex: Exception) {
+                    log.error { "Error while importing array of type ${cls.simpleName}: ${ex.message}."  }
                 }
             }
             zipEntry = zipIn.nextEntry
