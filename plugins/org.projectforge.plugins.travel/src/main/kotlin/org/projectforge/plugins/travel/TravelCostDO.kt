@@ -47,6 +47,7 @@ import javax.persistence.*
 @Table(name = "T_PLUGIN_TRAVEL", indexes = [javax.persistence.Index(name = "idx_fk_t_plugin_travel_kost2_id", columnList = "kost2_id"), javax.persistence.Index(name = "idx_fk_t_plugin_travel_user_id", columnList = "user_id")])
 open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo {
 
+    // TODO: Anke requires the staffnumber, which is part of EmployeeDO
     @PropertyInfo(i18nKey = "plugins.travel.entry.user")
     @get:JoinColumn(name = "user_id", nullable = false)
     open var user: PFUserDO? = null
@@ -71,6 +72,7 @@ open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo 
     @get:JoinColumn(name = "kost2_id", nullable = true)
     open var kost2: Kost2DO? = null
 
+    // TODO: Must be PFDateTime, Anke requires exact times
     @PropertyInfo(i18nKey = "plugins.travel.entry.beginOfTravel")
     @get:Column(name = "begin_of_travel")
     open var beginOfTravel: LocalDate? = null
@@ -79,6 +81,7 @@ open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo 
     @get:Column(name = "end_of_travel")
     open var endOfTravel: LocalDate? = null
 
+    // TODO: 1 Entry per day
     //open var catering: MutableList<CateringDay>? = null
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption.hotel")
