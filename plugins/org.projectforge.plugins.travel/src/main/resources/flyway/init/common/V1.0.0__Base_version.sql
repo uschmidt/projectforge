@@ -1,6 +1,8 @@
 -- This is the initial script for setting up the data base for this plugin.
 -- For specific data base dialects, place sql scripts in the sub directory init/{vendor}
 
+-- TODO: Change version number
+
 CREATE TABLE t_plugin_travel (
   pk               INTEGER NOT NULL,
   created          TIMESTAMP WITHOUT TIME ZONE,
