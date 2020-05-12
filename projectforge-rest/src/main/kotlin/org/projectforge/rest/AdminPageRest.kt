@@ -6,6 +6,7 @@ import mu.KotlinLogging
 import org.apache.commons.collections.CollectionUtils
 import org.projectforge.ProjectForgeVersion
 import org.projectforge.SystemAlertMessage
+import org.projectforge.SystemStatus
 import org.projectforge.business.book.BookDO
 import org.projectforge.business.book.BookDao
 import org.projectforge.business.book.BookStatus
@@ -37,6 +38,7 @@ import org.projectforge.rest.dto.FormLayoutData
 import org.projectforge.rest.dto.PostData
 import org.projectforge.ui.*
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -212,8 +214,7 @@ class AdminPageRest : AbstractDynamicPageRest() {
             layout.add(mebMenu, menuIndex++)
         }
 
-        // TODO: Check for developmentMode
-        if(false){
+        if(SystemStatus.isDevelopmentMode()){
             val developmentMenu = MenuItem("admin.development", i18nKey = "")
 
             developmentMenu.add(MenuItem("admin.checkI18nProperties",
@@ -255,14 +256,17 @@ class AdminPageRest : AbstractDynamicPageRest() {
     }
 
     @GetMapping("updateUserPrefs")
-    fun updateUserPrefs(){
+    fun updateUserPrefs(): ResponseEntity<Any> {
         checkAccess()
         log.info("Administration: updateUserPrefs")
         val output = userXmlPreferencesMigrationDao!!.migrateAllUserPrefs()
         val content = output.toByteArray()
         val ts = DateHelper.getTimestampAsFilenameSuffix(Date())
         val filename = "projectforge_updateUserPrefs_$ts.txt"
-        //DownloadUtils.setDownloadTarget(content, filename)
+        return ResponseEntity.ok()
+                .contentType(org.springframework.http.MediaType.parseMediaType("application/octet-stream"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=$filename")
+                .body(content)
     }
 
     @GetMapping("createMissingDatabaseIndices")
@@ -277,7 +281,7 @@ class AdminPageRest : AbstractDynamicPageRest() {
     }
 
     @GetMapping("dump")
-    fun dump(){
+    fun dump(): ResponseEntity<Any> {
         log.info("Administration: Database dump.")
         checkAccess()
         val ts = DateHelper.getTimestampAsFilenameSuffix(Date())
@@ -289,25 +293,36 @@ class AdminPageRest : AbstractDynamicPageRest() {
             throw RuntimeIOException(ex)
         }
 
-        //DownloadUtils.setDownloadTarget(out.toByteArray(), filename)
+        return ResponseEntity.ok()
+                .contentType(org.springframework.http.MediaType.parseMediaType("application/octet-stream"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=$filename")
+                .body(out.toByteArray())
     }
 
     @GetMapping("schemaExport")
-    fun schemaExport(){
+    fun schemaExport(): ResponseEntity<Any> {
         log.info("Administration: schema export.")
         checkAccess()
         val result = systemService!!.exportSchema()
         val filename = "projectforge_schema" + DateHelper.getDateAsFilenameSuffix(Date()) + ".sql"
-        //DownloadUtils.setDownloadTarget(result.toByteArray(), filename)
+
+        return ResponseEntity.ok()
+                .contentType(org.springframework.http.MediaType.parseMediaType("application/octet-stream"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=$filename")
+                .body(result.toByteArray())
     }
 
     @GetMapping("checkSystemIntegrity")
-    fun checkSystemIntegrity(){
+    fun checkSystemIntegrity(): ResponseEntity<Any> {
         log.info("Administration: check integrity of tasks.")
         checkAccess()
         val result = systemService!!.checkSystemIntegrity()
         val filename = "projectforge_check_report" + DateHelper.getDateAsFilenameSuffix(Date()) + ".txt"
-        //DownloadUtils.setDownloadTarget(result.toByteArray(), filename)
+
+        return ResponseEntity.ok()
+                .contentType(org.springframework.http.MediaType.parseMediaType("application/octet-stream"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=$filename")
+                .body(result.toByteArray())
     }
 
     @GetMapping("refreshCaches")
@@ -343,13 +358,16 @@ class AdminPageRest : AbstractDynamicPageRest() {
     }
 
     @GetMapping("exportConfiguration")
-    fun exportConfiguration() {
+    fun exportConfiguration(): ResponseEntity<Any> {
         log.info("Administration: export configuration file config.xml.")
         checkAccess()
         val xml = ConfigXml.getInstance().exportConfiguration()
         val filename = "config-" + DateHelper.getDateAsFilenameSuffix(Date()) + ".xml"
-        //DownloadUtils.setUTF8CharacterEncoding(getResponse())
-        //DownloadUtils.setDownloadTarget(xml.toByteArray(), filename)
+
+        return ResponseEntity.ok()
+                .contentType(org.springframework.http.MediaType.parseMediaType("application/octet-stream"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=$filename")
+                .body(xml.toByteArray())
     }
 
     @GetMapping("checkUnseenMebMails")
@@ -375,7 +393,7 @@ class AdminPageRest : AbstractDynamicPageRest() {
     }
 
     @GetMapping("checkI18nProperties")
-    fun checkI18nProperties() {
+    fun checkI18nProperties(): ResponseEntity<Any> {
         log.info("Administration: check i18n properties.")
         checkAccess()
         val buf = StringBuilder()
@@ -435,7 +453,11 @@ class AdminPageRest : AbstractDynamicPageRest() {
         }
         val result = buf.toString()
         val filename = "projectforge_i18n_check" + DateHelper.getDateAsFilenameSuffix(Date()) + ".txt"
-        //DownloadUtils.setDownloadTarget(result.toByteArray(), filename)
+
+        return ResponseEntity.ok()
+                .contentType(org.springframework.http.MediaType.parseMediaType("application/octet-stream"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=$filename")
+                .body(result.toByteArray())
     }
 
     private fun load(warnMessages: StringBuilder, locale: String): SortedMap<String, String> {
