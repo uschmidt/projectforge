@@ -26,22 +26,21 @@ class ConfigurationPagesRest: AbstractDTOPagesRest<ConfigurationDO, Configuratio
     override fun transformFromDB(obj: ConfigurationDO, editMode: Boolean): Configuration {
         val configuration = Configuration()
         configuration.copyFrom(obj)
-        configuration.descriptionI18nKey = obj.descriptionI18nKey
-        configuration.description = translate(obj.descriptionI18nKey)
         return configuration
     }
 
     override fun createListLayout(): UILayout {
         val layout = super.createListLayout()
                 .add(UITable.createUIResultSetTable()
-                        .add(lc, "parameter", "stringValue")
+                        .add(lc, "parameter")
+                        .add(UITableColumn("value", title = "administration.configuration.value"))
                         .add(UITableColumn("description", title = "description")))
         return LayoutUtils.processListPage(layout, this)
     }
 
     override fun createEditLayout(dto: Configuration, userAccess: UILayout.UserAccess): UILayout {
         val layout = super.createEditLayout(dto, userAccess)
-                .add(lc, "stringValue")
+                .add(lc, "value")
         return LayoutUtils.processEditPage(layout, dto, this)
     }
 
