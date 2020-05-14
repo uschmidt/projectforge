@@ -24,10 +24,13 @@
 package org.projectforge.rest
 
 import org.projectforge.Const
+import org.projectforge.business.group.service.GroupService
 import org.projectforge.business.user.UserDao
+import org.projectforge.business.user.UserRightValue
 import org.projectforge.framework.configuration.Configuration
 import org.projectforge.framework.i18n.translate
 import org.projectforge.framework.persistence.api.BaseSearchFilter
+import org.projectforge.framework.persistence.api.UserRightService
 import org.projectforge.framework.persistence.user.entities.PFUserDO
 import org.projectforge.framework.time.TimeNotation
 import org.projectforge.rest.config.Rest
@@ -47,12 +50,23 @@ import javax.servlet.http.HttpServletRequest
 class UserPagesRest
     : AbstractDTOPagesRest<PFUserDO, User, UserDao>(UserDao::class.java, "user.title") {
 
+    @Autowired
+    private val groupService: GroupService? = null
+
+    @Autowired
+    private lateinit var userDao: UserDao
+
+    @Autowired
+    private val userRightService: UserRightService? = null
+
     override fun transformFromDB(obj: PFUserDO, editMode: Boolean): User {
         val user = User()
         val copy = PFUserDO.createCopyWithoutSecretFields(obj)
         if (copy != null) {
             user.copyFrom(copy)
         }
+        user.groups = groupService?.getGroupnames(obj.id)
+        user.rights = getRightsAsString(obj.id)
         return user
     }
 
@@ -62,8 +76,8 @@ class UserPagesRest
         return userDO
     }
 
-    @Autowired
-    private lateinit var userDao: UserDao
+
+    override val classicsLinkListUrl: String? = "wa/userList"
 
     /**
      * LAYOUT List page
@@ -71,8 +85,10 @@ class UserPagesRest
     override fun createListLayout(): UILayout {
         val layout = super.createListLayout()
                 .add(UITable.createUIResultSetTable()
-                        .add(lc, "username", "deactivated", "lastname", "firstname", "personalPhoneIdentifiers",
-                                "description", "rights", "ldapValues"))
+                        .add(lc, "username", "deactivated", "lastname", "firstname", "personalPhoneIdentifiers", "description")
+                        .add(UITableColumn("groups", title = "user.assignedGroups"))
+                        .add(UITableColumn("rights", title = "access.rights"))
+                        .add(lc, "ldapValues"))
         return LayoutUtils.processListPage(layout, this)
     }
 
@@ -116,6 +132,32 @@ class UserPagesRest
             return list.filter { !it.deactivated } // Remove deactivated users when returning all.
         }
         return list
+    }
+
+    fun getRightsAsString(srcId: Int): String {
+        val rights = userDao.getUserRights(srcId)
+        val buf = StringBuffer()
+        if (rights != null) {
+            var first = true
+            for (right in rights) {
+                if (right.value != null && right.value != UserRightValue.FALSE) {
+                    if (first) {
+                        first = false
+                    } else {
+                        buf.append(", ")
+                    }
+                    val userRightId = userRightService?.getRightId(right.rightIdString)
+                    buf.append(translate(userRightId?.i18nKey))
+                    when {
+                        right.value == UserRightValue.READONLY -> buf.append(" (ro)")
+                        right.value == UserRightValue.PARTLYREADWRITE -> buf.append(" (prw)")
+                        right.value == UserRightValue.READWRITE -> buf.append(" (rw)")
+                    }
+                }
+            }
+        }
+
+        return buf.toString()
     }
 
     companion object {
