@@ -30,11 +30,21 @@ import org.projectforge.framework.persistence.user.entities.PFUserDO
 class Group(id: Int? = null,
             displayName: String? = null,
             var name: String? = null,
-            var assignedUsers: MutableSet<PFUserDO>? = null
+            var assignedUsers: MutableSet<PFUserDO>? = LinkedHashSet(),
+            var assignedUsersString: String? = "",
+            var organization: String? = null,
+            var description: String? = null
 ) : BaseDTODisplayObject<GroupDO>(id = id, displayName = displayName) {
+
     override fun copyFromMinimal(src: GroupDO) {
         super.copyFromMinimal(src)
         name = src.name
+    }
+
+    fun setUsersString() {
+        assignedUsers?.forEach {
+            assignedUsersString += it.username + ", "
+        }
     }
 
     companion object {
