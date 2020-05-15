@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("${Rest.URL}/visitorBook")
+@RequestMapping("${Rest.URL}/visitorbook")
 class VisitorbookPagesRest : AbstractDTOPagesRest<VisitorbookDO, Visitorbook, VisitorbookDao>(VisitorbookDao::class.java, "orga.visitorbook.title") {
 
     @Autowired
