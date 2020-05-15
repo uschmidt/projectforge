@@ -31,11 +31,12 @@ class ConfigurationPagesRest: AbstractDTOPagesRest<ConfigurationDO, Configuratio
 
     override val classicsLinkListUrl: String? = "wa/configuration"
 
+    // TODO: StringValue is not correct, it depends on the configurationType
     override fun createListLayout(): UILayout {
         val layout = super.createListLayout()
                 .add(UITable.createUIResultSetTable()
                         .add(lc, "parameter")
-                        .add(UITableColumn("value", title = "administration.configuration.value"))
+                        .add(UITableColumn("stringValue", title = "administration.configuration.value"))
                         .add(UITableColumn("description", title = "description")))
         return LayoutUtils.processListPage(layout, this)
     }
@@ -43,7 +44,7 @@ class ConfigurationPagesRest: AbstractDTOPagesRest<ConfigurationDO, Configuratio
     // TODO: How to prevent adding more configs?
     override fun createEditLayout(dto: Configuration, userAccess: UILayout.UserAccess): UILayout {
         val layout = super.createEditLayout(dto, userAccess)
-                .add(lc, "value")
+                .add(lc, "stringValue")
         return LayoutUtils.processEditPage(layout, dto, this)
     }
 
