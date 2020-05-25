@@ -312,7 +312,7 @@ open class ConfigurationDO : DefaultBaseDO {
                 this.stringValue = null
                 this.intValue = null
             }
-            else -> throw UnsupportedOperationException("Unkown type: $type")
+            else -> throw UnsupportedOperationException("Unknown type: $type")
         }
     }
 
