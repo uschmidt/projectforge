@@ -25,6 +25,7 @@ package org.projectforge.rest
 
 import org.projectforge.business.address.AddressbookDO
 import org.projectforge.business.address.AddressbookDao
+import org.projectforge.business.address.AddressbookRight
 import org.projectforge.business.group.service.GroupService
 import org.projectforge.business.user.service.UserService
 import org.projectforge.rest.config.Rest
@@ -43,6 +44,7 @@ class AddressBookPagesRest : AbstractDTOPagesRest<AddressbookDO, Addressbook, Ad
         AddressbookDao::class.java,
         "addressbook.title"
 ) {
+
     @Autowired
     private lateinit var groupService: GroupService
 
@@ -72,12 +74,15 @@ class AddressBookPagesRest : AbstractDTOPagesRest<AddressbookDO, Addressbook, Ad
     /**
      * LAYOUT List page
      */
+    // TODO: What should be displayed in access column?
     override fun createListLayout(): UILayout {
         val layout = super.createListLayout()
                 .add(UITable.createUIResultSetTable()
-                        .add(lc, "title", "description", "owner", "accessright", "last_update"))
+                        .add(lc, "title", "description", "owner", "access", "lastUpdate"))
         layout.getTableColumnById("owner").formatter = Formatter.USER
-        layout.getTableColumnById("last_update").formatter = Formatter.TIMESTAMP_MINUTES
+        layout.getTableColumnById("lastUpdate").formatter = Formatter.TIMESTAMP_MINUTES
+
+
         return LayoutUtils.processListPage(layout, this)
     }
 

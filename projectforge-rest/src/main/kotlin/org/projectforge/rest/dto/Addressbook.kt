@@ -33,7 +33,8 @@ class Addressbook(id: Int? = null,
                   var fullAccessGroups: List<Group>? = null,
                   var fullAccessUsers: List<User>? = null,
                   var readonlyAccessGroups: List<Group>? = null,
-                  var readonlyAccessUsers: List<User>? = null
+                  var readonlyAccessUsers: List<User>? = null,
+                  var accessDisplay: String? = ""
 ) : BaseDTODisplayObject<AddressbookDO>(id, displayName = displayName) {
 
     // The user and group ids are stored as csv list of integers in the data base.
