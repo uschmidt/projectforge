@@ -27,6 +27,7 @@ import org.projectforge.business.fibu.kost.Kost2DO
 import org.projectforge.business.fibu.kost.Kost2Dao
 import org.projectforge.business.fibu.kost.KostentraegerStatus
 import org.projectforge.framework.configuration.ApplicationContextProvider
+import java.math.BigDecimal
 
 class Kost2(
         id: Int? = null,
@@ -37,6 +38,8 @@ class Kost2(
         var endziffer: Int = 0,
         var kostentraegerStatus: KostentraegerStatus? = null,
         var description: String? = null,
+        var workFraction: BigDecimal? = null,
+        var comment: String? = null,
         var formattedNumber: String? = null,
         var project: Project? = null,
         var kost2Art: Kost2Art? = null
@@ -56,6 +59,7 @@ class Kost2(
         teilbereich = src.teilbereich
         endziffer = src.kost2Art?.id ?: 0
         description = src.description
+        comment = src.comment
         formattedNumber = src.formattedNumber
         this.project = src.projekt?.let {
             val project = Project()
