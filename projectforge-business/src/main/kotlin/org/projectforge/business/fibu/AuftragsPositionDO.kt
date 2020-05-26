@@ -79,7 +79,7 @@ open class AuftragsPositionDO : DefaultBaseDO(), DisplayNameCapable {
     @get:Column(name = "paymentType", length = 30)
     open var paymentType: AuftragsPositionsPaymentType? = null
 
-    @PropertyInfo(i18nKey = "fibu.auftrag.position.status")
+    @PropertyInfo(i18nKey = "status")
     @get:Enumerated(EnumType.STRING)
     @get:Column(name = "status", length = 30)
     open var status: AuftragsPositionsStatus? = null
