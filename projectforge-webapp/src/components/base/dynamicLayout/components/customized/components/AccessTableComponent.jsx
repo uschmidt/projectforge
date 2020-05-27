@@ -1,10 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { Button } from 'reactstrap';
 import { DynamicLayoutContext } from '../../../context';
-import {Button} from "reactstrap";
 
-function AccessTableComponent({user}) {
-    const { data, callAction} = React.useContext(DynamicLayoutContext);
+function AccessTableComponent() {
+    const { data, callAction } = React.useContext(DynamicLayoutContext);
 
     const clear = () => callAction({
         responseAction: {
@@ -46,150 +46,214 @@ function AccessTableComponent({user}) {
             <React.Fragment>
                 <table>
                     <tbody>
-                    <tr>
-                        <th>Access management</th>
-                        <td>
-                            <div className="btn-group" data-toggle="buttons">
+                        <tr>
+                            <th>Access management</th>
+                            <td>
+                                <div className="btn-group" data-toggle="buttons">
 
-                                <label className="btn btn-xs btn-primary">
-                                    <input type="checkbox" id="id10"/>
-                                    Select
-                                </label>
+                                    <label className="btn btn-xs btn-primary">
+                                        <input
+                                            type="checkbox"
+                                            id="id10"
+                                            defaultChecked={data.accessEntries[3].accessSelect}
+                                        />
+                                        Select
+                                    </label>
 
-                                <label className="btn btn-xs btn-primary">
-                                    <input type="checkbox" id="id11"/>
-                                    Insert
-                                </label>
+                                    <label className="btn btn-xs btn-primary">
+                                        <input
+                                            type="checkbox"
+                                            id="id11"
+                                            defaultChecked={data.accessEntries[3].accessInsert}
+                                        />
+                                        Insert
+                                    </label>
 
-                                <label className="btn btn-xs btn-primary">
-                                    <input type="checkbox" id="id12"/>
-                                    Update
-                                </label>
+                                    <label className="btn btn-xs btn-primary">
+                                        <input
+                                            type="checkbox"
+                                            id="id12"
+                                            defaultChecked={data.accessEntries[3].accessUpdate}
+                                        />
+                                        Update
+                                    </label>
 
-                                <label className="btn btn-xs btn-primary">
-                                    <input type="checkbox" id="id13"/>
-                                    Delete
-                                </label>
+                                    <label className="btn btn-xs btn-primary">
+                                        <input
+                                            type="checkbox"
+                                            id="id13"
+                                            defaultChecked={data.accessEntries[3].accessDelete}
+                                        />
+                                        Delete
+                                    </label>
 
-                            </div>
-                        </td>
-                    </tr>
+                                </div>
+                            </td>
+                        </tr>
 
-                    <tr>
-                        <th>Structure elements</th>
-                        <td>
-                            <div className="btn-group" data-toggle="buttons">
+                        <tr>
+                            <th>Structure elements</th>
+                            <td>
+                                <div className="btn-group" data-toggle="buttons">
 
-                                <label className="btn btn-xs btn-primary">
-                                    <input type="checkbox" id="id14"/>
-                                    Select
-                                </label>
+                                    <label className="btn btn-xs btn-primary">
+                                        <input
+                                            type="checkbox"
+                                            id="id14"
+                                            defaultChecked={data.accessEntries[1].accessSelect}
+                                        />
+                                        Select
+                                    </label>
 
-                                <label className="btn btn-xs btn-primary">
-                                    <input type="checkbox" id="id15"/>
-                                    Insert
-                                </label>
+                                    <label className="btn btn-xs btn-primary">
+                                        <input
+                                            type="checkbox"
+                                            id="id15"
+                                            defaultChecked={data.accessEntries[1].accessInsert}
+                                        />
+                                        Insert
+                                    </label>
 
-                                <label className="btn btn-xs btn-primary">
-                                    <input type="checkbox" id="id16"/>
-                                    Update
-                                </label>
+                                    <label className="btn btn-xs btn-primary">
+                                        <input
+                                            type="checkbox"
+                                            id="id16"
+                                            defaultChecked={data.accessEntries[1].accessUpdate}
+                                        />
+                                        Update
+                                    </label>
 
-                                <label className="btn btn-xs btn-primary">
-                                    <input type="checkbox" id="id17"/>
-                                    Delete
-                                </label>
+                                    <label className="btn btn-xs btn-primary">
+                                        <input
+                                            type="checkbox"
+                                            id="id17"
+                                            defaultChecked={data.accessEntries[1].accessDelete}
+                                        />
+                                        Delete
+                                    </label>
 
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Time sheets</th>
-                        <td>
-                            <div className="btn-group" data-toggle="buttons">
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Time sheets</th>
+                            <td>
+                                <div className="btn-group" data-toggle="buttons">
 
-                                <label className="btn btn-xs btn-primary">
-                                    <input type="checkbox" id="id18"/>
-                                    Select
-                                </label>
+                                    <label className="btn btn-xs btn-primary">
+                                        <input
+                                            type="checkbox"
+                                            id="id18"
+                                            defaultChecked={data.accessEntries[0].accessSelect}
+                                        />
+                                        Select
+                                    </label>
 
-                                <label className="btn btn-xs btn-primary">
-                                    <input type="checkbox" id="id19"/>
-                                    Insert
-                                </label>
+                                    <label className="btn btn-xs btn-primary">
+                                        <input
+                                            type="checkbox"
+                                            id="id19"
+                                            defaultChecked={data.accessEntries[0].accessInsert}
+                                        />
+                                        Insert
+                                    </label>
 
-                                <label className="btn btn-xs btn-primary">
-                                    <input type="checkbox" id="id1a"/>
-                                    Update
-                                </label>
+                                    <label className="btn btn-xs btn-primary">
+                                        <input
+                                            type="checkbox"
+                                            id="id1a"
+                                            defaultChecked={data.accessEntries[0].accessUpdate}
+                                        />
+                                        Update
+                                    </label>
 
-                                <label className="btn btn-xs btn-primary">
-                                    <input type="checkbox" id="id1b"/>
-                                    Delete
-                                </label>
+                                    <label className="btn btn-xs btn-primary">
+                                        <input
+                                            type="checkbox"
+                                            id="id1b"
+                                            defaultChecked={data.accessEntries[0].accessDelete}
+                                        />
+                                        Delete
+                                    </label>
 
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Own time sheets</th>
-                        <td>
-                            <div className="btn-group" data-toggle="buttons">
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Own time sheets</th>
+                            <td>
+                                <div className="btn-group" data-toggle="buttons">
 
-                                <label className="btn btn-xs btn-primary">
-                                    <input type="checkbox" id="id1c"/>
-                                    Select
-                                </label>
+                                    <label className="btn btn-xs btn-primary">
+                                        <input
+                                            type="checkbox"
+                                            id="id1c"
+                                            defaultChecked={data.accessEntries[2].accessSelect}
+                                        />
+                                        Select
+                                    </label>
 
-                                <label className="btn btn-xs btn-primary">
-                                    <input type="checkbox" id="id1d"/>
-                                    Insert
-                                </label>
+                                    <label className="btn btn-xs btn-primary">
+                                        <input
+                                            type="checkbox"
+                                            id="id1d"
+                                            defaultChecked={data.accessEntries[2].accessInsert}
+                                        />
+                                        Insert
+                                    </label>
 
-                                <label className="btn btn-xs btn-primary">
-                                    <input type="checkbox" id="id1e"/>
-                                    Update
-                                </label>
+                                    <label className="btn btn-xs btn-primary">
+                                        <input
+                                            type="checkbox"
+                                            id="id1e"
+                                            defaultChecked={data.accessEntries[2].accessUpdate}
+                                        />
+                                        Update
+                                    </label>
 
-                                <label className="btn btn-xs btn-primary">
-                                    <input type="checkbox" id="id1f"/>
-                                    Delete
-                                </label>
+                                    <label className="btn btn-xs btn-primary">
+                                        <input
+                                            type="checkbox"
+                                            id="id1f"
+                                            defaultChecked={data.accessEntries[2].accessDelete}
+                                        />
+                                        Delete
+                                    </label>
 
-                            </div>
-                        </td>
-                    </tr>
+                                </div>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
 
-                <br/>
+                <br />
 
 
                 <div>
                     Access Templates
 
-                    <Button id={"quickselect_clear"} onClick={clear}>
+                    <Button id="quickselect_clear" onClick={clear}>
                         Clear
                     </Button>
 
-                    <Button id={"quickselect_guest"}  onClick={guest}>
+                    <Button id="quickselect_guest" onClick={guest}>
                         Guest
                     </Button>
 
-                    <Button id={"quickselect_employee"}  onClick={employee}>
+                    <Button id="quickselect_employee" onClick={employee}>
                         Employee
                     </Button>
 
-                    <Button id={"quickselect_leader"}  onClick={leader}>
+                    <Button id="quickselect_leader" onClick={leader}>
                         Leader
                     </Button>
 
-                    <Button id={"quickselect_administrator"}  onClick={administrator}>
+                    <Button id="quickselect_administrator" onClick={administrator}>
                         Administrator
                     </Button>
                 </div>
             </React.Fragment>
-        )
+        ),
     );
 }
 
