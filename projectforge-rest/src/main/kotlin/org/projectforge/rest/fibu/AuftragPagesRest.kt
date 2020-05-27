@@ -52,6 +52,8 @@ class AuftragPagesRest : AbstractDTOPagesRest<AuftragDO, Auftrag, AuftragDao>(Au
         return auftrag
     }
 
+    override val classicsLinkListUrl: String? = "wa/orderBookList"
+
     /**
      * LAYOUT List page
      */
@@ -153,10 +155,10 @@ class AuftragPagesRest : AbstractDTOPagesRest<AuftragDO, Auftrag, AuftragDao>(Au
                                 .add(lc, "auftragsStatus")))
                 .add(UIRow()
                         .add(UICol()
-                                .add(UISelect.createProjectSelect(lc, "projekt", false))
+                                .add(UISelect.createProjectSelect(lc, "project", false))
                                 .add(lc, "projekt.status"))
                         .add(UICol()
-                                .add(UISelect.createCustomerSelect(lc, "kunde", false))
+                                .add(UISelect.createCustomerSelect(lc, "customer", false))
                                 .add(lc, "kundeText")))
                 .add(UIRow()
                         .add(UICol()
