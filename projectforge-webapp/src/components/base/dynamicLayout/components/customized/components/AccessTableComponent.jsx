@@ -6,10 +6,10 @@ import { DynamicLayoutContext } from '../../../context';
 function AccessTableComponent() {
     const { data, callAction } = React.useContext(DynamicLayoutContext);
 
-    let accessManagement = [false, true, false, false];
-    let tasks = [false, false, false, false];
-    let timesheets = [false, false, false, false];
-    let ownTimesheets = [false, false, false, false];
+    let accessManagementEntry;
+    let tasksEntry;
+    let timesheetsEntry;
+    let ownTimesheetsEntry;
 
     const clear = () => callAction({
         responseAction: {
@@ -48,23 +48,19 @@ function AccessTableComponent() {
 
     for (const [index, accessEntry] of data.accessEntries.entries()) {
         if (accessEntry.accessType === 'TASKS') {
-            tasks = [accessEntry.accessSelect, accessEntry.accessInsert,
-                accessEntry.accessUpdate, accessEntry.accessDelete];
+            tasksEntry = accessEntry;
         }
 
         if (accessEntry.accessType === 'TIMESHEETS') {
-            timesheets = [accessEntry.accessSelect, accessEntry.accessInsert,
-                accessEntry.accessUpdate, accessEntry.accessDelete];
+            timesheetsEntry = accessEntry;
         }
 
         if (accessEntry.accessType === 'OWN_TIMESHEETS') {
-            ownTimesheets = [accessEntry.accessSelect, accessEntry.accessInsert,
-                accessEntry.accessUpdate, accessEntry.accessDelete];
+            ownTimesheetsEntry = accessEntry;
         }
 
         if (accessEntry.accessType === 'TASK_ACCESS_MANAGEMENT') {
-            accessManagement = [accessEntry.accessSelect, accessEntry.accessInsert,
-                accessEntry.accessUpdate, accessEntry.accessDelete];
+            accessManagementEntry = accessEntry;
         }
     }
 
@@ -81,8 +77,8 @@ function AccessTableComponent() {
                                     <label className="btn btn-xs btn-primary">
                                         <input
                                             type="checkbox"
-                                            id="id10"
-                                            defaultChecked={accessManagement[0]}
+                                            id="accessSelect"
+                                            defaultChecked={accessManagementEntry.accessSelect}
                                         />
                                         Select
                                     </label>
@@ -90,8 +86,8 @@ function AccessTableComponent() {
                                     <label className="btn btn-xs btn-primary">
                                         <input
                                             type="checkbox"
-                                            id="id11"
-                                            defaultChecked={accessManagement[1]}
+                                            id="accessInsert"
+                                            defaultChecked={accessManagementEntry.accessInsert}
                                         />
                                         Insert
                                     </label>
@@ -99,8 +95,8 @@ function AccessTableComponent() {
                                     <label className="btn btn-xs btn-primary">
                                         <input
                                             type="checkbox"
-                                            id="id12"
-                                            defaultChecked={accessManagement[2]}
+                                            id="accessUpdate"
+                                            defaultChecked={accessManagementEntry.accessUpdate}
                                         />
                                         Update
                                     </label>
@@ -108,8 +104,8 @@ function AccessTableComponent() {
                                     <label className="btn btn-xs btn-primary">
                                         <input
                                             type="checkbox"
-                                            id="id13"
-                                            defaultChecked={accessManagement[3]}
+                                            id="accessDelete"
+                                            defaultChecked={accessManagementEntry.accessDelete}
                                         />
                                         Delete
                                     </label>
@@ -126,8 +122,8 @@ function AccessTableComponent() {
                                     <label className="btn btn-xs btn-primary">
                                         <input
                                             type="checkbox"
-                                            id="id14"
-                                            defaultChecked={tasks[0]}
+                                            id="taskSelect"
+                                            defaultChecked={tasksEntry.accessSelect}
                                         />
                                         Select
                                     </label>
@@ -135,8 +131,8 @@ function AccessTableComponent() {
                                     <label className="btn btn-xs btn-primary">
                                         <input
                                             type="checkbox"
-                                            id="id15"
-                                            defaultChecked={tasks[1]}
+                                            id="taskInsert"
+                                            defaultChecked={tasksEntry.accessInsert}
                                         />
                                         Insert
                                     </label>
@@ -144,8 +140,8 @@ function AccessTableComponent() {
                                     <label className="btn btn-xs btn-primary">
                                         <input
                                             type="checkbox"
-                                            id="id16"
-                                            defaultChecked={tasks[2]}
+                                            id="taskUpdate"
+                                            defaultChecked={tasksEntry.accessUpdate}
                                         />
                                         Update
                                     </label>
@@ -153,8 +149,8 @@ function AccessTableComponent() {
                                     <label className="btn btn-xs btn-primary">
                                         <input
                                             type="checkbox"
-                                            id="id17"
-                                            defaultChecked={tasks[3]}
+                                            id="taskDelete"
+                                            defaultChecked={tasksEntry.accessDelete}
                                         />
                                         Delete
                                     </label>
@@ -170,8 +166,8 @@ function AccessTableComponent() {
                                     <label className="btn btn-xs btn-primary">
                                         <input
                                             type="checkbox"
-                                            id="id18"
-                                            defaultChecked={timesheets[0]}
+                                            id="timeSheetSelect"
+                                            defaultChecked={timesheetsEntry.accessSelect}
                                         />
                                         Select
                                     </label>
@@ -179,8 +175,8 @@ function AccessTableComponent() {
                                     <label className="btn btn-xs btn-primary">
                                         <input
                                             type="checkbox"
-                                            id="id19"
-                                            defaultChecked={timesheets[1]}
+                                            id="timeSheetInsert"
+                                            defaultChecked={timesheetsEntry.accessInsert}
                                         />
                                         Insert
                                     </label>
@@ -188,8 +184,8 @@ function AccessTableComponent() {
                                     <label className="btn btn-xs btn-primary">
                                         <input
                                             type="checkbox"
-                                            id="id1a"
-                                            defaultChecked={timesheets[2]}
+                                            id="timeSheetUpdate"
+                                            defaultChecked={timesheetsEntry.accessUpdate}
                                         />
                                         Update
                                     </label>
@@ -197,8 +193,8 @@ function AccessTableComponent() {
                                     <label className="btn btn-xs btn-primary">
                                         <input
                                             type="checkbox"
-                                            id="id1b"
-                                            defaultChecked={timesheets[3]}
+                                            id="timeSheetDelete"
+                                            defaultChecked={timesheetsEntry.accessDelete}
                                         />
                                         Delete
                                     </label>
@@ -214,8 +210,8 @@ function AccessTableComponent() {
                                     <label className="btn btn-xs btn-primary">
                                         <input
                                             type="checkbox"
-                                            id="id1c"
-                                            defaultChecked={ownTimesheets[0]}
+                                            id="ownTimeSheetSelect"
+                                            defaultChecked={ownTimesheetsEntry.accessSelect}
                                         />
                                         Select
                                     </label>
@@ -223,8 +219,8 @@ function AccessTableComponent() {
                                     <label className="btn btn-xs btn-primary">
                                         <input
                                             type="checkbox"
-                                            id="id1d"
-                                            defaultChecked={ownTimesheets[1]}
+                                            id="ownTimeSheetInsert"
+                                            defaultChecked={ownTimesheetsEntry.accessInsert}
                                         />
                                         Insert
                                     </label>
@@ -232,8 +228,8 @@ function AccessTableComponent() {
                                     <label className="btn btn-xs btn-primary">
                                         <input
                                             type="checkbox"
-                                            id="id1e"
-                                            defaultChecked={ownTimesheets[2]}
+                                            id="ownTimeSheetUpdate"
+                                            defaultChecked={ownTimesheetsEntry.accessUpdate}
                                         />
                                         Update
                                     </label>
@@ -241,8 +237,8 @@ function AccessTableComponent() {
                                     <label className="btn btn-xs btn-primary">
                                         <input
                                             type="checkbox"
-                                            id="id1f"
-                                            defaultChecked={ownTimesheets[3]}
+                                            id="ownTimeSheetDelete"
+                                            defaultChecked={ownTimesheetsEntry.accessDelete}
                                         />
                                         Delete
                                     </label>
@@ -281,11 +277,7 @@ function AccessTableComponent() {
                 </div>
             </React.Fragment>
         ), [data,
-            callAction,
-            ownTimesheets,
-            timesheets,
-            tasks,
-            accessManagement],
+            callAction],
     );
 }
 
