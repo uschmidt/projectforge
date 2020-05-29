@@ -32,7 +32,7 @@ import java.time.LocalDate
 
 class Employee(id: Int? = null,
                displayName: String? = null,
-               var user: PFUserDO? = null,
+               var user: User? = User(),
                var kost1: Kost1? = null,
                var status: EmployeeStatus? = null,
                var position: String? = null,
@@ -53,4 +53,13 @@ class Employee(id: Int? = null,
                var country: String? = null,
                var state: String? = null,
                var comment: String? = null
-) : BaseDTODisplayObject<EmployeeDO>(id, displayName = displayName)
+) : BaseDTODisplayObject<EmployeeDO>(id, displayName = displayName){
+
+    override fun copyFrom(src: EmployeeDO) {
+        super.copyFrom(src)
+
+        if(src.user != null){
+            this.user!!.copyFrom(src.user!!)
+        }
+    }
+}
