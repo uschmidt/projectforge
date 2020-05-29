@@ -70,7 +70,7 @@ function CostNumberComponent() {
                     onChange={handleEndzifferChange}
                 />
             </React.Fragment>
-        ),
+        ), [data],
     );
 }
 

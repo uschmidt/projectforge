@@ -280,7 +280,12 @@ function AccessTableComponent() {
                     </Button>
                 </div>
             </React.Fragment>
-        ),
+        ), [data,
+            callAction,
+            ownTimesheets,
+            timesheets,
+            tasks,
+            accessManagement],
     );
 }
 
