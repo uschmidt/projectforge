@@ -38,8 +38,11 @@ class Project(id: Int? = null,
               var projektManagerGroup: Group? = null,
               var nummernkreis: Int? = null,
               var bereich: Int? = null,
-              var kost2Arts: List<Kost2Art>? = null)
+              var kost: String? = null,
+              var kost2Arts: MutableList<Kost2Art>? = ArrayList())
     : BaseDTODisplayObject<ProjektDO>(id, displayName = displayName) {
+
+    var kost2ArtsAsString: String = ""
 
     /**
      * @see copyFromMinimal
@@ -57,6 +60,7 @@ class Project(id: Int? = null,
 
     override fun copyFrom(src: ProjektDO) {
         super.copyFrom(src)
+        this.kost = src.kost
         this.customer = src.kunde?.let {
             Customer(it)
         }
@@ -68,20 +72,22 @@ class Project(id: Int? = null,
         }
     }
 
-    val kost2ArtsAsString: String
-        get() = kost2Arts?.joinToString { it.getFormattedId() } ?: ""
 
     fun transformKost2(allKost2Arts: List<org.projectforge.reporting.Kost2Art>?) {
         for (kost2 in allKost2Arts!!) {
-            val kost2Art = Kost2Art()
-            kost2Art.id = kost2.id
-            kost2Art.name = kost2.name
-            kost2Art.description = kost2.description
-            kost2Art.fakturiert = kost2.isFakturiert
-            kost2Art.projektStandard = kost2.isProjektStandard
-            kost2Art.deleted = kost2.isDeleted
-            kost2Art.selected = kost2.isSelected
-            kost2Art.existsAlready = kost2.isExistsAlready
+            if(kost2.isExistsAlready){
+                val kost2Art = Kost2Art()
+                kost2Art.id = kost2.id
+                kost2Art.name = kost2.name
+                kost2Art.description = kost2.description
+                kost2Art.fakturiert = kost2.isFakturiert
+                kost2Art.projektStandard = kost2.isProjektStandard
+                kost2Art.deleted = kost2.isDeleted
+                kost2Art.selected = kost2.isSelected
+                kost2Art.existsAlready = kost2.isExistsAlready
+                kost2Arts!!.add(kost2Art)
+            }
         }
+        kost2ArtsAsString = kost2Arts?.joinToString { it.getFormattedId() } ?: ""
     }
 }

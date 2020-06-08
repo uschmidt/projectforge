@@ -130,8 +130,7 @@ open class ProjektDO : DefaultBaseDO(), DisplayNameCapable {
     open var task: TaskDO? = null
 
     /**
-     * This Datev account number is used for the exports of invoices. If not given then the account number assigned to the
-     * KundeDO is used instead (default).
+     * This Datev account number is used for the exports of invoices. If not given then the account number assigned to the KundeDO is used instead (default).
      */
     @PropertyInfo(i18nKey = "fibu.konto")
     @get:ManyToOne(fetch = FetchType.LAZY)
