@@ -75,7 +75,7 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
      */
     override fun newBaseDO(request: HttpServletRequest?): TravelCostDO {
         val travelCost = super.newBaseDO(request)
-        travelCost.user = ThreadLocalUserContext.getUser()
+        //travelCost.user = ThreadLocalUserContext.getUser()
         return travelCost
     }
 
@@ -85,7 +85,7 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
     override fun createListLayout(): UILayout {
         val layout = super.createListLayout()
                 .add(UITable.createUIResultSetTable()
-                        .add(UITableColumn("user.name", "plugins.travel.entry.user"))
+                        .add(UITableColumn("user.displayName", "plugins.travel.entry.user"))
                         .add(lc, "beginOfTravel", "endOfTravel", "destination", "kilometers"))
         return LayoutUtils.processListPage(layout, this)
     }
@@ -98,7 +98,7 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
         val layout = super.createEditLayout(dto, userAccess)
                 .add(UISelect.createUserSelect(lc, "user", false, "plugins.travel.entry.user"))
                 .add(lc, "reasonOfTravel", "destination")
-                // TODO: Implement Kost2 here
+                .add(UICustomized("cost.number"))
                 .add(lc, "beginOfTravel", "startLocation", "endOfTravel", "returnLocation", "kilometers")
                 .add(UICheckbox("hotel", lc))
                 .add(UICheckbox("rentalCar", lc))

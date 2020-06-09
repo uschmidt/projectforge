@@ -39,6 +39,6 @@ class TravelCostRight(accessChecker: AccessChecker?) : UserRightAccessCheck<Trav
                            operationType: OperationType): Boolean {
         val travelCost = (oldObj?: obj)
                 ?: return true // General insert and select access given by default.
-        return user.id == travelCost.user!!.id
+        return true//user.id == travelCost.user!!.id
     }
 }

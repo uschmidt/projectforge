@@ -56,7 +56,7 @@ open class TravelCostDao protected constructor() : BaseDao<TravelCostDO>(TravelC
 
     override fun onSaveOrModify(obj: TravelCostDO) {
         super.onSaveOrModify(obj)
-        obj.user = ThreadLocalUserContext.getUser() // Set always the logged-in user as owner.
+        //obj.user = ThreadLocalUserContext.getUser() // Set always the logged-in user as owner.
     }
 
     override fun newInstance(): TravelCostDO {

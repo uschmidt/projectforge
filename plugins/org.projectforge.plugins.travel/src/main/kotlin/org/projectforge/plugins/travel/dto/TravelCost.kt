@@ -30,6 +30,7 @@ import org.projectforge.plugins.travel.TravelCostDO
 import org.projectforge.plugins.travel.TravelLocation
 import org.projectforge.rest.dto.AttachmentsSupport
 import org.projectforge.rest.dto.BaseDTO
+import org.projectforge.rest.dto.Kost2
 import java.time.LocalDate
 
 /**
@@ -42,7 +43,7 @@ class TravelCost(id: Int? = null,
                  var startLocation: TravelLocation? = null,
                  var returnLocation: TravelLocation? = null,
                  var destination: String? = null,
-                 var kost2: Kost2DO? = null,
+                 var kost2: Kost2? = Kost2(),
                  var beginOfTravel: LocalDate? = null,
                  var endOfTravel: LocalDate? = null,
                  var hotel: Boolean = false,
@@ -51,4 +52,12 @@ class TravelCost(id: Int? = null,
                  var flight: Boolean = false,
                  var kilometers: Int? = null,
                  override var attachments: List<Attachment>? = null): BaseDTO<TravelCostDO>(), AttachmentsSupport {
+
+    override fun copyFrom(src: TravelCostDO) {
+        super.copyFrom(src)
+
+        /*if(src.kost2 != null){
+            this.kost2!!.copyFrom(src.kost2!!)
+        }*/
+    }
 }

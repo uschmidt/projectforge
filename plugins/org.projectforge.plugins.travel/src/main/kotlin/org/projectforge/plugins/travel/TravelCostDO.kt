@@ -44,11 +44,18 @@ import javax.persistence.*
  */
 @Entity
 @Indexed
-@Table(name = "T_PLUGIN_TRAVEL", indexes = [javax.persistence.Index(name = "idx_fk_t_plugin_travel_kost2_id", columnList = "kost2_id"), javax.persistence.Index(name = "idx_fk_t_plugin_travel_user_id", columnList = "user_id")])
+@Table(name = "t_plugin_travel",
+        uniqueConstraints = [UniqueConstraint(columnNames = ["user_id"])],
+        indexes = [
+            //javax.persistence.Index(name = "idx_fk_t_plugin_travel_kost2_id", columnList = "kost2_id"),
+            javax.persistence.Index(name = "idx_fk_t_plugin_travel_user_id", columnList = "user_id")
+        ])
 open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo {
 
     // TODO: Anke requires the staffnumber, which is part of EmployeeDO
     @PropertyInfo(i18nKey = "plugins.travel.entry.user")
+    @IndexedEmbedded(depth = 1)
+    @get:ManyToOne(fetch = FetchType.LAZY)
     @get:JoinColumn(name = "user_id", nullable = false)
     open var user: PFUserDO? = null
 
@@ -69,6 +76,7 @@ open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo 
     open var destination: String? = null
 
     @PropertyInfo(i18nKey = "fibu.kost2")
+    @get:OneToOne(fetch = FetchType.LAZY)
     @get:JoinColumn(name = "kost2_id", nullable = true)
     open var kost2: Kost2DO? = null
 
@@ -77,6 +85,7 @@ open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo 
     @get:Column(name = "begin_of_travel")
     open var beginOfTravel: LocalDate? = null
 
+    // TODO: Must be PFDateTime, Anke requires exact times
     @PropertyInfo(i18nKey = "plugins.travel.entry.endOfTravel")
     @get:Column(name = "end_of_travel")
     open var endOfTravel: LocalDate? = null
@@ -102,11 +111,11 @@ open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo 
     open var kilometers: Int? = null
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption")
-    @get:Column(length = Constants.LENGTH_TEXT)
+    @get:Column(name = "assumption_of_costs", length = Constants.LENGTH_TEXT)
     open var assumptionOfCosts: String? = null
 
-    @get:Column(length = Constants.LENGTH_TEXT)
-    open var otherAssumptionsOfCosts: String? = null
+    /*@get:Column(length = Constants.LENGTH_TEXT)
+    open var otherAssumptionsOfCosts: String? = null*/
 
     @JsonIgnore
     @Field
