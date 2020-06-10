@@ -24,6 +24,7 @@
 package org.projectforge.rest.dto
 
 import org.projectforge.business.user.UserDao
+import org.projectforge.business.user.UserRightValue
 import org.projectforge.business.user.service.UserService
 import org.projectforge.common.StringHelper
 import org.projectforge.framework.configuration.ApplicationContextProvider
@@ -40,6 +41,8 @@ class User(id: Int? = null,
            var email: String? = null,
            var deactivated: Boolean = false,
            var timeZone: TimeZone? = null,
+           var groups: String? = "",
+           var rights: String? = "",
            var locale: Locale? = null,
            var dateFormat: String? = null,
            var excelDateFormat: String? = null,

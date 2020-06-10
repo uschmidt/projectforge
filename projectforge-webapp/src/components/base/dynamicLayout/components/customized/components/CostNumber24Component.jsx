@@ -52,7 +52,7 @@ function CostNumber24Component() {
                 .
                 ##
             </React.Fragment>
-        ),
+        ), [data],
     );
 }
 

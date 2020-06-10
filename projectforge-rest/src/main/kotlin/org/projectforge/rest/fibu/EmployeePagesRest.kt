@@ -56,10 +56,10 @@ class EmployeePagesRest : AbstractDTOPagesRest<EmployeeDO, Employee, EmployeeDao
     override fun createListLayout(): UILayout {
         val layout = super.createListLayout()
                 .add(UITable.createUIResultSetTable()
-                        .add(UITableColumn("fibu.employee.user.name", "name"))
-                        .add(UITableColumn("fibu.employee.user.firstname", "firstName"))
+                        .add(UITableColumn("user.lastname", "name"))
+                        .add(UITableColumn("user.firstname", "firstName"))
                         .add(lc, "status", "staffNumber")
-                        .add(UITableColumn("kost1", "fibu.kost1", formatter = Formatter.COST1))
+                        .add(UITableColumn("kost1.displayName", "fibu.kost1"))
                         .add(lc, "position", "abteilung", "eintrittsDatum", "austrittsDatum", "comment"))
         layout.getTableColumnById("eintrittsDatum").formatter = Formatter.DATE
         layout.getTableColumnById("austrittsDatum").formatter = Formatter.DATE

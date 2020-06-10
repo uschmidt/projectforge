@@ -26,6 +26,7 @@ package org.projectforge.framework.configuration.entities
 import de.micromata.genome.db.jpa.xmldump.api.JpaXmlPersist
 import org.hibernate.search.annotations.Field
 import org.hibernate.search.annotations.Indexed
+import org.projectforge.common.anots.PropertyInfo
 import org.projectforge.framework.configuration.Configuration
 import org.projectforge.framework.configuration.ConfigurationType
 import org.projectforge.framework.persistence.api.AUserRightId
@@ -59,6 +60,7 @@ open class ConfigurationDO : DefaultBaseDO {
     /**
      * Key under which the configuration value is stored in the database.
      */
+    @PropertyInfo(i18nKey = "administration.configuration.parameter")
     @Field
     @get:Column(length = 255, nullable = false)
     open var parameter: String? = null
@@ -66,6 +68,7 @@ open class ConfigurationDO : DefaultBaseDO {
     /**
      * If entry is not from type STRING then a RuntimeException will be thrown.
      */
+    @PropertyInfo(i18nKey = "administration.configuration.value")
     @Field
     @get:Column(length = PARAM_LENGTH)
     open var stringValue: String? = null
@@ -309,7 +312,7 @@ open class ConfigurationDO : DefaultBaseDO {
                 this.stringValue = null
                 this.intValue = null
             }
-            else -> throw UnsupportedOperationException("Unkown type: $type")
+            else -> throw UnsupportedOperationException("Unknown type: $type")
         }
     }
 

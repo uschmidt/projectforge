@@ -44,14 +44,11 @@ class GroupPagesRest: AbstractDTOPagesRest<GroupDO, Group, GroupDao>(GroupDao::c
     override fun transformFromDB(obj: GroupDO, editMode : Boolean): Group {
         val group = Group()
         group.copyFrom(obj)
-        group.assignedUsers?.forEach {
+        obj.assignedUsers?.forEach {
             val user = userService.getUser(it.id)
-            if (user != null) {
-                it.username = user.username
-                it.firstname = user.firstname
-                it.lastname = user.lastname
-            }
+            group.assignedUsers?.add(user)
         }
+        group.setUsersString()
         return group
     }
 
@@ -70,7 +67,9 @@ class GroupPagesRest: AbstractDTOPagesRest<GroupDO, Group, GroupDao>(GroupDao::c
     override fun createListLayout(): UILayout {
         val layout = super.createListLayout()
                 .add(UITable.createUIResultSetTable()
-                        .add(lc, "name", "organization", "description", "assignedUsers", "ldapValues"))
+                        .add(lc, "name", "organization", "description")
+                        .add(UITableColumn("assignedUsersString", title = "group.assignedUsers"))
+                        .add(lc, "ldapValues"))
         return LayoutUtils.processListPage(layout, this)
     }
 

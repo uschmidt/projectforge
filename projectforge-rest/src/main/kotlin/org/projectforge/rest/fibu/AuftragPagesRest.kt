@@ -52,6 +52,8 @@ class AuftragPagesRest : AbstractDTOPagesRest<AuftragDO, Auftrag, AuftragDao>(Au
         return auftrag
     }
 
+    override val classicsLinkListUrl: String? = "wa/orderBookList"
+
     /**
      * LAYOUT List page
      */
@@ -59,8 +61,8 @@ class AuftragPagesRest : AbstractDTOPagesRest<AuftragDO, Auftrag, AuftragDao>(Au
         val layout = super.createListLayout()
                 .add(UITable.createUIResultSetTable()
                         .add(lc, "nummer")
-                        .add(UITableColumn("kunde.displayName", title = "fibu.kunde"))
-                        .add(UITableColumn("projekt.displayName", title = "fibu.projekt"))
+                        .add(UITableColumn("customer.displayName", title = "fibu.kunde"))
+                        .add(UITableColumn("project.displayName", title = "fibu.projekt"))
                         .add(lc, "titel")
                         .add(UITableColumn("pos", title = "label.position.short"))
                         .add(UITableColumn("personDays", title = "projectmanagement.personDays",
@@ -145,7 +147,7 @@ class AuftragPagesRest : AbstractDTOPagesRest<AuftragDO, Auftrag, AuftragDao>(Au
                                 .add(lc, "nettoSumme")))
                 .add(UIRow()
                         .add(UICol()
-                                .add(lc, "title")))
+                                .add(lc, "titel")))
                 .add(UIRow()
                         .add(UICol()
                                 .add(lc, "referenz"))
@@ -153,12 +155,14 @@ class AuftragPagesRest : AbstractDTOPagesRest<AuftragDO, Auftrag, AuftragDao>(Au
                                 .add(lc, "auftragsStatus")))
                 .add(UIRow()
                         .add(UICol()
-                                .add(lc, "projekt", "projekt.status"))
+                                .add(UISelect.createProjectSelect(lc, "project", false))
+                                .add(lc, "projekt.status"))
                         .add(UICol()
-                                .add(lc, "kunde", "kundeText")))
+                                .add(UISelect.createCustomerSelect(lc, "customer", false))
+                                .add(lc, "kundeText")))
                 .add(UIRow()
                         .add(UICol()
-                                .add(lc, "projectmanager"))
+                                .add(lc, "projectManager"))
                         .add(UICol()
                                 .add(lc, "headOfBusinessManager"))
                         .add(UICol()
@@ -180,6 +184,7 @@ class AuftragPagesRest : AbstractDTOPagesRest<AuftragDO, Auftrag, AuftragDao>(Au
                 .add(UIRow()
                         .add(UICol()
                                 .add(lc, "periodOfPerformanceBegin", "periodOfPerformanceEnd", "probabilityOfOccurrence"))
+                        // TODO: Payment Schedules: positionNumber, scheduleDate, amount, comment, reached, vollstaendigFakturiert
                         .add(UICol()
                                 .add(UIList(lc, "paymentSchedules", "paymentSchedule")
                                         .add(UICol()

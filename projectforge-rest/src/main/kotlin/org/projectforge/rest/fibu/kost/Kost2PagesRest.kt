@@ -24,6 +24,7 @@
 package org.projectforge.rest.fibu.kost
 
 import org.projectforge.business.fibu.KostFormatter
+import org.projectforge.business.fibu.ProjektDO
 import org.projectforge.business.fibu.kost.Kost2DO
 import org.projectforge.business.fibu.kost.Kost2Dao
 import org.projectforge.rest.config.Rest
@@ -60,6 +61,8 @@ class Kost2PagesRest : AbstractDTOPagesRest<Kost2DO, Kost2, Kost2Dao>(Kost2Dao::
     override fun transformForDB(dto: Kost2): Kost2DO {
         val kost2DO = Kost2DO()
         dto.copyTo(kost2DO)
+        kost2DO.projekt = ProjektDO()
+        dto.project?.copyTo(kost2DO.projekt!!)
         return kost2DO
     }
 
@@ -74,7 +77,10 @@ class Kost2PagesRest : AbstractDTOPagesRest<Kost2DO, Kost2, Kost2Dao>(Kost2Dao::
                 .add(UITable.createUIResultSetTable()
                         .add(UITableColumn("formattedNumber", title = "fibu.kost2"))
                         .add(UITableColumn("kost2Art.name", title = "fibu.kost2.art"))
-                        .add(lc, "kost2Art.fakturiert", "workFraction", "projekt.kunde.name", "projekt.name", "kostentraegerStatus", "description", "comment"))
+                        .add(lc, "kost2Art.fakturiert", "workFraction")
+                        .add(UITableColumn("project.customer.name", title = "fibu.kunde.name"))
+                        .add(UITableColumn("project.name", title = "fibu.projekt.name"))
+                        .add(lc,  "kostentraegerStatus", "description", "comment"))
         return LayoutUtils.processListPage(layout, this)
     }
 
@@ -85,7 +91,7 @@ class Kost2PagesRest : AbstractDTOPagesRest<Kost2DO, Kost2, Kost2Dao>(Kost2Dao::
         val layout = super.createEditLayout(dto, userAccess)
                 .add(UIRow()
                         .add(UICol()
-                                .add(UISelect.createProjectSelect(lc, "projekt", false, "fibu.projekt"))
+                                .add(UISelect.createProjectSelect(lc, "project", false, "fibu.projekt"))
                                 .add(UICustomized("cost.number"))
                                 .add(lc, "workFraction", "description", "comment", "kostentraegerStatus")))
         return LayoutUtils.processEditPage(layout, dto, this)

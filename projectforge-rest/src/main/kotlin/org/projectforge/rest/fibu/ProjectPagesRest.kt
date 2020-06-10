@@ -47,6 +47,7 @@ class ProjectPagesRest
     override fun transformFromDB(obj: ProjektDO, editMode: Boolean): Project {
         val projekt = Project()
         projekt.copyFrom(obj)
+        projekt.transformKost2(kostCache?.getAllKost2Arts(obj.id))
         return projekt
     }
 
@@ -66,8 +67,8 @@ class ProjectPagesRest
         val layout = super.createListLayout()
                 .add(UITable.createUIResultSetTable()
                         .add(UITableColumn("kost", title = "fibu.projekt.nummer"))
-                        .add(lc, "identifier", "kunde.name", "name", "kunde.division", "task", "konto", "status", "projektManagerGroup")
-                        .add(UITableColumn("kost2Arten", title = "fibu.kost2art.kost2arten"))
+                        .add(lc, "identifier", "customer.name", "name", "kunde.division", "task", "konto", "status", "projektManagerGroup")
+                        .add(UITableColumn("kost2ArtsAsString", title = "fibu.kost2art.kost2arten"))
                         .add(lc,"description"))
         layout.getTableColumnById("konto").formatter = Formatter.KONTO
         layout.getTableColumnById("task").formatter = Formatter.TASK_PATH
@@ -97,9 +98,9 @@ class ProjectPagesRest
                 label += " (nf)"
             }
             val uiCheckbox = UICheckbox("" + it.getFormattedId(), label = label)
+
             layout.add(UIRow().add(UICol().add(uiCheckbox)))
         }
-
 
         return LayoutUtils.processEditPage(layout, dto, this)
     }

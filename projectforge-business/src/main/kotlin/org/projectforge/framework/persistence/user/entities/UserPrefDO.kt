@@ -32,6 +32,7 @@ import org.hibernate.search.annotations.Indexed
 import org.hibernate.search.annotations.IndexedEmbedded
 import org.projectforge.business.user.UserPrefAreaRegistry
 import org.projectforge.common.StringHelper
+import org.projectforge.common.anots.PropertyInfo
 import org.projectforge.framework.persistence.api.BaseDO
 import org.projectforge.framework.persistence.api.ModificationStatus
 import org.projectforge.framework.persistence.entities.AbstractBaseDO
@@ -73,11 +74,13 @@ class UserPrefDO : AbstractBaseDO<Int>() {
     @JsonIgnore
     private val log = org.slf4j.LoggerFactory.getLogger(UserPrefDO::class.java)
 
+    @PropertyInfo(i18nKey = "user")
     @IndexedEmbedded(depth = 1)
     @get:ManyToOne(fetch = FetchType.LAZY)
     @get:JoinColumn(name = "user_fk", nullable = false)
     var user: PFUserDO? = null
 
+    @PropertyInfo(i18nKey = "userPref.name")
     @Field
     @get:Column(length = 255, nullable = false)
     var name: String? = null
@@ -144,6 +147,7 @@ class UserPrefDO : AbstractBaseDO<Int>() {
     /**
      * User pref's ar
      */
+    @PropertyInfo(i18nKey = "userPref.area")
     @get:Column(length = UserPrefArea.MAX_ID_LENGTH, nullable = false)
     var area: String? = null
 

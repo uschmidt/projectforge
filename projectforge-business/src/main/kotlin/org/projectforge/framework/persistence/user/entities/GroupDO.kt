@@ -122,7 +122,6 @@ open class GroupDO : DefaultBaseDO(), DisplayNameCapable {
     @get:Column(name = "ldap_values", length = 4000)
     open var ldapValues: String? = null
 
-    // TODO: Type Set not yet supported
     @PropertyInfo(i18nKey = "group.assignedUsers")
     @ContainedIn
     @IndexedEmbedded(depth = 1)
