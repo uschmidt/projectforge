@@ -85,8 +85,8 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
     override fun createListLayout(): UILayout {
         val layout = super.createListLayout()
                 .add(UITable.createUIResultSetTable()
-                        .add(UITableColumn("user.displayName", "plugins.travel.entry.user"))
-                        .add(lc, "beginOfTravel", "endOfTravel", "destination", "kilometers"))
+                        .add(UITableColumn("employee.displayName", "plugins.travel.entry.user"))
+                        .add(lc, "employee.staffNumber", "beginOfTravel", "endOfTravel", "destination", "kilometers"))
         return LayoutUtils.processListPage(layout, this)
     }
 
@@ -96,7 +96,7 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
     override fun createEditLayout(dto: TravelCost, userAccess: UILayout.UserAccess): UILayout {
         //val location = UIInput("location", lc).enableAutoCompletion(this)
         val layout = super.createEditLayout(dto, userAccess)
-                .add(UISelect.createUserSelect(lc, "user", false, "plugins.travel.entry.user"))
+                .add(UISelect.createUserSelect(lc, "employee", false, "plugins.travel.entry.user"))
                 .add(lc, "reasonOfTravel", "destination")
                 .add(UICustomized("cost.number"))
                 .add(lc, "beginOfTravel", "startLocation", "endOfTravel", "returnLocation", "kilometers")

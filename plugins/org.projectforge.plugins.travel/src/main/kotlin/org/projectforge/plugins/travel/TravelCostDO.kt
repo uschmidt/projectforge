@@ -30,13 +30,12 @@ import de.micromata.genome.db.jpa.tabattr.entities.JpaTabAttrDataBaseDO
 import org.hibernate.search.annotations.Field
 import org.hibernate.search.annotations.Indexed
 import org.hibernate.search.annotations.IndexedEmbedded
+import org.projectforge.business.fibu.EmployeeDO
 import org.projectforge.business.fibu.kost.Kost2DO
 import org.projectforge.common.anots.PropertyInfo
 import org.projectforge.framework.jcr.AttachmentsInfo
 import org.projectforge.framework.persistence.api.Constants
 import org.projectforge.framework.persistence.attr.entities.DefaultBaseWithAttrDO
-import org.projectforge.framework.persistence.user.entities.PFUserDO
-import java.time.LocalDate
 import javax.persistence.*
 
 /**
@@ -45,19 +44,19 @@ import javax.persistence.*
 @Entity
 @Indexed
 @Table(name = "t_plugin_travel",
-        uniqueConstraints = [UniqueConstraint(columnNames = ["user_id"])],
+        uniqueConstraints = [UniqueConstraint(columnNames = ["employee_id"])],
         indexes = [
-            //javax.persistence.Index(name = "idx_fk_t_plugin_travel_kost2_id", columnList = "kost2_id"),
-            javax.persistence.Index(name = "idx_fk_t_plugin_travel_user_id", columnList = "user_id")
+            javax.persistence.Index(name = "idx_fk_t_plugin_travel_kost2_id", columnList = "kost2_id"),
+            javax.persistence.Index(name = "idx_fk_t_plugin_travel_employee_id", columnList = "employee_id")
         ])
 open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo {
 
     // TODO: Anke requires the staffnumber, which is part of EmployeeDO
     @PropertyInfo(i18nKey = "plugins.travel.entry.user")
     @IndexedEmbedded(depth = 1)
-    @get:ManyToOne(fetch = FetchType.LAZY)
-    @get:JoinColumn(name = "user_id", nullable = false)
-    open var user: PFUserDO? = null
+    @get:ManyToOne(fetch = FetchType.EAGER)
+    @get:JoinColumn(name = "employee_id", nullable = false)
+    open var employee: EmployeeDO? = null
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.reasonOfTravel")
     @get:Column(name = "reason_of_travel", length = Constants.LENGTH_TEXT)
@@ -76,19 +75,17 @@ open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo 
     open var destination: String? = null
 
     @PropertyInfo(i18nKey = "fibu.kost2")
-    @get:OneToOne(fetch = FetchType.LAZY)
+    @get:ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     @get:JoinColumn(name = "kost2_id", nullable = true)
     open var kost2: Kost2DO? = null
 
-    // TODO: Must be PFDateTime, Anke requires exact times
     @PropertyInfo(i18nKey = "plugins.travel.entry.beginOfTravel")
     @get:Column(name = "begin_of_travel")
-    open var beginOfTravel: LocalDate? = null
+    open var beginOfTravel: java.util.Date? = null
 
-    // TODO: Must be PFDateTime, Anke requires exact times
     @PropertyInfo(i18nKey = "plugins.travel.entry.endOfTravel")
     @get:Column(name = "end_of_travel")
-    open var endOfTravel: LocalDate? = null
+    open var endOfTravel: java.util.Date? = null
 
     // TODO: 1 Entry per day
     //open var catering: MutableList<CateringDay>? = null

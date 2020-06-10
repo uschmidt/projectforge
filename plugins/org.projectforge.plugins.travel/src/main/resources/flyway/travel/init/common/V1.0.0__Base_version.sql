@@ -1,21 +1,19 @@
 -- This is the initial script for setting up the data base for this plugin.
 -- For specific data base dialects, place sql scripts in the sub directory init/{vendor}
 
--- TODO: Change version number
-
 CREATE TABLE t_plugin_travel (
   pk                           INTEGER NOT NULL,
   created                      TIMESTAMP WITHOUT TIME ZONE,
   deleted                      BOOLEAN NOT NULL,
   last_update                  TIMESTAMP WITHOUT TIME ZONE,
-  user_id                      INTEGER NOT NULL,
+  employee_id                  INTEGER NOT NULL,
   reason_of_travel             CHARACTER VARYING(4000),
   start_location               CHARACTER VARYING(30),
   return_location              CHARACTER VARYING(30),
   destination                  CHARACTER VARYING(255),
   kost2_id                     INTEGER,
-  begin_of_travel              TIMESTAMP WITHOUT TIME ZONE,
-  end_of_travel                TIMESTAMP WITHOUT TIME ZONE,
+  begin_of_travel              TIMESTAMP,
+  end_of_travel                TIMESTAMP,
   hotel                        BOOLEAN NOT NULL,
   rental_car                   BOOLEAN NOT NULL,
   train                        BOOLEAN NOT NULL,
@@ -61,14 +59,14 @@ ALTER TABLE t_plugin_travel
 CREATE INDEX idx_fk_t_plugin_travel_kost2_id
   ON t_plugin_travel (kost2_id);
 
-CREATE INDEX idx_fk_t_plugin_travel_user_id
-  ON t_plugin_travel (user_id);
+CREATE INDEX idx_fk_t_plugin_travel_employee_id
+  ON t_plugin_travel (employee_id);
 
 CREATE INDEX idx_fk_t_plugin_travel_tenant_id
   ON t_plugin_travel (tenant_id);
 
 ALTER TABLE t_plugin_travel
-  ADD CONSTRAINT fkklvgq7lo4uhtnew1bttn FOREIGN KEY (user_id) REFERENCES t_pf_user (pk);
+  ADD CONSTRAINT fkklvgq7lo4uhtnew1bttn FOREIGN KEY (employee_id) REFERENCES t_fibu_employee (pk);
 
 ALTER TABLE t_plugin_travel
   ADD CONSTRAINT fkknf08hlcvgzcgvfupohm FOREIGN KEY (kost2_id) REFERENCES t_fibu_kost2 (pk);
