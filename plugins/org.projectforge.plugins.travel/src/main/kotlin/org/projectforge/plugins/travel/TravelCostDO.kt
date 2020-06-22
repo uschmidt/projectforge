@@ -36,6 +36,8 @@ import org.projectforge.common.anots.PropertyInfo
 import org.projectforge.framework.jcr.AttachmentsInfo
 import org.projectforge.framework.persistence.api.Constants
 import org.projectforge.framework.persistence.attr.entities.DefaultBaseWithAttrDO
+import java.time.LocalDate
+import java.util.*
 import javax.persistence.*
 
 /**
@@ -75,20 +77,20 @@ open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo 
     open var destination: String? = null
 
     @PropertyInfo(i18nKey = "fibu.kost2")
-    @get:ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
+    @get:ManyToOne(fetch = FetchType.EAGER)
     @get:JoinColumn(name = "kost2_id", nullable = true)
     open var kost2: Kost2DO? = null
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.beginOfTravel")
     @get:Column(name = "begin_of_travel")
-    open var beginOfTravel: java.util.Date? = null
+    open var beginOfTravel: Date? = null
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.endOfTravel")
     @get:Column(name = "end_of_travel")
-    open var endOfTravel: java.util.Date? = null
+    open var endOfTravel: Date? = null
 
-    // TODO: 1 Entry per day
-    //open var catering: MutableList<CateringDay>? = null
+    // TODO: Avoid making CateringDay a new table
+    //open var catering: CateringDay? = null
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption.hotel")
     open var hotel: Boolean = false
@@ -110,9 +112,6 @@ open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo 
     @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption")
     @get:Column(name = "assumption_of_costs", length = Constants.LENGTH_TEXT)
     open var assumptionOfCosts: String? = null
-
-    /*@get:Column(length = Constants.LENGTH_TEXT)
-    open var otherAssumptionsOfCosts: String? = null*/
 
     @JsonIgnore
     @Field
