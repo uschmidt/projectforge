@@ -23,11 +23,14 @@
 
 package org.projectforge.plugins.travel
 
+import org.projectforge.business.vacation.service.VacationSendMailService
+import org.projectforge.framework.access.OperationType
 import org.projectforge.framework.persistence.api.BaseDao
 import org.projectforge.framework.persistence.api.BaseSearchFilter
 import org.projectforge.framework.persistence.api.QueryFilter
 import org.projectforge.framework.persistence.user.api.ThreadLocalUserContext
 import org.projectforge.framework.persistence.user.entities.PFUserDO
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 
 /**
@@ -35,6 +38,9 @@ import org.springframework.stereotype.Repository
  */
 @Repository
 open class TravelCostDao protected constructor() : BaseDao<TravelCostDO>(TravelCostDO::class.java) {
+
+    @Autowired
+    private lateinit var travelCostSendMailService: TravelCostSendMailService
 
     init {
         userRightId = TravelPluginUserRightId.PLUGIN_TRAVEL
@@ -54,9 +60,9 @@ open class TravelCostDao protected constructor() : BaseDao<TravelCostDO>(TravelC
         return queryFilter
     }
 
-    override fun onSaveOrModify(obj: TravelCostDO) {
-        super.onSaveOrModify(obj)
-        //obj.user = ThreadLocalUserContext.getUser() // Set always the logged-in user as owner.
+    override fun afterSave(obj: TravelCostDO) {
+        super.afterSave(obj)
+        //travelCostSendMailService.checkAndSendMail(obj, OperationType.INSERT)
     }
 
     override fun newInstance(): TravelCostDO {
