@@ -90,7 +90,7 @@ class UISelect<T>(val id: String,
     companion object {
         fun createUserSelect(lc: LayoutContext, id:String, multi: Boolean, label: String? = null, additionalLabel: String? = null, tooltip: String? = null,
                              showOnlyActiveUsers: Boolean = true): UISelect<Int> {
-            return UISelect<Int>(id,
+            return UISelect(id,
                     lc,
                     multi = multi,
                     label = label ?: ElementsRegistry.getElementInfo(lc, id)?.i18nKey,
@@ -100,7 +100,7 @@ class UISelect<T>(val id: String,
         }
 
         fun createGroupSelect(lc: LayoutContext,id:String, multi: Boolean, label: String? = null, additionalLabel: String? = null, tooltip: String? = null): UISelect<Int> {
-            return UISelect<Int>(id,
+            return UISelect(id,
                     lc,
                     multi = multi,
                     label = label ?: ElementsRegistry.getElementInfo(lc, id)?.i18nKey,
@@ -109,8 +109,18 @@ class UISelect<T>(val id: String,
                     tooltip = tooltip ?: ElementsRegistry.getElementInfo(lc, id)?.tooltipI18nKey)
         }
 
+        fun createEmployeeSelect(lc: LayoutContext,id:String, multi: Boolean, label: String? = null, additionalLabel: String? = null, tooltip: String? = null): UISelect<Int> {
+            return UISelect(id,
+                    lc,
+                    multi = multi,
+                    label = label ?: ElementsRegistry.getElementInfo(lc, id)?.i18nKey,
+                    additionalLabel = additionalLabel ?: ElementsRegistry.getElementInfo(lc, id)?.additionalI18nKey,
+                    autoCompletion = AutoCompletion.getAutoCompletion4Employees(),
+                    tooltip = tooltip ?: ElementsRegistry.getElementInfo(lc, id)?.tooltipI18nKey)
+        }
+
         fun createCustomerSelect(lc: LayoutContext,id:String, multi: Boolean, label: String? = null, additionalLabel: String? = null, tooltip: String? = null): UISelect<Int> {
-            return UISelect<Int>(id,
+            return UISelect(id,
                     lc,
                     multi = multi,
                     label = label ?: ElementsRegistry.getElementInfo(lc, id)?.i18nKey,
@@ -120,7 +130,7 @@ class UISelect<T>(val id: String,
         }
 
         fun createProjectSelect(lc: LayoutContext,id:String, multi: Boolean, label: String? = null, additionalLabel: String? = null, tooltip: String? = null): UISelect<Int> {
-            return UISelect<Int>(id,
+            return UISelect(id,
                     lc,
                     multi = multi,
                     label = label ?: ElementsRegistry.getElementInfo(lc, id)?.i18nKey,

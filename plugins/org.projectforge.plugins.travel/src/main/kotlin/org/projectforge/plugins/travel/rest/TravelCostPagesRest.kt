@@ -23,6 +23,7 @@
 
 package org.projectforge.plugins.travel.rest
 
+import org.projectforge.framework.i18n.translate
 import org.projectforge.framework.jcr.AttachmentsService
 import org.projectforge.framework.persistence.user.api.ThreadLocalUserContext
 import org.projectforge.plugins.travel.TravelCostDO
@@ -37,6 +38,12 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import javax.annotation.PostConstruct
 import javax.servlet.http.HttpServletRequest
+import kotlin.math.abs
+import jdk.jfr.Timespan.MILLISECONDS
+import java.util.concurrent.TimeUnit
+import javax.xml.datatype.DatatypeConstants.DAYS
+
+
 
 // TODO: Add jcr support (see ContractPagesRest/jcr and attachment*)
 /**
@@ -85,8 +92,20 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
     override fun createListLayout(): UILayout {
         val layout = super.createListLayout()
                 .add(UITable.createUIResultSetTable()
-                        .add(UITableColumn("employee.displayName", "plugins.travel.entry.user"))
-                        .add(lc, "employee.staffNumber", "beginOfTravel", "endOfTravel", "destination", "kilometers"))
+                        .add(UITableColumn("employee.user.displayName", "plugins.travel.entry.user"))
+                        .add(lc, "employee.staffNumber", "beginOfTravel", "endOfTravel", "destination", "kilometers")
+                        .add(UITableColumn("formattedRefundByKilometer",
+                                "TODO"))
+                        .add(UITableColumn("formattedRefundByKilometerPassenger",
+                                "TODO"))
+                        .add(UITableColumn("totalRefund",
+                                "TODO"))
+                        .add(UITableColumn("cateringPrice",
+                                "TODO"))
+                        .add(UITableColumn("cateringNumber",
+                                "TODO"))
+                        .add(UITableColumn("cateringCost",
+                                "TODO")))
         return LayoutUtils.processListPage(layout, this)
     }
 
@@ -95,11 +114,17 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
      */
     override fun createEditLayout(dto: TravelCost, userAccess: UILayout.UserAccess): UILayout {
         //val location = UIInput("location", lc).enableAutoCompletion(this)
+        val dayRange = UICustomized("dayRange")
+                .add("startDateId", "beginOfTravel")
+                .add("endDateId", "endOfTravel")
+                .add("label", translate("timePeriod"))
         val layout = super.createEditLayout(dto, userAccess)
-                .add(UISelect.createUserSelect(lc, "employee", false, "plugins.travel.entry.user"))
+                .add(UISelect.createEmployeeSelect(lc, "employee", false, "plugins.travel.entry.user"))
                 .add(lc, "reasonOfTravel", "destination")
-                .add(UICustomized("cost.number"))
-                .add(lc, "beginOfTravel", "startLocation", "endOfTravel", "returnLocation", "kilometers")
+                // TODO: Maybe a Kost2 Selection?
+                //.add(UICustomized("plugins.travel.edit.kost2"))
+                .add(dayRange)
+                .add(lc, "startLocation", "returnLocation", "kilometers")
                 .add(UICheckbox("hotel", lc))
                 .add(UICheckbox("rentalCar", lc))
                 .add(UICheckbox("train", lc))
