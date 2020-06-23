@@ -67,10 +67,15 @@ class Kost1PagesRest : AbstractDTOPagesRest<Kost1DO, Kost1, Kost1Dao>(Kost1Dao::
      * LAYOUT Edit page
      */
     override fun createEditLayout(dto: Kost1, userAccess: UILayout.UserAccess): UILayout {
+        val costNumber = UICustomized("cost.number")
+                .add("nummernkreis", dto.nummernkreis)
+                .add("bereich", dto.bereich)
+                .add("teilbereich", dto.teilbereich)
+                .add("endziffer", dto.endziffer)
         val layout = super.createEditLayout(dto, userAccess)
                 .add(UIRow()
                         .add(UICol()
-                                .add(UICustomized("cost.number"))
+                                .add(costNumber)
                                 .add(lc, "description", "kostentraegerStatus")))
         return LayoutUtils.processEditPage(layout, dto, this)
     }
