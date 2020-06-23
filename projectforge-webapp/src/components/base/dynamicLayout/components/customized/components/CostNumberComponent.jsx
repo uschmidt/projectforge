@@ -2,8 +2,9 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { DynamicLayoutContext } from '../../../context';
 
-function CostNumberComponent() {
+function CostNumberComponent({ values }) {
     const { data, setData } = React.useContext(DynamicLayoutContext);
+    const { nummernkreis, bereich, teilbereich, endziffer } = values;
 
     const handleNummernkreisChange = (event) => {
         // console.log(event.target.value)
@@ -36,7 +37,7 @@ function CostNumberComponent() {
                     maxLength="1"
                     min="0"
                     max="9"
-                    value={data.nummernkreis.toString()}
+                    value={nummernkreis.toString()}
                     onChange={handleNummernkreisChange}
                 />
                 .
@@ -46,7 +47,7 @@ function CostNumberComponent() {
                     size="3"
                     min="0"
                     max="999"
-                    value={data.bereich.toString()}
+                    value={bereich.toString()}
                     onChange={handleBereichChange}
                 />
                 .
@@ -56,7 +57,7 @@ function CostNumberComponent() {
                     size="2"
                     min="0"
                     max="99"
-                    value={data.teilbereich.toString()}
+                    value={teilbereich.toString()}
                     onChange={handleTeilbereichChange}
                 />
                 .
@@ -66,7 +67,7 @@ function CostNumberComponent() {
                     size="2"
                     min="0"
                     max="99"
-                    value={data.endziffer.toString()}
+                    value={endziffer.toString()}
                     onChange={handleEndzifferChange}
                 />
             </React.Fragment>
