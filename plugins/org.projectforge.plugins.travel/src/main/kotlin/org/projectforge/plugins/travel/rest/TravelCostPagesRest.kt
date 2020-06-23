@@ -40,6 +40,7 @@ import javax.annotation.PostConstruct
 import javax.servlet.http.HttpServletRequest
 import kotlin.math.abs
 import jdk.jfr.Timespan.MILLISECONDS
+import org.projectforge.rest.dto.PostData
 import java.util.concurrent.TimeUnit
 import javax.xml.datatype.DatatypeConstants.DAYS
 
@@ -86,6 +87,11 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
         return travelCost
     }
 
+    override fun onAfterSaveOrUpdate(request: HttpServletRequest, obj: TravelCostDO, postData: PostData<TravelCost>) {
+        super.onAfterSaveOrUpdate(request, obj, postData)
+        print("")
+    }
+
     /**
      * LAYOUT List page
      */
@@ -130,6 +136,8 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
                 .add(UICheckbox("train", lc))
                 .add(UICheckbox("flight", lc))
                 .add(lc, "assumptionOfCosts")
+                .add(UICheckbox("receiptsCompletelyAvailable", lc))
+
         //additionalLabel = "access.users",
         return LayoutUtils.processEditPage(layout, dto, this)
     }

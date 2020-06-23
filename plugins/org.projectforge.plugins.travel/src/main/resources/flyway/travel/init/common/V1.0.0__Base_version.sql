@@ -24,7 +24,8 @@ CREATE TABLE t_plugin_travel (
   attachments_ids              CHARACTER VARYING(10000),
   attachments_size             SMALLINT,
   attachments_last_user_action CHARACTER VARYING(10000),
-  assumption_of_costs          CHARACTER VARYING(4000)
+  assumption_of_costs          CHARACTER VARYING(4000),
+  receipts_completely_available BOOLEAN NOT NULL
 );
 
 CREATE TABLE t_plugin_travel_attr (

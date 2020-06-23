@@ -93,6 +93,7 @@ open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo 
     //open var catering: CateringDay? = null
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption.hotel")
+    @get:Column(name = "hotel")
     open var hotel: Boolean = false
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption.rentalCar")
@@ -100,9 +101,11 @@ open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo 
     open var rentalCar: Boolean = false
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption.train")
+    @get:Column(name = "train")
     open var train: Boolean = false
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption.flight")
+    @get:Column(name = "flight")
     open var flight: Boolean = false
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption.kilometers")
@@ -112,6 +115,10 @@ open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo 
     @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption")
     @get:Column(name = "assumption_of_costs", length = Constants.LENGTH_TEXT)
     open var assumptionOfCosts: String? = null
+
+    @PropertyInfo(i18nKey = "plugins.travel.entry.receiptsComplete")
+    @get:Column(name = "receipts_completely_available")
+    open var receiptsCompletelyAvailable: Boolean = false
 
     @JsonIgnore
     @Field
