@@ -31,6 +31,7 @@ import org.projectforge.plugins.travel.TravelLocation
 import org.projectforge.rest.dto.AttachmentsSupport
 import org.projectforge.rest.dto.BaseDTO
 import org.projectforge.rest.dto.Employee
+import org.projectforge.rest.dto.Kost2
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
@@ -44,10 +45,13 @@ class TravelCost(id: Int? = null,
                  var startLocation: TravelLocation? = null,
                  var returnLocation: TravelLocation? = null,
                  var destination: String? = null,
-                 //var kost2: Kost2? = Kost2(),
+                 var nummernkreis: Int? = 0,
+                 var bereich: Int? = 0,
+                 var teilbereich: Int? = 0,
+                 var endziffer: Int? = 0,
                  var beginOfTravel: java.util.Date? = null,
                  var endOfTravel: java.util.Date? = null,
-                 var catering: CateringDay? = null,
+                 var catering: MutableSet<CateringDay>? = null,
                  var hotel: Boolean = false,
                  var rentalCar: Boolean = false,
                  var train: Boolean = false,
@@ -69,9 +73,14 @@ class TravelCost(id: Int? = null,
     override fun copyFrom(src: TravelCostDO) {
         super.copyFrom(src)
 
-        /*if(src.kost2 != null){
-            this.kost2!!.copyFrom(src.kost2!!)
-        }*/
+        if(src.kost2 != null){
+            nummernkreis = src.kost2!!.nummernkreis
+            bereich = src.kost2!!.bereich
+            teilbereich = src.kost2!!.teilbereich
+            if(src.kost2!!.kost2Art != null){
+                endziffer = src.kost2!!.kost2Art!!.id
+            }
+        }
 
         if(src.employee != null){
             this.employee!!.copyFrom(src.employee!!)
@@ -86,20 +95,17 @@ class TravelCost(id: Int? = null,
         }
 
 
-        val diffInMillies = abs(endOfTravel!!.time - beginOfTravel!!.time)
-        val diff = TimeUnit.HOURS.convert(diffInMillies, TimeUnit.MILLISECONDS)
+        if(beginOfTravel != null && endOfTravel != null) {
+            val diffInMillies = abs(endOfTravel!!.time - beginOfTravel!!.time)
+            val diff = TimeUnit.HOURS.convert(diffInMillies, TimeUnit.MILLISECONDS)
 
-        if(diff >= 24){
-            cateringPrice = NumberFormatter.formatCurrency(28) + " €"
-            rkPauschale = NumberFormatter.formatCurrency(10) + " €"
-        } else if (diff >= 8){
-            cateringPrice = NumberFormatter.formatCurrency(14) + " €"
-            rkPauschale = NumberFormatter.formatCurrency(10) + " €"
-        }
-
-        if(catering != null){
-            cateringNumber = "" + catering!!.getNumber()
-            cateringCost = NumberFormatter.formatCurrency(catering!!.getNumber() * cateringCostPerPoint) + " €"
+            if (diff >= 24) {
+                cateringPrice = NumberFormatter.formatCurrency(28) + " €"
+                rkPauschale = NumberFormatter.formatCurrency(10) + " €"
+            } else if (diff >= 8) {
+                cateringPrice = NumberFormatter.formatCurrency(14) + " €"
+                rkPauschale = NumberFormatter.formatCurrency(10) + " €"
+            }
         }
     }
 }

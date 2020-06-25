@@ -40,11 +40,12 @@ import javax.annotation.PostConstruct
 import javax.servlet.http.HttpServletRequest
 import kotlin.math.abs
 import jdk.jfr.Timespan.MILLISECONDS
+import org.projectforge.business.fibu.kost.Kost2ArtDO
+import org.projectforge.business.fibu.kost.Kost2DO
+import org.projectforge.rest.dto.Kost2
 import org.projectforge.rest.dto.PostData
 import java.util.concurrent.TimeUnit
 import javax.xml.datatype.DatatypeConstants.DAYS
-
-
 
 // TODO: Add jcr support (see ContractPagesRest/jcr and attachment*)
 /**
@@ -66,6 +67,19 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
     override fun transformForDB(dto: TravelCost): TravelCostDO {
         val travelCostDO = TravelCostDO()
         dto.copyTo(travelCostDO)
+        if(travelCostDO.kost2 == null){
+            travelCostDO.kost2 = Kost2DO()
+            travelCostDO.kost2!!.kost2Art = Kost2ArtDO().withId(dto.endziffer)
+        }
+
+        travelCostDO.kost2!!.nummernkreis = dto.nummernkreis!!
+        travelCostDO.kost2!!.bereich = dto.bereich!!
+        travelCostDO.kost2!!.teilbereich = dto.teilbereich!!
+
+        if(travelCostDO.kost2?.kost2Art != null){
+            travelCostDO.kost2?.kost2Art?.id = dto.endziffer
+        }
+
         return travelCostDO
     }
 
@@ -85,11 +99,6 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
         val travelCost = super.newBaseDO(request)
         //travelCost.user = ThreadLocalUserContext.getUser()
         return travelCost
-    }
-
-    override fun onAfterSaveOrUpdate(request: HttpServletRequest, obj: TravelCostDO, postData: PostData<TravelCost>) {
-        super.onAfterSaveOrUpdate(request, obj, postData)
-        print("")
     }
 
     /**
@@ -119,6 +128,12 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
      * LAYOUT Edit page
      */
     override fun createEditLayout(dto: TravelCost, userAccess: UILayout.UserAccess): UILayout {
+        val costNumber = UICustomized("cost.number")
+            costNumber.add("nummernkreis", dto.nummernkreis!!)
+                    .add("bereich", dto.bereich!!)
+                    .add("teilbereich", dto.teilbereich!!)
+                    .add("endziffer", dto.endziffer!!)
+
         //val location = UIInput("location", lc).enableAutoCompletion(this)
         val dayRange = UICustomized("dayRange")
                 .add("startDateId", "beginOfTravel")
@@ -127,8 +142,7 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
         val layout = super.createEditLayout(dto, userAccess)
                 .add(UISelect.createEmployeeSelect(lc, "employee", false, "plugins.travel.entry.user"))
                 .add(lc, "reasonOfTravel", "destination")
-                // TODO: Maybe a Kost2 Selection?
-                //.add(UICustomized("plugins.travel.edit.kost2"))
+                .add(costNumber)
                 .add(dayRange)
                 .add(lc, "startLocation", "returnLocation", "kilometers")
                 .add(UICheckbox("hotel", lc))

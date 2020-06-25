@@ -25,6 +25,7 @@ package org.projectforge.plugins.travel
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import de.micromata.genome.db.jpa.history.api.NoHistory
+import de.micromata.genome.db.jpa.tabattr.api.EntityWithConfigurableAttr
 import de.micromata.genome.db.jpa.tabattr.entities.JpaTabAttrBaseDO
 import de.micromata.genome.db.jpa.tabattr.entities.JpaTabAttrDataBaseDO
 import org.hibernate.search.annotations.Field
@@ -51,9 +52,8 @@ import javax.persistence.*
             javax.persistence.Index(name = "idx_fk_t_plugin_travel_kost2_id", columnList = "kost2_id"),
             javax.persistence.Index(name = "idx_fk_t_plugin_travel_employee_id", columnList = "employee_id")
         ])
-open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo {
+open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), EntityWithConfigurableAttr, AttachmentsInfo {
 
-    // TODO: Anke requires the staffnumber, which is part of EmployeeDO
     @PropertyInfo(i18nKey = "plugins.travel.entry.user")
     @IndexedEmbedded(depth = 1)
     @get:ManyToOne(fetch = FetchType.EAGER)
@@ -77,7 +77,8 @@ open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo 
     open var destination: String? = null
 
     @PropertyInfo(i18nKey = "fibu.kost2")
-    @get:ManyToOne(fetch = FetchType.EAGER)
+    @IndexedEmbedded(depth = 1)
+    @get:ManyToOne(fetch = FetchType.EAGER, cascade = [CascadeType.MERGE])
     @get:JoinColumn(name = "kost2_id", nullable = true)
     open var kost2: Kost2DO? = null
 
@@ -89,8 +90,8 @@ open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo 
     @get:Column(name = "end_of_travel")
     open var endOfTravel: Date? = null
 
-    // TODO: Avoid making CateringDay a new table
-    //open var catering: CateringDay? = null
+    //@get:OneToMany(cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
+    //open var catering: List<CateringDay>? = null
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption.hotel")
     @get:Column(name = "hotel")
@@ -141,6 +142,11 @@ open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), AttachmentsInfo 
     @JsonIgnore
     @get:Column(length = 10000, name = "attachments_last_user_action")
     override var attachmentsLastUserAction: String? = null
+
+    @Transient
+    override fun getAttrSchemaName(): String {
+        return "travelCost"
+    }
 
     @Transient
     override fun getAttrEntityClass(): Class<out JpaTabAttrBaseDO<TravelCostDO, Int>> {
