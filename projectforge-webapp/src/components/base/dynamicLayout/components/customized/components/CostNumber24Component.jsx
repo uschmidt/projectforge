@@ -2,8 +2,11 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { DynamicLayoutContext } from '../../../context';
 
-function CostNumber24Component() {
+function CostNumber24Component({ values }) {
     const { data, setData } = React.useContext(DynamicLayoutContext);
+    const {
+        bereich, nummer,
+    } = values;
 
     const handleBereichChange = (event) => {
         // console.log(event.target.value)
@@ -14,13 +17,6 @@ function CostNumber24Component() {
         // console.log(event.target.value)
         setData({ nummer: event.target.value });
     };
-
-    function ensureBereich() {
-        if (data.bereich === undefined) {
-            return '0';
-        }
-        return data.bereich.toString();
-    }
 
 
     return React.useMemo(
@@ -36,7 +32,7 @@ function CostNumber24Component() {
                     size="3"
                     min="0"
                     max="999"
-                    value={ensureBereich}
+                    defaultValue={bereich}
                     onChange={handleBereichChange}
                 />
                 .
@@ -46,7 +42,7 @@ function CostNumber24Component() {
                     size="2"
                     min="0"
                     max="99"
-                    value={data.nummer.toString()}
+                    defaultValue={nummer}
                     onChange={handleNummerChange}
                 />
                 .

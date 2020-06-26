@@ -4,7 +4,9 @@ import { DynamicLayoutContext } from '../../../context';
 
 function CostNumberComponent({ values }) {
     const { data, setData } = React.useContext(DynamicLayoutContext);
-    const { nummernkreis, bereich, teilbereich, endziffer } = values;
+    const {
+        nummernkreis, bereich, teilbereich, endziffer,
+    } = values;
 
     const handleNummernkreisChange = (event) => {
         // console.log(event.target.value)
@@ -37,7 +39,7 @@ function CostNumberComponent({ values }) {
                     maxLength="1"
                     min="0"
                     max="9"
-                    value={nummernkreis.toString()}
+                    defaultValue={nummernkreis.toString()}
                     onChange={handleNummernkreisChange}
                 />
                 .
@@ -47,7 +49,7 @@ function CostNumberComponent({ values }) {
                     size="3"
                     min="0"
                     max="999"
-                    value={bereich.toString()}
+                    defaultValue={bereich.toString()}
                     onChange={handleBereichChange}
                 />
                 .
@@ -57,7 +59,7 @@ function CostNumberComponent({ values }) {
                     size="2"
                     min="0"
                     max="99"
-                    value={teilbereich.toString()}
+                    defaultValue={teilbereich.toString()}
                     onChange={handleTeilbereichChange}
                 />
                 .
@@ -67,7 +69,7 @@ function CostNumberComponent({ values }) {
                     size="2"
                     min="0"
                     max="99"
-                    value={endziffer.toString()}
+                    defaultValue={endziffer.toString()}
                     onChange={handleEndzifferChange}
                 />
             </React.Fragment>
