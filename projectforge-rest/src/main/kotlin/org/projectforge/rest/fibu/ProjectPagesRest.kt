@@ -23,6 +23,8 @@
 
 package org.projectforge.rest.fibu
 
+import org.projectforge.business.fibu.KundeDO
+import org.projectforge.business.fibu.KundeDao
 import org.projectforge.business.fibu.ProjektDO
 import org.projectforge.business.fibu.ProjektDao
 import org.projectforge.business.fibu.kost.KostCache
@@ -44,16 +46,24 @@ class ProjectPagesRest
     @Autowired
     private val kostCache: KostCache? = null
 
+    @Autowired
+    private val kundeDao: KundeDao? = null
+
     override fun transformFromDB(obj: ProjektDO, editMode: Boolean): Project {
         val projekt = Project()
         projekt.copyFrom(obj)
         projekt.transformKost2(kostCache?.getAllKost2Arts(obj.id))
+        projekt.bereich = obj.bereich ?: 0
         return projekt
     }
 
     override fun transformForDB(dto: Project): ProjektDO {
         val projektDO = ProjektDO()
         dto.copyTo(projektDO)
+        projektDO.internKost2_4 = dto.bereich
+        if(dto.customer != null){
+            projektDO.kunde = kundeDao!!.getById(dto.customer!!.id)
+        }
         return projektDO
     }
 
@@ -67,7 +77,9 @@ class ProjectPagesRest
         val layout = super.createListLayout()
                 .add(UITable.createUIResultSetTable()
                         .add(UITableColumn("kost", title = "fibu.projekt.nummer"))
-                        .add(lc, "identifier", "customer.name", "name", "kunde.division", "task", "konto", "status", "projektManagerGroup")
+                        .add(lc, "identifier")
+                        .add(UITableColumn("customer.name", title = "fibu.kunde.name"))
+                        .add(lc, "name", "kunde.division", "task", "konto", "status", "projektManagerGroup")
                         .add(UITableColumn("kost2ArtsAsString", title = "fibu.kost2art.kost2arten"))
                         .add(lc,"description"))
         layout.getTableColumnById("konto").formatter = Formatter.KONTO
@@ -80,13 +92,16 @@ class ProjectPagesRest
      * LAYOUT Edit page
      */
     override fun createEditLayout(dto: Project, userAccess: UILayout.UserAccess): UILayout {
+        val costNumber = UICustomized("cost.number24")
+                .add("nummer", dto.nummer)
+                .add("bereich", dto.bereich)
         val konto = UIInput("konto", lc, tooltip = "fibu.projekt.konto.tooltip")
 
         val layout = super.createEditLayout(dto, userAccess)
                 .add(UIRow()
                         .add(UICol()
-                                .add(UICustomized("cost.number24"))
-                                .add(UISelect.createCustomerSelect(lc, "kunde", false, "fibu.kunde"))
+                                .add(costNumber)
+                                .add(UISelect.createCustomerSelect(lc, "customer", false, "fibu.kunde"))
                                 .add(konto)
                                 .add(lc, "name", "identifier", "task")
                                 .add(UISelect.createGroupSelect(lc, "projektManagerGroup", false, "fibu.projekt.projektManagerGroup"))
