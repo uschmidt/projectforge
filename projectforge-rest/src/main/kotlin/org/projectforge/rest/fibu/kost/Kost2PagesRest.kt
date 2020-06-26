@@ -25,6 +25,8 @@ package org.projectforge.rest.fibu.kost
 
 import org.projectforge.business.fibu.KostFormatter
 import org.projectforge.business.fibu.ProjektDO
+import org.projectforge.business.fibu.ProjektDao
+import org.projectforge.business.fibu.kost.Kost2ArtDO
 import org.projectforge.business.fibu.kost.Kost2DO
 import org.projectforge.business.fibu.kost.Kost2Dao
 import org.projectforge.rest.config.Rest
@@ -33,12 +35,16 @@ import org.projectforge.rest.dto.Kost2
 import org.projectforge.rest.dto.Customer
 import org.projectforge.rest.dto.Project
 import org.projectforge.ui.*
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("${Rest.URL}/cost2")
 class Kost2PagesRest : AbstractDTOPagesRest<Kost2DO, Kost2, Kost2Dao>(Kost2Dao::class.java, "fibu.kost2.title") {
+
+    @Autowired
+    private val projektDao: ProjektDao? = null
 
     override fun transformFromDB(obj: Kost2DO, editMode: Boolean): Kost2 {
         val kost2 = Kost2()
@@ -61,8 +67,14 @@ class Kost2PagesRest : AbstractDTOPagesRest<Kost2DO, Kost2, Kost2Dao>(Kost2Dao::
     override fun transformForDB(dto: Kost2): Kost2DO {
         val kost2DO = Kost2DO()
         dto.copyTo(kost2DO)
-        kost2DO.projekt = ProjektDO()
-        dto.project?.copyTo(kost2DO.projekt!!)
+        if(dto.project != null){
+            kost2DO.projekt = projektDao!!.getById(dto.project!!.id)
+        }
+        if(kost2DO.kost2Art != null){
+            kost2DO.kost2Art?.id = dto.endziffer
+        } else {
+            kost2DO.kost2Art = Kost2ArtDO().withId(dto.endziffer)
+        }
         return kost2DO
     }
 
