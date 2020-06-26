@@ -58,7 +58,7 @@ object BaseDaoSupport {
         val em = emgr.entityManager
         em.persist(obj)
         if (baseDao.logDatabaseActions) {
-            log.info("New " + baseDao.clazz.getSimpleName() + " added (" + obj.getId() + "): " + obj.toString())
+            log.info("New " + baseDao.clazz.simpleName + " added (" + obj.id + "): " + obj.toString())
         }
         baseDao.prepareHibernateSearch(obj, OperationType.INSERT)
         em.merge(obj)
@@ -70,8 +70,8 @@ object BaseDaoSupport {
     private fun <O : ExtendedBaseDO<Int>> preInternalSave(baseDao: BaseDao<O>, obj: O) {
         Validate.notNull<O>(obj)
         //TODO: Muss der richtige Tenant gesetzt werden. Ist nur Workaround.
-        if (obj.getTenant() == null) {
-            obj.setTenant(baseDao.getDefaultTenant())
+        if (obj.tenant == null) {
+            obj.tenant = baseDao.defaultTenant
         }
         obj.setCreated()
         obj.setLastUpdate()
@@ -91,7 +91,7 @@ object BaseDaoSupport {
         baseDao.emgrFactory.runInTrans { emgr ->
             internalUpdate(emgr, baseDao, obj, checkAccess, res)
         }
-        postInternalUpdate<O>(baseDao, obj, res)
+        postInternalUpdate(baseDao, obj, res)
         return res.modStatus
     }
 
@@ -129,7 +129,7 @@ object BaseDaoSupport {
                 em.merge(dbObj)
                 em.flush()
                 if (baseDao.logDatabaseActions) {
-                    log.info(baseDao.clazz.getSimpleName() + " updated: " + dbObj.toString())
+                    log.info(baseDao.clazz.simpleName + " updated: " + dbObj.toString())
                 }
                 baseDao.flushSearchSession(em)
             }
@@ -168,17 +168,17 @@ object BaseDaoSupport {
                 HistoryBaseDaoAdapter.wrapHistoryUpdate(emgr, dbObj) {
                     BaseDaoJpaAdapter.beforeUpdateCopyMarkDelete(dbObj, obj)
                     baseDao.copyValues(obj, dbObj) // If user has made additional changes.
-                    dbObj.setDeleted(true)
+                    dbObj.isDeleted = true
                     dbObj.setLastUpdate()
                     obj.isDeleted = true                     // For callee having same object.
-                    obj.setLastUpdate(dbObj.getLastUpdate()) // For callee having same object.
+                    obj.lastUpdate = dbObj.lastUpdate // For callee having same object.
                     em.merge(dbObj)
                     em.flush()
                     baseDao.flushSearchSession(em)
                     null
                 }
                 if (baseDao.logDatabaseActions) {
-                    log.info(baseDao.clazz.getSimpleName() + " marked as deleted: " + dbObj.toString())
+                    log.info(baseDao.clazz.simpleName + " marked as deleted: " + dbObj.toString())
                 }
             }
             baseDao.afterSaveOrModify(obj)
@@ -198,7 +198,7 @@ object BaseDaoSupport {
                 dbObj.isDeleted = false
                 dbObj.setLastUpdate()
                 obj.isDeleted = false                   // For callee having same object.
-                obj.setLastUpdate(dbObj.getLastUpdate()) // For callee having same object.
+                obj.lastUpdate = dbObj.lastUpdate // For callee having same object.
                 em.merge(dbObj)
                 em.flush()
                 baseDao.flushSearchSession(em)
@@ -210,7 +210,7 @@ object BaseDaoSupport {
         baseDao.afterSaveOrModify(obj)
         baseDao.afterUndelete(obj)
         if (baseDao.logDatabaseActions) {
-            log.info(baseDao.clazz.getSimpleName() + " undeleted: " + dbObj.toString())
+            log.info(baseDao.clazz.simpleName + " undeleted: " + dbObj.toString())
         }
     }
 
@@ -225,7 +225,7 @@ object BaseDaoSupport {
                     preInternalUpdate(baseDao, obj, false)
                     val res = ResultObject<O>()
                     internalUpdate(emgr, baseDao, obj, false, res)
-                    postInternalUpdate<O>(baseDao, obj, res)
+                    postInternalUpdate(baseDao, obj, res)
                 } else {
                     preInternalSave(baseDao, obj)
                     internalSave(emgr, baseDao, obj)
@@ -242,7 +242,7 @@ object BaseDaoSupport {
      */
     @JvmStatic
     fun <O : ExtendedBaseDO<Int>> internalSaveOrUpdate(baseDao: BaseDao<O>, col: Collection<O>, blockSize: Int) {
-        val list: MutableList<O> = ArrayList<O>()
+        val list: MutableList<O> = ArrayList()
         var counter = 0
         for (obj in col) {
             list.add(obj)

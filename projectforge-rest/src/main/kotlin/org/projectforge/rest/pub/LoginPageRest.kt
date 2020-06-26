@@ -169,7 +169,7 @@ open class LoginPageRest {
         if (loginData.stayLoggedIn == true) {
             val loggedInUser = userService.internalGetById(user.id)
             val stayLoggedInKey = userAuthenticationsService.internalGetToken(user.id, UserTokenType.STAY_LOGGED_IN_KEY)
-            val cookie = Cookie(Const.COOKIE_NAME_FOR_STAY_LOGGED_IN, "${loggedInUser.getId()}:${loggedInUser.username}:$stayLoggedInKey")
+            val cookie = Cookie(Const.COOKIE_NAME_FOR_STAY_LOGGED_IN, "${loggedInUser.id}:${loggedInUser.username}:$stayLoggedInKey")
             cookieService.addStayLoggedInCookie(request, response, cookie)
         }
         // Execute login:
@@ -196,9 +196,9 @@ open class LoginPageRest {
         val loginHandler = applicationContext.getBean(LoginDefaultHandler::class.java)
 
         val result = loginHandler.checkLogin(loginData.username, loginData.password)
-        if (result.getLoginResultStatus() == LoginResultStatus.SUCCESS) {
+        if (result.loginResultStatus == LoginResultStatus.SUCCESS) {
             loginProtection.clearLoginTimeOffset(result.user?.username, result.user?.id, clientIpAddress)
-        } else if (result.getLoginResultStatus() == LoginResultStatus.FAILED) {
+        } else if (result.loginResultStatus == LoginResultStatus.FAILED) {
             loginProtection.incrementFailedLoginTimeOffset(loginData.username, clientIpAddress)
         }
         return result
