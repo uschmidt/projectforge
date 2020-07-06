@@ -21,15 +21,25 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-package org.projectforge.rest.dto
+package org.projectforge.web
 
-import org.projectforge.framework.persistence.user.entities.PFUserDO
-import org.projectforge.framework.persistence.user.entities.UserPrefDO
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
+import org.projectforge.business.address.AddressDO
+import org.projectforge.business.address.AddressImageDao
+import org.projectforge.caldav.service.VCardService
+import java.nio.charset.StandardCharsets
+import java.time.LocalDate
+import java.time.Month
 
-class UserPref(
-        var user: PFUserDO? = null,
-        var name: String? = null,
-        var area: String? = null
-): BaseDTO<UserPrefDO>() {
-
+class VCardServiceTest {
+    @Test
+    fun vcardTest() {
+        val address = AddressDO()
+        address.birthday = LocalDate.of(1970, Month.NOVEMBER, 21)
+        address.firstName = "Kai"
+        address.name = "Reinhard"
+        val byteArray = VCardService().buildVCardByteArray(address, AddressImageDao())
+        Assertions.assertTrue(byteArray.toString(StandardCharsets.UTF_8).contains("BDAY:1970-11-21"))
+    }
 }

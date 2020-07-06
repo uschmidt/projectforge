@@ -21,15 +21,31 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-package org.projectforge.rest.dto
+package org.projectforge.plugins.ihk;
 
-import org.projectforge.framework.persistence.user.entities.PFUserDO
-import org.projectforge.framework.persistence.user.entities.UserPrefDO
+public class IHKCommentObject {
 
-class UserPref(
-        var user: PFUserDO? = null,
-        var name: String? = null,
-        var area: String? = null
-): BaseDTO<UserPrefDO>() {
+    String ausbildungsStartDate;
+    int ausbildungsJahr;
+    String teamName;
 
+    public IHKCommentObject(String ausbildungsStartDate, int ausbildungsJahr, String teamName){
+
+        this.ausbildungsStartDate = ausbildungsStartDate;
+        this.ausbildungsJahr = ausbildungsJahr;
+        this.teamName = teamName;
+
+    }
+
+    public int getAusbildungsJahr() {
+        return ausbildungsJahr;
+    }
+
+    public String getAusbildungStartDate() {
+        return ausbildungsStartDate;
+    }
+
+    public String getTeamName() {
+        return teamName;
+    }
 }

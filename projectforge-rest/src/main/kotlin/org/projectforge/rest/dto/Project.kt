@@ -25,10 +25,12 @@ package org.projectforge.rest.dto
 
 import org.projectforge.business.fibu.ProjektDO
 import org.projectforge.business.fibu.ProjektStatus
+import org.projectforge.framework.persistence.user.entities.PFUserDO
 
 class Project(id: Int? = null,
               displayName: String? = null,
               var nummer: Int = 0,
+              var bereich: Int = 0,
               var name: String? = null,
               var identifier: String? = null,
               var status: ProjektStatus? = null,
@@ -36,8 +38,8 @@ class Project(id: Int? = null,
               var konto: Konto? = null,
               var task: Task? = null,
               var projektManagerGroup: Group? = null,
+              var projectManager: PFUserDO? = null,
               var nummernkreis: Int? = null,
-              var bereich: Int? = null,
               var kost: String? = null,
               var kost2Arts: MutableList<Kost2Art>? = ArrayList())
     : BaseDTODisplayObject<ProjektDO>(id, displayName = displayName) {
@@ -60,7 +62,6 @@ class Project(id: Int? = null,
 
     override fun copyFrom(src: ProjektDO) {
         super.copyFrom(src)
-        this.kost = src.kost
         this.customer = src.kunde?.let {
             Customer(it)
         }
@@ -70,6 +71,8 @@ class Project(id: Int? = null,
         this.task = src.task?.let {
             Task(it)
         }
+
+        this.kost = src.kost
     }
 
 

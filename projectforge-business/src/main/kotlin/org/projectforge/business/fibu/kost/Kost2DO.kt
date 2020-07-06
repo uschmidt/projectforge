@@ -95,7 +95,7 @@ open class Kost2DO: DefaultBaseDO(), Comparable<Kost2DO>, DisplayNameCapable {
     open var teilbereich: Int = 0
 
     @PropertyInfo(i18nKey = "fibu.kost2.art")
-    @get:ManyToOne(fetch = FetchType.EAGER)
+    @get:ManyToOne(cascade = [CascadeType.MERGE], fetch = FetchType.EAGER)
     @get:JoinColumn(name = "kost2_art_id", nullable = false)
     open var kost2Art: Kost2ArtDO? = null
 
@@ -122,7 +122,7 @@ open class Kost2DO: DefaultBaseDO(), Comparable<Kost2DO>, DisplayNameCapable {
      */
     @PropertyInfo(i18nKey = "fibu.projekt")
     @IndexedEmbedded(depth = 2)
-    @get:ManyToOne(fetch = FetchType.EAGER)
+    @get:ManyToOne(cascade = [CascadeType.MERGE], fetch = FetchType.EAGER)
     @get:JoinColumn(name = "projekt_id")
     open var projekt: ProjektDO? = null
 
