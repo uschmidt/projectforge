@@ -25,9 +25,6 @@ package org.projectforge.plugins.travel
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import de.micromata.genome.db.jpa.history.api.NoHistory
-import de.micromata.genome.db.jpa.tabattr.api.EntityWithConfigurableAttr
-import de.micromata.genome.db.jpa.tabattr.entities.JpaTabAttrBaseDO
-import de.micromata.genome.db.jpa.tabattr.entities.JpaTabAttrDataBaseDO
 import org.hibernate.search.annotations.Field
 import org.hibernate.search.annotations.Indexed
 import org.hibernate.search.annotations.IndexedEmbedded
@@ -36,8 +33,8 @@ import org.projectforge.business.fibu.kost.Kost2DO
 import org.projectforge.common.anots.PropertyInfo
 import org.projectforge.framework.jcr.AttachmentsInfo
 import org.projectforge.framework.persistence.api.Constants
-import org.projectforge.framework.persistence.attr.entities.DefaultBaseWithAttrDO
-import java.time.LocalDate
+import org.projectforge.framework.persistence.entities.DefaultBaseDO
+import org.projectforge.framework.persistence.user.entities.UserPrefDO
 import java.util.*
 import javax.persistence.*
 
@@ -52,7 +49,9 @@ import javax.persistence.*
             javax.persistence.Index(name = "idx_fk_t_plugin_travel_kost2_id", columnList = "kost2_id"),
             javax.persistence.Index(name = "idx_fk_t_plugin_travel_employee_id", columnList = "employee_id")
         ])
-open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), EntityWithConfigurableAttr, AttachmentsInfo {
+open class TravelCostDO: DefaultBaseDO(), AttachmentsInfo {
+    @JsonIgnore
+    private val log = org.slf4j.LoggerFactory.getLogger(TravelCostDO::class.java)
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.user")
     @IndexedEmbedded(depth = 1)
@@ -90,8 +89,40 @@ open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), EntityWithConfig
     @get:Column(name = "end_of_travel")
     open var endOfTravel: Date? = null
 
-    //@get:OneToMany(cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
-    //open var catering: List<CateringDay>? = null
+    /**
+     * The value as string representation (e. g. json).
+     */
+    @get:Column(name = "value_string", length = 100000) // 100.000, should be space enough.
+    var cateringValueString: String? = null
+
+    /**
+     * The value as object (deserialized from json).
+     * The list of cateringDays
+     */
+    @get:Transient
+    var cateringValueObject: Any? = null
+
+    /**
+     * The type of the value (class name). It's not of type class because types are may-be refactored or removed.
+     */
+    @get:Transient
+    var cateringValueTypeString: String? = null
+
+    /**
+     * [valueTypeString] as class or null, if [valueTypeString] is null.
+     */
+    val valueType: Class<*>?
+        @Transient
+        get() {
+            try {
+                return if (cateringValueTypeString.isNullOrBlank())
+                    null
+                else Class.forName(cateringValueTypeString)
+            } catch (ex: ClassNotFoundException) {
+                log.error("Can't get value type from '$cateringValueTypeString'. Class not found (old incompatible ProjectForge version)?")
+                return null
+            }
+        }
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.costAssumption.hotel")
     @get:Column(name = "hotel")
@@ -142,34 +173,6 @@ open class TravelCostDO: DefaultBaseWithAttrDO<TravelCostDO>(), EntityWithConfig
     @JsonIgnore
     @get:Column(length = 10000, name = "attachments_last_user_action")
     override var attachmentsLastUserAction: String? = null
-
-    @Transient
-    override fun getAttrSchemaName(): String {
-        return "travelCost"
-    }
-
-    @Transient
-    override fun getAttrEntityClass(): Class<out JpaTabAttrBaseDO<TravelCostDO, Int>> {
-        return TravelCostAttrDO::class.java
-    }
-
-    @Transient
-    override fun getAttrEntityWithDataClass(): Class<out JpaTabAttrBaseDO<TravelCostDO, Int>> {
-        return TravelCostAttrWithDataDO::class.java
-    }
-
-    @Transient
-    override fun getAttrDataEntityClass(): Class<out JpaTabAttrDataBaseDO<out JpaTabAttrBaseDO<TravelCostDO, Int>, Int>> {
-        return TravelCostAttrDataDO::class.java
-    }
-
-    override fun createAttrEntity(key: String, type: Char, value: String): JpaTabAttrBaseDO<TravelCostDO, Int> {
-        return TravelCostAttrDO(this, key, type, value)
-    }
-
-    override fun createAttrEntityWithData(key: String, type: Char, value: String): JpaTabAttrBaseDO<TravelCostDO, Int> {
-        return TravelCostAttrWithDataDO(this, key, type, value)
-    }
 
 
 }
