@@ -23,24 +23,40 @@
 
 package org.projectforge.plugins.travel
 
-import org.projectforge.business.vacation.service.VacationSendMailService
-import org.projectforge.framework.access.OperationType
+import com.fasterxml.jackson.annotation.JsonAutoDetect
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.PropertyAccessor
+import com.fasterxml.jackson.core.JsonProcessingException
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import org.apache.commons.lang3.StringUtils
+import org.projectforge.business.user.UserPrefDao
+import org.projectforge.framework.json.*
 import org.projectforge.framework.persistence.api.BaseDao
 import org.projectforge.framework.persistence.api.BaseSearchFilter
 import org.projectforge.framework.persistence.api.QueryFilter
 import org.projectforge.framework.persistence.user.api.ThreadLocalUserContext
 import org.projectforge.framework.persistence.user.entities.PFUserDO
+import org.projectforge.framework.time.PFDateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
+import java.io.IOException
+import java.time.LocalDate
 
 /**
  * @author Jan Brümmer (j.bruemmer@micromata.de)
  */
 @Repository
 open class TravelCostDao protected constructor() : BaseDao<TravelCostDO>(TravelCostDO::class.java) {
+    private val log = org.slf4j.LoggerFactory.getLogger(UserPrefDao::class.java)
 
     @Autowired
     private lateinit var travelCostSendMailService: TravelCostSendMailService
+
+    private val MAGIC_JSON_START = "^JSON:"
 
     init {
         userRightId = TravelPluginUserRightId.PLUGIN_TRAVEL
@@ -60,6 +76,50 @@ open class TravelCostDao protected constructor() : BaseDao<TravelCostDO>(TravelC
         return queryFilter
     }
 
+    fun deserizalizeValueObject(travelCost: TravelCostDO): Any? {
+        if (travelCost.valueType == null)
+            return null
+        travelCost.cateringValueObject = fromJson(travelCost.cateringValueString!!, travelCost.valueType)
+        return travelCost.cateringValueObject
+    }
+
+    private fun isJsonObject(value: String): Boolean {
+        return StringUtils.startsWith(value, MAGIC_JSON_START)
+    }
+
+    private fun <T> fromJson(json: String?, classOfT: Class<T>?): T? {
+        var json = json ?: ""
+        if (!isJsonObject(json))
+            return null
+        json = json.substring(MAGIC_JSON_START.length)
+        try {
+            return getObjectMapper().readValue(json, classOfT!!)
+        } catch (ex: IOException) {
+            log.error("Can't deserialize json object (may-be incompatible ProjectForge versions): " + ex.message + " json=" + json, ex)
+            return null
+        }
+
+    }
+
+    override fun onSaveOrModify(obj: TravelCostDO) {
+        if (obj.cateringValueObject == null) {
+            obj.cateringValueString = null
+            obj.cateringValueTypeString = null
+        } else {
+            obj.cateringValueString = toJson(obj.cateringValueObject)
+            obj.cateringValueTypeString = obj.cateringValueObject!!.javaClass.name
+        }
+    }
+
+    private fun toJson(obj: Any?): String {
+        try {
+            return MAGIC_JSON_START + getObjectMapper().writeValueAsString(obj)
+        } catch (ex: JsonProcessingException) {
+            log.error("Error while trying to serialze object as json: " + ex.message, ex)
+            return ""
+        }
+    }
+
     override fun afterSave(obj: TravelCostDO) {
         super.afterSave(obj)
         //travelCostSendMailService.checkAndSendMail(obj, OperationType.INSERT)
@@ -68,5 +128,44 @@ open class TravelCostDao protected constructor() : BaseDao<TravelCostDO>(TravelC
     override fun newInstance(): TravelCostDO {
         return TravelCostDO()
     }
+
+    companion object {
+        private var objectMapper: ObjectMapper? = null
+
+        fun getObjectMapper(): ObjectMapper {
+            if (objectMapper != null) {
+                return objectMapper!!
+            }
+            val mapper = ObjectMapper()
+            mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
+            mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            mapper.setSerializationInclusion(JsonInclude.Include.NON_DEFAULT)
+            mapper.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false)
+            mapper.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false)
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+
+            val module = SimpleModule()
+            module.addSerializer(LocalDate::class.java, LocalDateSerializer())
+            module.addDeserializer(LocalDate::class.java, LocalDateDeserializer())
+
+            module.addSerializer(PFDateTime::class.java, PFDateTimeSerializer())
+            module.addDeserializer(PFDateTime::class.java, PFDateTimeDeserializer())
+
+            module.addSerializer(java.util.Date::class.java, UtilDateSerializer(UtilDateFormat.ISO_DATE_TIME_SECONDS))
+            module.addDeserializer(java.util.Date::class.java, UtilDateDeserializer())
+
+            module.addSerializer(java.sql.Date::class.java, SqlDateSerializer())
+            module.addDeserializer(java.sql.Date::class.java, SqlDateDeserializer())
+
+            mapper.registerModule(module)
+            mapper.registerModule(KotlinModule())
+            objectMapper = mapper
+            return mapper
+        }
+    }
+
+
+
 
 }

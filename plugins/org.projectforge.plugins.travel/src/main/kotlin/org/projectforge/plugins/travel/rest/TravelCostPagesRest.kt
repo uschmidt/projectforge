@@ -23,29 +23,28 @@
 
 package org.projectforge.plugins.travel.rest
 
-import org.projectforge.framework.i18n.translate
+import org.projectforge.business.fibu.kost.Kost2ArtDO
+import org.projectforge.business.fibu.kost.Kost2DO
 import org.projectforge.framework.jcr.AttachmentsService
-import org.projectforge.framework.persistence.user.api.ThreadLocalUserContext
+import org.projectforge.model.rest.RestPaths
 import org.projectforge.plugins.travel.TravelCostDO
 import org.projectforge.plugins.travel.TravelCostDao
 import org.projectforge.plugins.travel.dto.TravelCost
 import org.projectforge.rest.config.JacksonConfiguration
 import org.projectforge.rest.config.Rest
 import org.projectforge.rest.core.AbstractDTOPagesRest
+import org.projectforge.rest.core.PagesResolver
+import org.projectforge.rest.dto.PostData
 import org.projectforge.ui.*
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import javax.annotation.PostConstruct
 import javax.servlet.http.HttpServletRequest
-import kotlin.math.abs
-import jdk.jfr.Timespan.MILLISECONDS
-import org.projectforge.business.fibu.kost.Kost2ArtDO
-import org.projectforge.business.fibu.kost.Kost2DO
-import org.projectforge.rest.dto.Kost2
-import org.projectforge.rest.dto.PostData
-import java.util.concurrent.TimeUnit
-import javax.xml.datatype.DatatypeConstants.DAYS
+import javax.validation.Valid
 
 // TODO: Add jcr support (see ContractPagesRest/jcr and attachment*)
 /**
@@ -58,7 +57,11 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
     @Autowired
     private lateinit var attachmentsService: AttachmentsService
 
+    @Autowired
+    private lateinit var travelCostDao: TravelCostDao
+
     override fun transformFromDB(obj: TravelCostDO, editMode: Boolean): TravelCost {
+        travelCostDao.deserizalizeValueObject(obj)
         val travelCost = TravelCost()
         travelCost.copyFrom(obj)
         return travelCost
@@ -80,6 +83,8 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
             travelCostDO.kost2?.kost2Art?.id = dto.endziffer
         }
 
+        travelCostDO.cateringValueObject = dto.catering
+
         return travelCostDO
     }
 
@@ -99,6 +104,21 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
         val travelCost = super.newBaseDO(request)
         //travelCost.user = ThreadLocalUserContext.getUser()
         return travelCost
+    }
+
+    override fun onWatchFieldsUpdate(request: HttpServletRequest, dto: TravelCost, watchFieldsTriggered: Array<String>?): ResponseEntity<ResponseAction> {
+        val startDate = dto.beginOfTravel
+        val endDate = dto.endOfTravel
+        if (watchFieldsTriggered?.contains("beginOfTravel") == true && startDate != null) {
+            if (endDate == null || endDate.before(startDate)) {
+                dto.endOfTravel = startDate
+            }
+        } else if (watchFieldsTriggered?.contains("endOfTravel") == true && endDate != null) {
+            if (startDate == null || endDate.before(startDate)) {
+                dto.beginOfTravel = endDate
+            }
+        }
+        return ResponseEntity.ok(ResponseAction(targetType = TargetType.UPDATE).addVariable("data", dto))
     }
 
     /**
@@ -135,22 +155,22 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
                     .add("endziffer", dto.endziffer!!)
 
         //val location = UIInput("location", lc).enableAutoCompletion(this)
-        val dayRange = UICustomized("dayRange")
-                .add("startDateId", "beginOfTravel")
-                .add("endDateId", "endOfTravel")
-                .add("label", translate("timePeriod"))
         val layout = super.createEditLayout(dto, userAccess)
                 .add(UISelect.createEmployeeSelect(lc, "employee", false, "plugins.travel.entry.user"))
                 .add(lc, "reasonOfTravel", "destination")
                 .add(costNumber)
-                .add(dayRange)
-                .add(lc, "startLocation", "returnLocation", "kilometers")
+                .add(lc, "beginOfTravel", "endOfTravel")
+                .add(lc, "startLocation", "returnLocation")
+                .add(UICustomized("catering.day"))
+                .add(lc, "kilometers")
                 .add(UICheckbox("hotel", lc))
                 .add(UICheckbox("rentalCar", lc))
                 .add(UICheckbox("train", lc))
                 .add(UICheckbox("flight", lc))
                 .add(lc, "assumptionOfCosts")
                 .add(UICheckbox("receiptsCompletelyAvailable", lc))
+
+        layout.watchFields.addAll(arrayOf("beginOfTravel", "endOfTravel"))
 
         //additionalLabel = "access.users",
         return LayoutUtils.processEditPage(layout, dto, this)
