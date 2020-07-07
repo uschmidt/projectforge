@@ -65,6 +65,9 @@ function DynamicCustomized({ id, ...props }) {
         case 'calendar.subscriptionInfo':
             Tag = CalendarSubscriptionInfo;
             break;
+        case 'catering.day':
+            // Tag = CateringDayComponent;
+            break;
         case 'cost.number':
             Tag = CostNumberComponent;
             break;
