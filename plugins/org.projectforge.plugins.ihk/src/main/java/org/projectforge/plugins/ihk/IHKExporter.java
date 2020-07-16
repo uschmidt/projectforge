@@ -28,6 +28,8 @@ import de.micromata.merlin.excel.ExcelSheet;
 import de.micromata.merlin.excel.ExcelWorkbook;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.projectforge.business.timesheet.TimesheetDO;
 import org.projectforge.framework.time.PFDateTime;
 import org.springframework.core.io.ClassPathResource;
@@ -55,19 +57,19 @@ class IHKExporter {
 
     private static final int FIRST_DATA_ROW_NUM = 2;
 
-    static private String teamName;
-    static private int ausbildungsJahr = -1;
-    static private LocalDate ausbildungsStartDate;
+    static private String teamname;
+    static private int ausbildungsjahr = -1;
+    static private LocalDate ausbildungsbeginn;
     static private String docNr = "error";
 
-    static byte[] getExcel(final List<TimesheetDO> timesheets, LocalDate ausbildungsstartDate, String teamname, int ausbildungsjahr) {
+    static byte[] getExcel(final List<TimesheetDO> timesheets, LocalDate ausbildungsBeginn, String teamName, int ausbildungsJahr) {
         if (timesheets.size() < 1) {
             return new byte[]{};
         }
 
-        teamName = teamname;
-        ausbildungsJahr = ausbildungsjahr;
-        ausbildungsStartDate = ausbildungsstartDate;
+        teamname = teamName;
+        ausbildungsjahr = ausbildungsJahr;
+        ausbildungsbeginn = ausbildungsBeginn;
 
         ExcelSheet excelSheet = null;
         ExcelRow emptyRow = null;
@@ -150,11 +152,41 @@ class IHKExporter {
             }
         }
 
-        excelSheet.getRow(FIRST_DATA_ROW_NUM + cell).getCell(0).setCellValue(sdf.format(timesheet.getStartTime()));
-        excelSheet.getRow(FIRST_DATA_ROW_NUM + cell).getCell(1).setCellValue(description);
-        excelSheet.getRow(FIRST_DATA_ROW_NUM + cell).getCell(3).setCellValue(lernfeld);
-        excelSheet.getRow(FIRST_DATA_ROW_NUM + cell).getCell(4).setCellValue(trimDouble(durationInHours));
-        excelSheet.getRow(FIRST_DATA_ROW_NUM + cell).getCell(5).setCellValue(trimDouble(hourCounter));
+        /*
+        // if you wanna use merlin style:
+
+        final CellStyle descriptionStyle = excelSheet.getExcelWorkbook().createOrGetCellStyle("description");
+        descriptionStyle.setWrapText(true);
+
+        CellStyle style = excelSheet.getExcelWorkbook().createOrGetCellStyle("id");
+        style.setWrapText(true);
+        excelRow.getCell(1).setCellStyle(style);
+        */
+
+        ExcelRow excelRow = excelSheet.getRow(FIRST_DATA_ROW_NUM + cell);
+
+        excelRow.getCell(0).setCellValue(sdf.format(timesheet.getStartTime()));
+        excelRow.getCell(1).setCellValue(description);
+        excelRow.getCell(3).setCellValue(lernfeld);
+        excelRow.getCell(4).setCellValue(trimDouble(durationInHours));
+        excelRow.getCell(5).setCellValue(trimDouble(hourCounter));
+
+
+        /*
+        Calculate height of cell from the content lenght and the number of line breaks
+         */
+        
+        String puffer = description;
+        int counterOfBreaking = -1, counterOfOverlength = 0;
+
+        String[] pufferSplit = puffer.split("\n");
+
+        for (int i = 0; i < pufferSplit.length; i++) {
+            counterOfBreaking++;
+            counterOfOverlength += pufferSplit[i].length() / 70;
+        }
+
+        excelRow.setHeight(14 + counterOfOverlength * 14 + counterOfBreaking * 14);
 
         return hourCounter;
     }
@@ -179,19 +211,19 @@ class IHKExporter {
     private static String getCurrentAzubiYear(Date date) {
         String azubiYear = "";
 
-        if (ausbildungsJahr > 0) {
-            azubiYear = ausbildungsJahr + "";
+        if (ausbildungsjahr > 0) {
+            azubiYear = ausbildungsjahr + "";
             return azubiYear;
         }
 
-        if (ausbildungsStartDate != null) {
-            Period period = Period.between(ausbildungsStartDate, date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+        if (ausbildungsbeginn != null) {
+            Period period = Period.between(ausbildungsbeginn, date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
             double diff = period.getYears();
             if (diff < 1.0) return "1";
             if (diff < 2.0) return "2";
             if (diff <= 3.0) return "3";
         } else {
-            log.info("ihk plugin: ausbildungsStartDate was null");
+            log.info("ihk plugin: ausbildungsbeginn was null");
             return "UNKNOWN";
         }
         return "UNKNOWN";
@@ -199,20 +231,20 @@ class IHKExporter {
 
     private static String getDocNrByDate(Date sundayDate) {
         long diff = 0;
-        if (ausbildungsStartDate != null) {
-            diff = DAYS.between(ausbildungsStartDate, sundayDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+        if (ausbildungsbeginn != null) {
+            diff = DAYS.between(ausbildungsbeginn, sundayDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
         } else {
-            log.info("ihk plugin: ausbildungsStartDate was null");
+            log.info("ihk plugin: ausbildungsbeginn was null");
         }
         docNr = "" + diff / 7;
         return docNr;
     }
 
     private static String getDepartment() {
-        if (teamName != null) {
-            return teamName;
+        if (teamname != null) {
+            return teamname;
         } else {
-            log.info("ihk plugin: teamName was null");
+            log.info("ihk plugin: teamname was null");
             return "UNKNOWN";
         }
     }
