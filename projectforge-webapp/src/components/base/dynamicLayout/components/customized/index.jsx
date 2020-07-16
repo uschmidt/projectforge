@@ -24,6 +24,7 @@ import IncomingInvoicePositionsComponent from './components/IncomingInvoicePosit
 import VacationStatistics from './components/vacation/VacationStatistics';
 import VacationTable from './components/vacation/VacationTable';
 import CostNumber24Component from './components/CostNumber24Component';
+import CateringDayComponent from './components/CateringDayComponent';
 
 function DynamicCustomized({ id, ...props }) {
     let Tag;
@@ -66,7 +67,7 @@ function DynamicCustomized({ id, ...props }) {
             Tag = CalendarSubscriptionInfo;
             break;
         case 'catering.day':
-            // Tag = CateringDayComponent;
+            Tag = CateringDayComponent;
             break;
         case 'cost.number':
             Tag = CostNumberComponent;
