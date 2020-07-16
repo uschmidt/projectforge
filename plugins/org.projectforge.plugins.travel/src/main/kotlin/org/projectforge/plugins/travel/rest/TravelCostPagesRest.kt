@@ -23,28 +23,24 @@
 
 package org.projectforge.plugins.travel.rest
 
-import org.projectforge.business.fibu.kost.Kost2ArtDO
-import org.projectforge.business.fibu.kost.Kost2DO
+import org.projectforge.business.fibu.EmployeeDO
+import org.projectforge.business.fibu.EmployeeDao
+import org.projectforge.business.fibu.kost.Kost2Dao
 import org.projectforge.framework.jcr.AttachmentsService
-import org.projectforge.model.rest.RestPaths
+import org.projectforge.plugins.travel.CateringDay
 import org.projectforge.plugins.travel.TravelCostDO
 import org.projectforge.plugins.travel.TravelCostDao
 import org.projectforge.plugins.travel.dto.TravelCost
 import org.projectforge.rest.config.JacksonConfiguration
 import org.projectforge.rest.config.Rest
 import org.projectforge.rest.core.AbstractDTOPagesRest
-import org.projectforge.rest.core.PagesResolver
-import org.projectforge.rest.dto.PostData
 import org.projectforge.ui.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import javax.annotation.PostConstruct
 import javax.servlet.http.HttpServletRequest
-import javax.validation.Valid
 
 // TODO: Add jcr support (see ContractPagesRest/jcr and attachment*)
 /**
@@ -60,28 +56,38 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
     @Autowired
     private lateinit var travelCostDao: TravelCostDao
 
+    @Autowired
+    private lateinit var employeeDao: EmployeeDao
+
+    @Autowired
+    private lateinit var kost2Dao: Kost2Dao
+
     override fun transformFromDB(obj: TravelCostDO, editMode: Boolean): TravelCost {
-        travelCostDao.deserizalizeValueObject(obj)
         val travelCost = TravelCost()
         travelCost.copyFrom(obj)
+        val jsonObject = travelCostDao.deserizalizeValueObject(obj)
+        if(jsonObject is HashSet<*>){
+            travelCost.catering = jsonObject as HashSet<CateringDay>
+            travelCost.updateCateringEntries()
+        }
         return travelCost
     }
 
     override fun transformForDB(dto: TravelCost): TravelCostDO {
         val travelCostDO = TravelCostDO()
         dto.copyTo(travelCostDO)
-        if(travelCostDO.kost2 == null){
-            travelCostDO.kost2 = Kost2DO()
-            travelCostDO.kost2!!.kost2Art = Kost2ArtDO().withId(dto.endziffer)
+
+        if(travelCostDO.employee == null){
+            travelCostDO.employee = EmployeeDO()
         }
 
-        travelCostDO.kost2!!.nummernkreis = dto.nummernkreis!!
-        travelCostDO.kost2!!.bereich = dto.bereich!!
-        travelCostDO.kost2!!.teilbereich = dto.teilbereich!!
 
-        if(travelCostDO.kost2?.kost2Art != null){
-            travelCostDO.kost2?.kost2Art?.id = dto.endziffer
+        if(dto.employee != null){
+            val name = dto.employee!!.displayName!!.split(" ")
+            travelCostDO.employee = employeeDao.findByName(name[1] + "," + name[0])
         }
+
+        travelCostDO.kost2 = kost2Dao.getKost2(dto.nummernkreis!!, dto.bereich!!, dto.teilbereich!!, dto.endziffer!!)
 
         travelCostDO.cateringValueObject = dto.catering
 
@@ -118,6 +124,7 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
                 dto.beginOfTravel = endDate
             }
         }
+        dto.updateCateringEntries()
         return ResponseEntity.ok(ResponseAction(targetType = TargetType.UPDATE).addVariable("data", dto))
     }
 
@@ -171,6 +178,13 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
                 .add(UICheckbox("receiptsCompletelyAvailable", lc))
 
         layout.watchFields.addAll(arrayOf("beginOfTravel", "endOfTravel"))
+
+        layout.addTranslations("plugins.travel.entry.catering.list",
+                "plugins.travel.entry.catering.dayNumber",
+                "plugins.travel.entry.date",
+                "plugins.travel.entry.catering.list.breakfast",
+                "plugins.travel.entry.catering.list.lunch",
+                "plugins.travel.entry.catering.list.dinner")
 
         //additionalLabel = "access.users",
         return LayoutUtils.processEditPage(layout, dto, this)

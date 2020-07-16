@@ -56,8 +56,6 @@ open class TravelCostDao protected constructor() : BaseDao<TravelCostDO>(TravelC
     @Autowired
     private lateinit var travelCostSendMailService: TravelCostSendMailService
 
-    private val MAGIC_JSON_START = "^JSON:"
-
     init {
         userRightId = TravelPluginUserRightId.PLUGIN_TRAVEL
     }
@@ -131,6 +129,8 @@ open class TravelCostDao protected constructor() : BaseDao<TravelCostDO>(TravelC
 
     companion object {
         private var objectMapper: ObjectMapper? = null
+
+        private val MAGIC_JSON_START = "^JSON:"
 
         fun getObjectMapper(): ObjectMapper {
             if (objectMapper != null) {

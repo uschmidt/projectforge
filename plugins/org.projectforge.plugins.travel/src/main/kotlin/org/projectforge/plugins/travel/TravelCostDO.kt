@@ -105,7 +105,7 @@ open class TravelCostDO: DefaultBaseDO(), AttachmentsInfo {
     /**
      * The type of the value (class name). It's not of type class because types are may-be refactored or removed.
      */
-    @get:Transient
+    @get:Column(name = "value_type", length = 1000)
     var cateringValueTypeString: String? = null
 
     /**

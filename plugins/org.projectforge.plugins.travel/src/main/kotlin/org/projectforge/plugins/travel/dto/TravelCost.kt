@@ -24,15 +24,17 @@
 package org.projectforge.plugins.travel.dto
 
 import org.projectforge.framework.jcr.Attachment
+import org.projectforge.framework.time.PFDateTime
 import org.projectforge.framework.utils.NumberFormatter
 import org.projectforge.plugins.travel.CateringDay
 import org.projectforge.plugins.travel.TravelCostDO
 import org.projectforge.plugins.travel.TravelLocation
 import org.projectforge.rest.dto.AttachmentsSupport
 import org.projectforge.rest.dto.BaseDTO
+import org.projectforge.rest.dto.BaseDTODisplayObject
 import org.projectforge.rest.dto.Employee
-import org.projectforge.rest.dto.Kost2
 import java.util.concurrent.TimeUnit
+import kotlin.collections.HashSet
 import kotlin.math.abs
 
 /**
@@ -51,13 +53,14 @@ class TravelCost(id: Int? = null,
                  var endziffer: Int? = 0,
                  var beginOfTravel: java.util.Date? = null,
                  var endOfTravel: java.util.Date? = null,
-                 var catering: MutableSet<CateringDay>? = null,
+                 var catering: MutableSet<CateringDay> = HashSet(),
+                 var cateringToLoad: MutableList<CateringDay> = ArrayList(),
                  var hotel: Boolean = false,
                  var rentalCar: Boolean = false,
                  var train: Boolean = false,
                  var flight: Boolean = false,
                  var kilometers: Int? = null,
-                 override var attachments: List<Attachment>? = null): BaseDTO<TravelCostDO>(), AttachmentsSupport {
+                 override var attachments: List<Attachment>? = null): BaseDTODisplayObject<TravelCostDO>(id, displayName = displayName), AttachmentsSupport {
 
     val refundByKilometer = 0.30
     val refundByKilometerPassenger = 0.02
@@ -107,5 +110,39 @@ class TravelCost(id: Int? = null,
                 rkPauschale = NumberFormatter.formatCurrency(10) + " €"
             }
         }
+    }
+
+    fun updateCateringEntries() {
+        var begin = PFDateTime.from(beginOfTravel!!)
+        var end = PFDateTime.from(endOfTravel!!)
+
+        cateringToLoad = ArrayList()
+
+        while (begin.isBefore(end) || begin.isSameDay(end)){
+            var cateringDay = getCateringDay(begin)
+            if(cateringDay != null){
+                cateringToLoad.add(cateringDay)
+            } else {
+                cateringDay = CateringDay(begin.localDate)
+                catering.add(cateringDay)
+                cateringToLoad.add(cateringDay)
+                cateringDay.dayNumber = catering.size
+            }
+            begin = begin.plusDays(1)
+        }
+
+        cateringToLoad = cateringToLoad.sortedBy { it.dayNumber }.toMutableList()
+    }
+
+    private fun getCateringDay(date: PFDateTime): CateringDay? {
+        for (cateringDay in catering){
+            if(cateringDay.date == null){
+                continue
+            }
+            if(date.isSameDay(PFDateTime.from(cateringDay.date!!))){
+                return cateringDay
+            }
+        }
+        return null
     }
 }

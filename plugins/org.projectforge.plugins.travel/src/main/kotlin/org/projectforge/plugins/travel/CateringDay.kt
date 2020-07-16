@@ -23,12 +23,22 @@
 
 package org.projectforge.plugins.travel
 
+import java.time.LocalDate
+
 /**
  * @author Jan Brümmer (j.bruemmer@micromata.de)
  */
-open class CateringDay {
+open class CateringDay() {
 
-    open var dayNumber: Int? = null
+    constructor(date: LocalDate? = null) : this() {
+        this.date = date
+    }
+
+    var date: LocalDate? = null
+
+    open var dayNumber = 0
+
+    open var dateFormatted: String? = null
 
     // Worth 1 point
     open var breakfast: Boolean = false
