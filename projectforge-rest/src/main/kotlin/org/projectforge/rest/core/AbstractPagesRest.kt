@@ -808,7 +808,7 @@ constructor(private val baseDaoClazz: Class<B>,
     /**
      * Use this service for adding new items as well as updating existing items (id isn't null).
      */
-    @PutMapping(RestPaths.SAVE_OR_UDATE)
+    @PutMapping(RestPaths.SAVE_OR_UPDATE)
     fun saveOrUpdate(request: HttpServletRequest, @Valid @RequestBody postData: PostData<DTO>): ResponseEntity<ResponseAction> {
         val dbObj = transformForDB(postData.data)
         return saveOrUpdate(request, baseDao, dbObj, postData, this, validate(request, dbObj, postData))
