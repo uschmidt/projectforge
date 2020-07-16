@@ -24,16 +24,13 @@
 package org.projectforge.ui
 
 import org.projectforge.favorites.Favorites
-import org.projectforge.framework.ToStringUtil
 import org.projectforge.framework.i18n.addTranslations
 import org.projectforge.framework.i18n.translate
 import org.projectforge.framework.persistence.api.BaseDao
 import org.projectforge.framework.persistence.api.ExtendedBaseDO
 import org.projectforge.framework.persistence.api.HibernateUtils
 import org.projectforge.model.rest.RestPaths
-import org.projectforge.rest.AttachmentsServicesRest
 import org.projectforge.rest.core.AbstractPagesRest
-import org.projectforge.rest.core.RestResolver
 
 /**
  * Utils for the Layout classes for handling auto max-length (get from JPA entities) and translations as well as
@@ -146,14 +143,14 @@ class LayoutUtils {
                         layout.addAction(UIButton("update",
                                 color = UIColor.PRIMARY,
                                 default = true,
-                                responseAction = ResponseAction(pagesRest.getRestPath(RestPaths.SAVE_OR_UDATE), targetType = TargetType.PUT)))
+                                responseAction = ResponseAction(pagesRest.getRestPath(RestPaths.SAVE_OR_UPDATE), targetType = TargetType.PUT)))
                     }
                 }
             } else if (userAccess.insert == true) {
                 layout.addAction(UIButton("create",
                         color = UIColor.SUCCESS,
                         default = true,
-                        responseAction = ResponseAction(pagesRest.getRestPath(RestPaths.SAVE_OR_UDATE), targetType = TargetType.PUT)))
+                        responseAction = ResponseAction(pagesRest.getRestPath(RestPaths.SAVE_OR_UPDATE), targetType = TargetType.PUT)))
             }
             process(layout)
             layout.addTranslations("label.historyOfChanges")

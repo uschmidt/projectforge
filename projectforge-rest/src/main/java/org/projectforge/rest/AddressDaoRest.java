@@ -178,7 +178,7 @@ public class AddressDaoRest {
   }
 
   @PUT
-  @Path(RestPaths.SAVE_OR_UDATE)
+  @Path(RestPaths.SAVE_OR_UPDATE)
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   public Response saveOrUpdateAddressObject(final AddressObject addressObject) {
