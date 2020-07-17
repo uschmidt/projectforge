@@ -51,7 +51,7 @@ import java.time.LocalDate
  * @author Jan Brümmer (j.bruemmer@micromata.de)
  */
 @Repository
-open class TravelCostDao protected constructor() : BaseDao<TravelCostDO>(TravelCostDO::class.java) {
+open class TravelCostDao: BaseDao<TravelCostDO>(TravelCostDO::class.java) {
     private val log = org.slf4j.LoggerFactory.getLogger(UserPrefDao::class.java)
 
     @Autowired
@@ -78,13 +78,13 @@ open class TravelCostDao protected constructor() : BaseDao<TravelCostDO>(TravelC
     fun deserizalizeValueObject(travelCost: TravelCostDO): Any? {
         if (travelCost.valueType == null)
             return null
-        val json = fromJson(travelCost.cateringValueString!!, travelCost.valueType)
-        as HashSet<*>
-
         val result: HashSet<CateringDay> = HashSet()
+        val json = fromJson(travelCost.cateringValueString!!, travelCost.valueType)
 
-        json.forEach {
-            result.add(getObjectMapper().convertValue(it))
+        if (json is HashSet<*>){
+            json.forEach {
+                result.add(getObjectMapper().convertValue(it))
+            }
         }
 
         travelCost.cateringValueObject = result

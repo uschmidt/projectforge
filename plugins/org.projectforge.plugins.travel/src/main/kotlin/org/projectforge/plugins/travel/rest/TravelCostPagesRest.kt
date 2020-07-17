@@ -23,7 +23,6 @@
 
 package org.projectforge.plugins.travel.rest
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.projectforge.business.fibu.EmployeeDO
 import org.projectforge.business.fibu.EmployeeDao
 import org.projectforge.business.fibu.kost.Kost2Dao
@@ -89,7 +88,9 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
 
         travelCostDO.kost2 = kost2Dao.getKost2(dto.nummernkreis!!, dto.bereich!!, dto.teilbereich!!, dto.endziffer!!)
 
-        travelCostDO.cateringValueObject = dto.cateringToLoad
+        dto.catering = HashSet()
+        dto.catering.addAll(dto.cateringToLoad)
+        travelCostDO.cateringValueObject = dto.catering
 
         return travelCostDO
     }
@@ -166,8 +167,7 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
                 .add(UISelect.createEmployeeSelect(lc, "employee", false, "plugins.travel.entry.user"))
                 .add(lc, "reasonOfTravel", "destination")
                 .add(costNumber)
-                .add(lc, "beginOfTravel", "endOfTravel")
-                .add(lc, "startLocation", "returnLocation")
+                .add(lc, "beginOfTravel", "startLocation", "endOfTravel", "returnLocation")
                 .add(UICustomized("catering.day"))
                 .add(lc, "kilometers")
                 .add(UICheckbox("hotel", lc))

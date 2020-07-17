@@ -4,7 +4,7 @@ import React from 'react';
 import { DynamicLayoutContext } from '../../../context';
 
 function CateringDayEntries({ entries }) {
-    const { data, setData } = React.useContext(DynamicLayoutContext);
+    const { setData } = React.useContext(DynamicLayoutContext);
 
     const updateList = () => {
         // console.log(event.target.value)
