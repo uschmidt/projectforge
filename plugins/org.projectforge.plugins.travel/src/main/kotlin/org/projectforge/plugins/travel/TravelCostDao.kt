@@ -30,8 +30,11 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.deser.std.NumberDeserializers
 import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.databind.ser.std.BooleanSerializer
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.convertValue
 import org.apache.commons.lang3.StringUtils
 import org.projectforge.business.user.UserPrefDao
 import org.projectforge.framework.json.*
@@ -77,7 +80,16 @@ open class TravelCostDao protected constructor() : BaseDao<TravelCostDO>(TravelC
     fun deserizalizeValueObject(travelCost: TravelCostDO): Any? {
         if (travelCost.valueType == null)
             return null
-        travelCost.cateringValueObject = fromJson(travelCost.cateringValueString!!, travelCost.valueType)
+        val json = fromJson(travelCost.cateringValueString!!, travelCost.valueType)
+        as HashSet<*>
+
+        val result: HashSet<CateringDay> = HashSet()
+
+        json.forEach {
+            result.add(getObjectMapper().convertValue(it))
+        }
+
+        travelCost.cateringValueObject = result
         return travelCost.cateringValueObject
     }
 
@@ -141,16 +153,21 @@ open class TravelCostDao protected constructor() : BaseDao<TravelCostDO>(TravelC
             mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
             mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
             mapper.setSerializationInclusion(JsonInclude.Include.NON_DEFAULT)
+            mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
             mapper.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false)
             mapper.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false)
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
             val module = SimpleModule()
+
             module.addSerializer(LocalDate::class.java, LocalDateSerializer())
             module.addDeserializer(LocalDate::class.java, LocalDateDeserializer())
 
             module.addSerializer(PFDateTime::class.java, PFDateTimeSerializer())
             module.addDeserializer(PFDateTime::class.java, PFDateTimeDeserializer())
+
+            module.addSerializer(Boolean::class.java, BooleanSerializer(false))
+            module.addDeserializer(Boolean::class.java, NumberDeserializers.BooleanDeserializer(Boolean::class.java, false))
 
             module.addSerializer(java.util.Date::class.java, UtilDateSerializer(UtilDateFormat.ISO_DATE_TIME_SECONDS))
             module.addDeserializer(java.util.Date::class.java, UtilDateDeserializer())
