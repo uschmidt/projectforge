@@ -30,9 +30,7 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.deser.std.NumberDeserializers
 import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.databind.ser.std.BooleanSerializer
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import org.apache.commons.lang3.StringUtils
@@ -165,9 +163,6 @@ open class TravelCostDao protected constructor() : BaseDao<TravelCostDO>(TravelC
 
             module.addSerializer(PFDateTime::class.java, PFDateTimeSerializer())
             module.addDeserializer(PFDateTime::class.java, PFDateTimeDeserializer())
-
-            module.addSerializer(Boolean::class.java, BooleanSerializer(false))
-            module.addDeserializer(Boolean::class.java, NumberDeserializers.BooleanDeserializer(Boolean::class.java, false))
 
             module.addSerializer(java.util.Date::class.java, UtilDateSerializer(UtilDateFormat.ISO_DATE_TIME_SECONDS))
             module.addDeserializer(java.util.Date::class.java, UtilDateDeserializer())

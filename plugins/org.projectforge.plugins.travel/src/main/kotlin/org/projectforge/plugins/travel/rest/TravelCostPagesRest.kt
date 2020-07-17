@@ -23,6 +23,7 @@
 
 package org.projectforge.plugins.travel.rest
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.projectforge.business.fibu.EmployeeDO
 import org.projectforge.business.fibu.EmployeeDao
 import org.projectforge.business.fibu.kost.Kost2Dao
@@ -81,7 +82,6 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
             travelCostDO.employee = EmployeeDO()
         }
 
-
         if(dto.employee != null){
             val name = dto.employee!!.displayName!!.split(" ")
             travelCostDO.employee = employeeDao.findByName(name[1] + "," + name[0])
@@ -89,7 +89,7 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
 
         travelCostDO.kost2 = kost2Dao.getKost2(dto.nummernkreis!!, dto.bereich!!, dto.teilbereich!!, dto.endziffer!!)
 
-        travelCostDO.cateringValueObject = dto.catering
+        travelCostDO.cateringValueObject = dto.cateringToLoad
 
         return travelCostDO
     }

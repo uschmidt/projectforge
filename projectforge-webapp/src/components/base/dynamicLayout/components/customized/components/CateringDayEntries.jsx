@@ -1,8 +1,16 @@
 /* eslint-disable no-param-reassign */
 import PropTypes from 'prop-types';
 import React from 'react';
+import { DynamicLayoutContext } from '../../../context';
 
 function CateringDayEntries({ entries }) {
+    const { data, setData } = React.useContext(DynamicLayoutContext);
+
+    const updateList = () => {
+        // console.log(event.target.value)
+        setData({ cateringToLoad: entries });
+    };
+
     function setBreakfast(event, dayNumber) {
         // console.log(event.target.checked);
         entries = entries.map((item) => {
@@ -17,6 +25,7 @@ function CateringDayEntries({ entries }) {
 
             return item;
         });
+        updateList();
     }
 
     function setLunch(event, dayNumber) {
@@ -33,6 +42,7 @@ function CateringDayEntries({ entries }) {
 
             return item;
         });
+        updateList();
     }
 
     function setDinner(event, dayNumber) {
@@ -49,6 +59,7 @@ function CateringDayEntries({ entries }) {
 
             return item;
         });
+        updateList();
     }
 
     return (
@@ -60,21 +71,21 @@ function CateringDayEntries({ entries }) {
                     <td>
                         <input
                             type="checkbox"
-                            defaultValue={entry.breakfast}
+                            defaultChecked={entry.breakfast}
                             onChange={event => setBreakfast(event, entry.dayNumber)}
                         />
                     </td>
                     <td>
                         <input
                             type="checkbox"
-                            defaultValue={entry.lunch}
+                            defaultChecked={entry.lunch}
                             onChange={event => setLunch(event, entry.dayNumber)}
                         />
                     </td>
                     <td>
                         <input
                             type="checkbox"
-                            defaultValue={entry.dinner}
+                            defaultChecked={entry.dinner}
                             onChange={event => setDinner(event, entry.dayNumber)}
                         />
                     </td>

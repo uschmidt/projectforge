@@ -21,7 +21,7 @@ function CateringDayComponent() {
                     </tr>
                 </thead>
                 <tbody>
-                    <CateringDayEntries entries={data.cateringToLoad} />
+                    <CateringDayEntries entries={data.cateringToLoad}/>
                 </tbody>
             </Table>
         </React.Fragment>
