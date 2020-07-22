@@ -81,7 +81,7 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
             travelCostDO.employee = EmployeeDO()
         }
 
-        if(dto.employee != null){
+        if(dto.employee?.displayName != null){
             val name = dto.employee!!.displayName!!.split(" ")
             travelCostDO.employee = employeeDao.findByName(name[1] + "," + name[0])
         }
@@ -169,6 +169,8 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
                 .add(costNumber)
                 .add(lc, "beginOfTravel", "startLocation", "endOfTravel", "returnLocation")
                 .add(UICustomized("catering.day"))
+                .add(UIFieldset(title = "attachment.list")
+                        .add(UIAttachmentList(category, dto.id)))
                 .add(lc, "kilometers")
                 .add(UICheckbox("hotel", lc))
                 .add(UICheckbox("rentalCar", lc))
