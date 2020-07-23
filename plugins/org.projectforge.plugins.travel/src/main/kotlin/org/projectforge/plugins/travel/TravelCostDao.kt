@@ -35,6 +35,8 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import org.apache.commons.lang3.StringUtils
 import org.projectforge.business.user.UserPrefDao
+import org.projectforge.business.vacation.model.VacationDO
+import org.projectforge.framework.access.OperationType
 import org.projectforge.framework.json.*
 import org.projectforge.framework.persistence.api.BaseDao
 import org.projectforge.framework.persistence.api.BaseSearchFilter
@@ -59,6 +61,7 @@ open class TravelCostDao: BaseDao<TravelCostDO>(TravelCostDO::class.java) {
 
     init {
         userRightId = TravelPluginUserRightId.PLUGIN_TRAVEL
+        this.supportAfterUpdate = true
     }
 
     /**
@@ -130,7 +133,22 @@ open class TravelCostDao: BaseDao<TravelCostDO>(TravelCostDO::class.java) {
 
     override fun afterSave(obj: TravelCostDO) {
         super.afterSave(obj)
-        //travelCostSendMailService.checkAndSendMail(obj, OperationType.INSERT)
+        travelCostSendMailService.checkAndSendMail(obj, OperationType.INSERT)
+    }
+
+    override fun afterUpdate(obj: TravelCostDO, dbObj: TravelCostDO) {
+        super.afterUpdate(obj, dbObj)
+        travelCostSendMailService.checkAndSendMail(obj, OperationType.UPDATE, dbObj)
+    }
+
+    override fun afterDelete(obj: TravelCostDO) {
+        super.afterDelete(obj)
+        travelCostSendMailService.checkAndSendMail(obj, OperationType.DELETE)
+    }
+
+    override fun afterUndelete(obj: TravelCostDO) {
+        super.afterDelete(obj)
+        travelCostSendMailService.checkAndSendMail(obj, OperationType.UNDELETE)
     }
 
     override fun newInstance(): TravelCostDO {

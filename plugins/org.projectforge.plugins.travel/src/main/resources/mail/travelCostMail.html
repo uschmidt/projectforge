@@ -1,0 +1,49 @@
+<html>
+#INCLUDE{mail/mailHead.html}
+<body>
+<div id="mail">
+  <div class="container">
+    <div class="content">
+      #INCLUDE{mail/mailOpening.html}
+      <p>
+        <%= pf.getMessage("plugins.travel.mail.action", travelCostInfo.formatEmployee(), "<b>${travelCostInfo.periodText}</b>", mailInfo.operation, travelCostInfo.formatModifiedByUser()) %>
+        <%= pf.getMessage("plugins.travel.mail.reason.${mailInfo.mode}", travelCostInfo.formatEmployee()) %>
+      </p>
+      <table class="width-2">
+        <tr>
+          <td>
+            <a href="mailto:${travelCostInfo.employeeMail}">
+              <span class="title"><%= pf.getI18nString("plugins.travel.entry.user") %></span>
+              <span class="value"><%= pf.getString(travelCostInfo.employeeFullname) %></span>
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <span class="title"><%= pf.getI18nString("plugins.travel.entry.beginOfTravel") %></span>
+            <span class="value"><%= pf.getString(travelCostInfo.startDate) %></span>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <span class="title"><%= pf.getI18nString("plugins.travel.entry.endOfTravel") %></span>
+            <span class="value"><%= pf.getString(travelCostInfo.endDate) %></span>
+          </td>
+        </tr>
+      </table>
+      <a
+              href="${travelCostInfo.link}"
+              class="button"
+              target="_blank"
+              rel="noreferrer"
+      >
+        <%= pf.getI18nString("plugins.travel.mail.link") %>
+      </a>
+
+      #INCLUDE{mail/mailClosing.html}
+      #INCLUDE{mail/mailFooter.html}
+    </div>
+  </div>
+</div>
+</body>
+</html>

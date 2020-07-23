@@ -5,6 +5,7 @@ import org.projectforge.business.configuration.ConfigurationService
 import org.projectforge.business.configuration.ConfigurationServiceAccessor
 import org.projectforge.business.fibu.EmployeeDao
 import org.projectforge.framework.access.OperationType
+import org.projectforge.framework.configuration.ApplicationContextProvider
 import org.projectforge.framework.i18n.I18nHelper
 import org.projectforge.framework.persistence.user.api.ThreadLocalUserContext
 import org.projectforge.framework.persistence.user.entities.PFUserDO
@@ -66,13 +67,12 @@ class TravelCostSendMailService {
         travelCostInfo.updateI18n(recipient)
         val vacationer = travelCostInfo.employeeUser!!
         val obj = travelCostInfo.travelCost
+        val operation = translate(recipient, "plugins.travel.mail.modType.${operationType.name.toLowerCase()}")
 
         val i18nArgs = arrayOf(travelCostInfo.employeeFullname,
-                travelCostInfo.periodText,
-                translate(recipient, "vacation.mail.modType.${operationType.name.toLowerCase()}"))
-        val subject = translate(recipient, "vacation.mail.action.short", *i18nArgs)
-        val operation = translate(recipient, "vacation.mail.modType.${operationType.name.toLowerCase()}")
-        val mailInfo = MailInfo(subject, operation)
+                travelCostInfo.periodText, operation)
+        val subject = translate(recipient, "plugins.travel.mail.action.short", *i18nArgs)
+        val mailInfo = MailInfo(subject, operation, "own")
         val mail = Mail()
         mail.subject = subject
         mail.contentType = Mail.CONTENTTYPE_HTML
@@ -94,12 +94,13 @@ class TravelCostSendMailService {
             log.error { "Oups, no recipient is given to prepare mail. No notification is done." }
             return null
         }
-        val data = mutableMapOf("travelCostInfo" to travelCostInfo, "vacation" to obj, "mailInfo" to mailInfo)
-        mail.content = sendMail.renderGroovyTemplate(mail, "mail/vacationMail.html", data, translate(recipient, "vacation"), recipient)
+        val data = mutableMapOf("travelCostInfo" to travelCostInfo, "travelCost" to obj, "mailInfo" to mailInfo)
+        mail.content = sendMail.renderGroovyTemplate(mail, "mail/travelCostMail.html", data, translate(recipient, "plugins.travel"), recipient)
         return mail
     }
 
     internal class TravelCostInfo(sendMail: SendMail, employeeDao: EmployeeDao, val travelCost: TravelCostDO) {
+        val link = getLinkToTravelCostEntry(travelCost.id)
         val modifiedByUser = ThreadLocalUserContext.getUser()
         val modifiedByUserFullname = modifiedByUser.getFullname()
         val modifiedByUserMail = modifiedByUser.email
@@ -109,7 +110,7 @@ class TravelCostSendMailService {
         val startDate = dateFormatter.getFormattedDate(travelCost.beginOfTravel)
         val endDate = dateFormatter.getFormattedDate(travelCost.endOfTravel)
         // TODO
-        val periodText = I18nHelper.getLocalizedMessage("vacation.mail.period", startDate, endDate)
+        val periodText = I18nHelper.getLocalizedMessage("plugins.travel.mail.period", startDate, endDate)
         var valid: Boolean = true
 
         /**
@@ -119,11 +120,43 @@ class TravelCostSendMailService {
             employeeFullname = employeeUser?.getFullname() ?: translate(recipient, "unknown")
         }
 
+        fun formatModifiedByUser(): String {
+            return formatUserWithMail(this.modifiedByUserFullname, this.modifiedByUserMail)
+        }
+
+        fun formatEmployee(): String {
+            return formatUserWithMail(this.employeeFullname, this.employeeMail)
+        }
+
+        fun formatUserWithMail(name: String, mail: String? = null): String {
+            if (mail == null) {
+                return name
+            }
+
+            return "<a href=\"mailto:${mail}\">${name}</a>"
+        }
     }
 
-    private class MailInfo(val subject: String, val operation: String)
+    private class MailInfo(val subject: String, val operation: String, val mode: String)
 
     companion object {
+        private var _linkToVacationEntry: String? = null
+        private val linkToTravelCostEntry: String
+            get() {
+                if (_linkToVacationEntry == null) {
+                    val sendMail = ApplicationContextProvider.getApplicationContext().getBean(SendMail::class.java)
+                    _linkToVacationEntry = sendMail.buildUrl("$travelCostEditPagePath/")
+                }
+                return _linkToVacationEntry!!
+            }
+
+        fun getLinkToTravelCostEntry(id: String) : String {
+            return "$linkToTravelCostEntry$id?returnToCaller=account"
+        }
+        fun getLinkToTravelCostEntry(id: Int) : String {
+            return getLinkToTravelCostEntry(id.toString())
+        }
+        private val travelCostEditPagePath = "react/travelCost/edit"
         private val dateFormatter = DateTimeFormatter.instance()
 
         private var _defaultLocale: Locale? = null
