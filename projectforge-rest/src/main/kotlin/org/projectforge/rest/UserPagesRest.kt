@@ -102,22 +102,15 @@ class UserPagesRest
                                 .add(lc, "username", "firstname", "lastname", "organization", "email",
                                         /*"authenticationToken",*/
                                         "jiraUsername", "hrPlanning", "deactivated"/*, "password"*/))
-                        .add(createUserSettingsCol(UILength(1)))
-                        .add(UICol().add(lc, "sshPublicKey")))
-                /*.add(UISelect<Int>("readonlyAccessUsers", lc,
-                        multi = true,
-                        label = "user.assignedGroups",
-                        additionalLabel = "access.groups",
-                        autoCompletion = AutoCompletion<Int>(url = "group/aco"),
-                        labelProperty = "name",
-                        valueProperty = "id"))
+                        .add(createUserSettingsCol(UILength(6))))
+                .add(UISelect.createGroupSelect(lc, "readonlyAccessUsers", true, "user.assignedGroups", "access.groups"))
                 .add(UISelect<Int>("readonlyAccessUsers", lc,
                         multi = true,
                         label = "multitenancy.assignedTenants",
                         additionalLabel = "access.groups",
                         autoCompletion = AutoCompletion<Int>(url = "group/aco"),
                         labelProperty = "name",
-                        valueProperty = "id"))*/
+                        valueProperty = "id"))
                 .add(lc, "description")
 
         return LayoutUtils.processEditPage(layout, dto, this)
@@ -183,6 +176,7 @@ class UserPagesRest
                     .add(UISelect("dateFormat", userLC, required = false, values = dateFormats))
                     .add(UISelect("excelDateFormat", userLC, required = false, values = excelDateFormats))
                     .add(UISelect("timeNotation", userLC, required = false, values = timeNotations))
+                    .add(userLC, "sshPublicKey")
         }
 
         private fun createUISelectValue(pattern: String, today: LocalDate, excelDateFormat: Boolean = false): UISelectValue<String> {
