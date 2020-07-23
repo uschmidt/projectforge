@@ -1,15 +1,90 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import { Button } from 'reactstrap';
+import PropTypes from 'prop-types';
 import { DynamicLayoutContext } from '../../../context';
 
 function AccessTableComponent() {
-    const { data, callAction } = React.useContext(DynamicLayoutContext);
+    const { data, setData, callAction } = React.useContext(DynamicLayoutContext);
+
+    let entries = data.accessEntries;
 
     let accessManagementEntry;
     let tasksEntry;
     let timesheetsEntry;
     let ownTimesheetsEntry;
+
+    const updateList = () => {
+        // console.log(event.target.value)
+        setData({ accessEntries: entries });
+    };
+
+    function setSelectAccess(event, accessType) {
+        // console.log(event.target.checked);
+        entries = entries.map((item) => {
+            if (item.accessType === accessType) {
+                const updatedItem = {
+                    ...item,
+                    accessSelect: event.target.checked,
+                };
+
+                return updatedItem;
+            }
+
+            return item;
+        });
+        updateList();
+    }
+
+    function setInsertAccess(event, accessType) {
+        // console.log(event.target.checked);
+        entries = entries.map((item) => {
+            if (item.accessType === accessType) {
+                const updatedItem = {
+                    ...item,
+                    accessInsert: event.target.checked,
+                };
+
+                return updatedItem;
+            }
+
+            return item;
+        });
+        updateList();
+    }
+
+    function setUpdateAccess(event, accessType) {
+        // console.log(event.target.checked);
+        entries = entries.map((item) => {
+            if (item.accessType === accessType) {
+                const updatedItem = {
+                    ...item,
+                    accessUpdate: event.target.checked,
+                };
+
+                return updatedItem;
+            }
+
+            return item;
+        });
+        updateList();
+    }
+
+    function setDeleteAccess(event, accessType) {
+        // console.log(event.target.checked);
+        entries = entries.map((item) => {
+            if (item.accessType === accessType) {
+                const updatedItem = {
+                    ...item,
+                    accessUpdate: event.target.checked,
+                };
+
+                return updatedItem;
+            }
+
+            return item;
+        });
+        updateList();
+    }
 
     const clear = () => callAction({
         responseAction: {
@@ -46,7 +121,7 @@ function AccessTableComponent() {
         },
     });
 
-    for (const [index, accessEntry] of data.accessEntries.entries()) {
+    for (const [index, accessEntry] of entries.entries()) {
         if (accessEntry.accessType === 'TASKS') {
             tasksEntry = accessEntry;
         }
@@ -79,6 +154,7 @@ function AccessTableComponent() {
                                             type="checkbox"
                                             id="accessSelect"
                                             defaultChecked={accessManagementEntry.accessSelect}
+                                            onChange={event => setSelectAccess(event, 'TASK_ACCESS_MANAGEMENT')}
                                         />
                                         Select
                                     </label>
@@ -88,6 +164,7 @@ function AccessTableComponent() {
                                             type="checkbox"
                                             id="accessInsert"
                                             defaultChecked={accessManagementEntry.accessInsert}
+                                            onChange={event => setInsertAccess(event, 'TASK_ACCESS_MANAGEMENT')}
                                         />
                                         Insert
                                     </label>
@@ -97,6 +174,7 @@ function AccessTableComponent() {
                                             type="checkbox"
                                             id="accessUpdate"
                                             defaultChecked={accessManagementEntry.accessUpdate}
+                                            onChange={event => setUpdateAccess(event, 'TASK_ACCESS_MANAGEMENT')}
                                         />
                                         Update
                                     </label>
@@ -106,6 +184,7 @@ function AccessTableComponent() {
                                             type="checkbox"
                                             id="accessDelete"
                                             defaultChecked={accessManagementEntry.accessDelete}
+                                            onChange={event => setDeleteAccess(event, 'TASK_ACCESS_MANAGEMENT')}
                                         />
                                         Delete
                                     </label>
@@ -124,6 +203,7 @@ function AccessTableComponent() {
                                             type="checkbox"
                                             id="taskSelect"
                                             defaultChecked={tasksEntry.accessSelect}
+                                            onChange={event => setSelectAccess(event, 'TASKS')}
                                         />
                                         Select
                                     </label>
@@ -133,6 +213,7 @@ function AccessTableComponent() {
                                             type="checkbox"
                                             id="taskInsert"
                                             defaultChecked={tasksEntry.accessInsert}
+                                            onChange={event => setInsertAccess(event, 'TASKS')}
                                         />
                                         Insert
                                     </label>
@@ -142,6 +223,7 @@ function AccessTableComponent() {
                                             type="checkbox"
                                             id="taskUpdate"
                                             defaultChecked={tasksEntry.accessUpdate}
+                                            onChange={event => setUpdateAccess(event, 'TASKS')}
                                         />
                                         Update
                                     </label>
@@ -151,6 +233,7 @@ function AccessTableComponent() {
                                             type="checkbox"
                                             id="taskDelete"
                                             defaultChecked={tasksEntry.accessDelete}
+                                            onChange={event => setDeleteAccess(event, 'TASKS')}
                                         />
                                         Delete
                                     </label>
@@ -168,6 +251,7 @@ function AccessTableComponent() {
                                             type="checkbox"
                                             id="timeSheetSelect"
                                             defaultChecked={timesheetsEntry.accessSelect}
+                                            onChange={event => setSelectAccess(event, 'TIMESHEETS')}
                                         />
                                         Select
                                     </label>
@@ -177,6 +261,7 @@ function AccessTableComponent() {
                                             type="checkbox"
                                             id="timeSheetInsert"
                                             defaultChecked={timesheetsEntry.accessInsert}
+                                            onChange={event => setInsertAccess(event, 'TIMESHEETS')}
                                         />
                                         Insert
                                     </label>
@@ -186,6 +271,7 @@ function AccessTableComponent() {
                                             type="checkbox"
                                             id="timeSheetUpdate"
                                             defaultChecked={timesheetsEntry.accessUpdate}
+                                            onChange={event => setUpdateAccess(event, 'TIMESHEETS')}
                                         />
                                         Update
                                     </label>
@@ -195,6 +281,7 @@ function AccessTableComponent() {
                                             type="checkbox"
                                             id="timeSheetDelete"
                                             defaultChecked={timesheetsEntry.accessDelete}
+                                            onChange={event => setDeleteAccess(event, 'TIMESHEETS')}
                                         />
                                         Delete
                                     </label>
@@ -212,6 +299,7 @@ function AccessTableComponent() {
                                             type="checkbox"
                                             id="ownTimeSheetSelect"
                                             defaultChecked={ownTimesheetsEntry.accessSelect}
+                                            onChange={event => setSelectAccess(event, 'OWN_TIMESHEETS')}
                                         />
                                         Select
                                     </label>
@@ -221,6 +309,7 @@ function AccessTableComponent() {
                                             type="checkbox"
                                             id="ownTimeSheetInsert"
                                             defaultChecked={ownTimesheetsEntry.accessInsert}
+                                            onChange={event => setInsertAccess(event, 'OWN_TIMESHEETS')}
                                         />
                                         Insert
                                     </label>
@@ -230,6 +319,7 @@ function AccessTableComponent() {
                                             type="checkbox"
                                             id="ownTimeSheetUpdate"
                                             defaultChecked={ownTimesheetsEntry.accessUpdate}
+                                            onChange={event => setUpdateAccess(event, 'OWN_TIMESHEETS')}
                                         />
                                         Update
                                     </label>
@@ -239,6 +329,7 @@ function AccessTableComponent() {
                                             type="checkbox"
                                             id="ownTimeSheetDelete"
                                             defaultChecked={ownTimesheetsEntry.accessDelete}
+                                            onChange={event => setDeleteAccess(event, 'OWN_TIMESHEETS')}
                                         />
                                         Delete
                                     </label>
@@ -281,9 +372,20 @@ function AccessTableComponent() {
     );
 }
 
-const mapStateToProps = ({ authentication }) => ({
-    user: authentication.user,
-});
+AccessTableComponent.propTypes = {
+    entries: PropTypes.arrayOf(PropTypes.shape({
+        id: PropTypes.number,
+        accessType: PropTypes.string,
+        accessSelect: PropTypes.bool,
+        accessInsert: PropTypes.bool,
+        accessUpdate: PropTypes.bool,
+        accessDelete: PropTypes.bool,
+    })),
+};
+
+AccessTableComponent.defaultProps = {
+    entries: undefined,
+};
 
 
-export default connect(mapStateToProps)(AccessTableComponent);
+export default AccessTableComponent;
