@@ -40,6 +40,7 @@ class GroupAccessPagesRest : AbstractDOPagesRest<GroupTaskAccessDO, AccessDao>(A
      */
     override fun newBaseDO(request: HttpServletRequest?): GroupTaskAccessDO {
         val groupTaskAccess = super.newBaseDO(request)
+        groupTaskAccess.clear()
         return groupTaskAccess
     }
 
