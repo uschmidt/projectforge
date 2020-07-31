@@ -33,13 +33,17 @@ private val log = KotlinLogging.logger {}
  * Helper for getting url of rest calls.
  */
 object RestResolver {
-    const val REACT_PATH = "react"
+    const val REACT_PATH = "/react"
 
     /**
      * Uses class annotation [RequestMapping] to determine rest url of given class.
      */
     fun getRestUrl(restClass: Class<*>, subPath: String? = null, withoutPrefix: Boolean = false): String {
         return getUrl(restClass, Rest.URL, subPath, withoutPrefix)
+    }
+
+    fun getReactUrl(restClass: Class<*>, subPath: String? = null, withoutPrefix: Boolean = false): String {
+        return getUrl(restClass, REACT_PATH, subPath, withoutPrefix)
     }
 
     /**
