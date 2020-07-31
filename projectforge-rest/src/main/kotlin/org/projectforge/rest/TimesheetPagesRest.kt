@@ -415,6 +415,8 @@ class TimesheetPagesRest : AbstractDTOPagesRest<TimesheetDO, Timesheet, Timeshee
         elements.add(element)
     }
 
+    override val classicsLinkListUrl: String? = "wa/timesheetList"
+
     companion object {
         private const val PREF_AREA = "timesheet"
         private const val PREF_EDIT_NAME = "edit.recent"
