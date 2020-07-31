@@ -91,7 +91,7 @@ public class MenuItemRegistry implements Serializable {
     // createdMenuEntry.setNewCounterModel(new MenuNewCounterMeb());
     register(MenuItemDefId.SEARCH, SearchPage.class);
     register(MenuItemDefId.TASK_TREE, TaskTreePage.class);
-    register(MenuItemDefId.TIMESHEET_LIST, TimesheetListPage.class);
+    //register(MenuItemDefId.TIMESHEET_LIST, TimesheetListPage.class);
     register(MenuItemDefId.MONTHLY_EMPLOYEE_REPORT, MonthlyEmployeeReportPage.class);
     register(MenuItemDefId.PERSONAL_STATISTICS, PersonalStatisticsPage.class);
     register(MenuItemDefId.HR_VIEW, HRListPage.class);
@@ -99,7 +99,7 @@ public class MenuItemRegistry implements Serializable {
     register(MenuItemDefId.GANTT, GanttChartListPage.class);
     register(MenuItemDefId.OUTGOING_INVOICE_LIST, RechnungListPage.class);
     register(MenuItemDefId.INCOMING_INVOICE_LIST, EingangsrechnungListPage.class);
-    register(MenuItemDefId.CUSTOMER_LIST, CustomerListPage.class);
+    //register(MenuItemDefId.CUSTOMER_LIST, CustomerListPage.class);
     register(MenuItemDefId.PROJECT_LIST, ProjektListPage.class);
     register(MenuItemDefId.EMPLOYEE_LIST, EmployeeListPage.class);
     register(MenuItemDefId.EMPLOYEE_SALARY_LIST, EmployeeSalaryListPage.class);
@@ -107,17 +107,17 @@ public class MenuItemRegistry implements Serializable {
     // createdMenuEntry.setNewCounterModel(new MenuNewCounterOrder());
     // createdMenuEntry.setNewCounterTooltip("menu.fibu.orderbook.htmlSuffixTooltip");
     register(MenuItemDefId.ACCOUNT_LIST, KontoListPage.class);
-    register(MenuItemDefId.COST1_LIST, Kost1ListPage.class);
-    register(MenuItemDefId.COST2_LIST, Kost2ListPage.class);
-    register(MenuItemDefId.COST2_TYPE_LIST, Kost2ArtListPage.class);
+    //register(MenuItemDefId.COST1_LIST, Kost1ListPage.class);
+    //register(MenuItemDefId.COST2_LIST, Kost2ListPage.class);
+    //register(MenuItemDefId.COST2_TYPE_LIST, Kost2ArtListPage.class);
     register(MenuItemDefId.SCRIPT_LIST, ScriptListPage.class);
     register(MenuItemDefId.SCRIPTING, ScriptingPage.class);
     register(MenuItemDefId.REPORT_OBJECTIVES, ReportObjectivesPage.class);
     register(MenuItemDefId.ACCOUNTING_RECORD_LIST, AccountingRecordListPage.class);
     register(MenuItemDefId.DATEV_IMPORT, DatevImportPage.class);
-    register(MenuItemDefId.OUTBOX_LIST, PostausgangListPage.class);
-    register(MenuItemDefId.INBOX_LIST, PosteingangListPage.class);
-    register(MenuItemDefId.CONTRACTS, ContractListPage.class);
+    //register(MenuItemDefId.OUTBOX_LIST, PostausgangListPage.class);
+    //register(MenuItemDefId.INBOX_LIST, PosteingangListPage.class);
+    //register(MenuItemDefId.CONTRACTS, ContractListPage.class);
     register(MenuItemDefId.VISITORBOOK, VisitorbookListPage.class);
     register(MenuItemDefId.MY_PREFERENCES, UserPrefListPage.class);
     register(MenuItemDefId.USER_LIST, UserListPage.class);
@@ -127,7 +127,7 @@ public class MenuItemRegistry implements Serializable {
     register(MenuItemDefId.SQL_CONSOLE, SqlConsolePage.class);
     register(MenuItemDefId.GROOVY_CONSOLE, GroovyConsolePage.class);
     register(MenuItemDefId.LUCENE_CONSOLE, LuceneConsolePage.class);
-    register(MenuItemDefId.CONFIGURATION, ConfigurationListPage.class);
+    //register(MenuItemDefId.CONFIGURATION, ConfigurationListPage.class);
     register(MenuItemDefId.PLUGIN_ADMIN, PluginListPage.class);
   }
 

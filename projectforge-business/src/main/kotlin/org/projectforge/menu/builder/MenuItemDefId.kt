@@ -51,14 +51,13 @@ enum class MenuItemDefId constructor(val i18nKey: String, val url: String? = nul
     TEAMCALENDAR("menu.plugins.teamcal", getReactListUrl("teamCal")), //
     CHANGE_PASSWORD("menu.changePassword", getReactDynamicPageUrl("changePassword")), //
     CHANGE_WLAN_PASSWORD("menu.changeWlanPassword", getReactDynamicPageUrl("changeWlanPassword")), //
-    CONFIGURATION("menu.configuration", "wa/configuration"), //
+    CONFIGURATION("menu.configuration", getReactListUrl("configuration")), //
     CONTACT_LIST("menu.contactList"), //
     CONTRACTS("menu.contracts", getReactListUrl("contract")), //
     COST1_LIST("menu.fibu.kost1", getReactListUrl("cost1")), //
-    COST2_LIST("menu.fibu.kost2", "wa/cost2List"), //
-    COST2_TYPE_LIST("menu.fibu.kost2arten", "wa/cost2TypeList"), //
-    CUSTOMER_LIST("menu.fibu.kunden", "wa/customerList"), //
-    //CUSTOMER_LIST("menu.fibu.kunden", getReactListUrl("customer")), // Doesn't work yet
+    COST2_LIST("menu.fibu.kost2", getReactListUrl("cost2")), //
+    COST2_TYPE_LIST("menu.fibu.kost2arten", getReactListUrl("cost2Type")), //
+    CUSTOMER_LIST("menu.fibu.kunden", getReactListUrl("customer")),
 
     DATEV_IMPORT("menu.fibu.datevImport", "wa/datevImport"), //
     DOCUMENTATION("menu.documentation"), //
@@ -90,7 +89,7 @@ enum class MenuItemDefId constructor(val i18nKey: String, val url: String? = nul
     SCRIPTING("menu.scripting", "wa/scripting"), //
     SEARCH("menu.search", "wa/search"), //
     TASK_TREE("menu.taskTree", "wa/taskTree"), //
-    TIMESHEET_LIST("menu.timesheetList", "wa/timesheetList"), //
+    TIMESHEET_LIST("menu.timesheetList", getReactListUrl("timesheet")), //
     USER_LIST("menu.userList", "wa/userList"), //
     VACATION("menu.vacation", getReactListUrl("vacation")), //
     VACATION_ACCOUNT("menu.vacation.leaveaccount", getReactDynamicPageUrl("vacationAccount")), //
@@ -101,7 +100,7 @@ enum class MenuItemDefId constructor(val i18nKey: String, val url: String? = nul
     GROOVY_CONSOLE("menu.groovyConsole", "wa/wicket/bookmarkable/org.projectforge.web.admin.GroovyConsolePage"), //
     LUCENE_CONSOLE("menu.luceneConsole", "wa/wicket/bookmarkable/org.projectforge.web.admin.LuceneConsolePage"), //
     PLUGIN_ADMIN("menu.pluginAdmin", "wa/wicket/bookmarkable/org.projectforge.web.admin.PluginListPage"), //
-    SYSTEM("menu.system", "wa/admin"), //
+    SYSTEM("menu.system", getReactDynamicPageUrl("admin")), //
     SYSTEM_STATISTICS("menu.systemStatistics", getReactDynamicPageUrl("systemStatistics")), //
     TENANT_LIST("menu.multiTenancy");
 
