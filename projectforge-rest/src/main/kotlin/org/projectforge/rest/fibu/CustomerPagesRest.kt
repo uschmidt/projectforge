@@ -71,7 +71,9 @@ class CustomerPagesRest
         val layout = super.createListLayout()
                 .add(UITable.createUIResultSetTable()
                         .add(UITableColumn("kost", title = "fibu.kunde.nummer"))
-                        .add(lc, "identifier", "name", "division", "konto", "statusAsString", "description"))
+                        .add(lc, "identifier", "name", "division", "konto")
+                        .add(UITableColumn("statusAsString", title = "status"))
+                        .add(lc, "description"))
         layout.getTableColumnById("konto").formatter = Formatter.KONTO
         return LayoutUtils.processListPage(layout, this)
     }
