@@ -65,8 +65,11 @@ class UserPagesRest
         if (copy != null) {
             user.copyFrom(copy)
         }
-        user.groups = groupService?.getGroupnames(obj.id)
-        user.rights = getRightsAsString(obj.id)
+
+        if(obj.id != null){
+            user.groups = groupService?.getGroupnames(obj.id)
+            user.rights = getRightsAsString(obj.id)
+        }
         return user
     }
 
