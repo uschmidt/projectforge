@@ -84,6 +84,17 @@ class UISelect<T>(val id: String,
         return this
     }
 
+    fun buildFromList(list: Collection<String>): UISelect<T> {
+        val newvalues = mutableListOf<UISelectValue<T>>()
+        list.forEach { value ->
+            val translation = translate(value)
+            @Suppress("UNCHECKED_CAST")
+            newvalues.add(UISelectValue(value as T, translation))
+        }
+        values = newvalues
+        return this
+    }
+
     // fun getEnumValues(enumClass: KClass<out Enum<*>>): Array<out Enum<*>> = enumClass.java.enumConstants
     private fun getEnumValues(enumClass: Class<out Enum<*>>): Array<out Enum<*>> = enumClass.enumConstants
 
