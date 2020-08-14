@@ -25,15 +25,31 @@ package org.projectforge.rest.hr
 
 import org.projectforge.business.humanresources.HRPlanningDO
 import org.projectforge.business.humanresources.HRPlanningDao
+import org.projectforge.business.humanresources.HRPlanningEntryDO
+import org.projectforge.business.humanresources.HRPlanningEntryDao
 import org.projectforge.rest.config.Rest
 import org.projectforge.rest.core.AbstractDOPagesRest
+import org.projectforge.rest.core.AbstractDTOPagesRest
+import org.projectforge.rest.dto.HRPlanning
+import org.projectforge.rest.dto.HRPlanningEntry
 import org.projectforge.ui.*
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("${Rest.URL}/hrPlanning")
-class HRPlanningPagesRest : AbstractDOPagesRest<HRPlanningDO, HRPlanningDao>(HRPlanningDao::class.java, "hr.planning.title") {
+class HRPlanningPagesRest : AbstractDTOPagesRest<HRPlanningDO, HRPlanning, HRPlanningDao>(HRPlanningDao::class.java, "hr.planning.title") {
+    override fun transformForDB(dto: HRPlanning): HRPlanningDO {
+        val hrPlanningDO = HRPlanningDO()
+        dto.copyTo(hrPlanningDO)
+        return hrPlanningDO
+    }
+
+    override fun transformFromDB(obj: HRPlanningDO, editMode: Boolean): HRPlanning {
+        val hrPlanning = HRPlanning()
+        hrPlanning.copyFrom(obj)
+        return hrPlanning
+    }
 
     /**
      * LAYOUT List page
@@ -50,9 +66,25 @@ class HRPlanningPagesRest : AbstractDOPagesRest<HRPlanningDO, HRPlanningDao>(HRP
     /**
      * LAYOUT Edit page
      */
-    override fun createEditLayout(dto: HRPlanningDO, userAccess: UILayout.UserAccess): UILayout {
+    override fun createEditLayout(dto: HRPlanning, userAccess: UILayout.UserAccess): UILayout {
         val layout = super.createEditLayout(dto, userAccess)
-                .add(UILabel("TODO"))
+                .add(UISelect.createUserSelect(lc, "user", false))
+                .add(lc, "week")
+                .add(UIList(lc, "entries", "entry", positionLabel = "menu.addNewEntry")
+                        .add(UIRow()
+                                .add(UICol()
+                                        .add(lc, "entry.status")
+                                        .add(UISelect.createProjectSelect(lc, "entry.projekt", multi = false))))
+                        .add(UIRow()
+                                .add(UICol()
+                                        .add(lc, "entry.priority"))
+                                .add(UICol()
+                                        .add(lc, "entry.probability")))
+                        .add(UIRow()
+                                .add(UICol()
+                                        .add(lc, "entry.unassignedHours", "entry.mondayHours", "entry.tuesdayHours", "entry.wednesdayHours", "entry.thursdayHours", "entry.fridayHours", "weekendHours"))
+                                .add(UICol()
+                                        .add(lc, "entry.description"))))
         return LayoutUtils.processEditPage(layout, dto, this)
     }
 }

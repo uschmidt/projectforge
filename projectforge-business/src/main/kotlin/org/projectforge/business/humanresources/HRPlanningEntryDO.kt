@@ -64,6 +64,7 @@ open class HRPlanningEntryDO : DefaultBaseDO(), DisplayNameCapable {
     @get:JoinColumn(name = "projekt_fk")
     open var projekt: ProjektDO? = null
 
+    @PropertyInfo(i18nKey = "status")
     @Field
     @get:Enumerated(EnumType.STRING)
     @get:Column(name = "status", length = 20)
