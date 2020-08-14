@@ -24,8 +24,6 @@
 package org.projectforge.rest
 
 import mu.KotlinLogging
-import org.projectforge.business.user.UserDao
-import org.projectforge.business.user.service.UserService
 import org.projectforge.framework.i18n.I18nHelper
 import org.projectforge.framework.i18n.translate
 import org.projectforge.framework.persistence.user.api.ThreadLocalUserContext
@@ -38,11 +36,10 @@ import org.projectforge.rest.core.RestResolver
 import org.projectforge.rest.dto.FormLayoutData
 import org.projectforge.rest.dto.PostData
 import org.projectforge.ui.*
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.util.HashMap
+import java.util.*
 import javax.servlet.http.HttpServletRequest
 
 private val log = KotlinLogging.logger {}
@@ -50,12 +47,6 @@ private val log = KotlinLogging.logger {}
 @RestController
 @RequestMapping("${Rest.URL}/feedback")
 class FeedbackPageRest : AbstractDynamicPageRest() {
-
-    @Autowired
-    private lateinit var userDao: UserDao
-
-    @Autowired
-    private lateinit var userService: UserService
 
     class FeedbackData(
             var userId: Int? = null,
