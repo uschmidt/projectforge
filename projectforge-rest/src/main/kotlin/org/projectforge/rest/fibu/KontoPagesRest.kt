@@ -108,4 +108,6 @@ class KontoPagesRest
                                 .add(lc, "nummer", "status", "bezeichnung", "description")))
         return LayoutUtils.processEditPage(layout, dto, this)
     }
+
+    override val autoCompleteSearchFields = arrayOf("name", "bezeichnung")
 }
