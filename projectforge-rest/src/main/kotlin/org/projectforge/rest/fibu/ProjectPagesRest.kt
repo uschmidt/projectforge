@@ -23,7 +23,6 @@
 
 package org.projectforge.rest.fibu
 
-import org.projectforge.business.fibu.KundeDO
 import org.projectforge.business.fibu.KundeDao
 import org.projectforge.business.fibu.ProjektDO
 import org.projectforge.business.fibu.ProjektDao
@@ -114,7 +113,7 @@ class ProjectPagesRest
             }
             val uiCheckbox = UICheckbox("" + it.getFormattedId(), label = label)
 
-            layout.add(UIRow().add(UICol().add(uiCheckbox)))
+            layout.add(uiCheckbox)
         }
 
         return LayoutUtils.processEditPage(layout, dto, this)

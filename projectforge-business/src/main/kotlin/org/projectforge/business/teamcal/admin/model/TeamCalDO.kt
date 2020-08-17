@@ -149,9 +149,9 @@ open class TeamCalDO() : BaseUserGroupRightsDO() {
             }
             val buf = StringBuffer()
             var dotRead = false
-            for (i in 0 until externalSubscriptionUrl!!.length) {
-                val ch = externalSubscriptionUrl!![i]
-                if (dotRead == true && ch == '/') {
+            for (element in externalSubscriptionUrl!!) {
+                val ch = element
+                if (dotRead && ch == '/') {
                     buf.append("/...")
                     break
                 } else if (ch == '?') {

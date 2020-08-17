@@ -158,7 +158,7 @@ internal class DBFullTextResultIterator<O : ExtendedBaseDO<Int>>(
             try {
                 query = parser.parse(queryString)
             } catch (ex: org.apache.lucene.queryparser.classic.ParseException) {
-                val errorMsg = ("Lucene error message: '${ex.message}'  (for ${baseDao.doClass.getSimpleName()}: '$queryString').")
+                val errorMsg = ("Lucene error message: '${ex.message}'  (for ${baseDao.doClass.simpleName}: '$queryString').")
                 // TODO feedback
                 log.error(errorMsg)
             }
