@@ -48,9 +48,15 @@ class ConfigurationPagesRest: AbstractDTOPagesRest<ConfigurationDO, Configuratio
 
     override fun transformForDB(dto: Configuration): ConfigurationDO {
         val configurationDO = ConfigurationDO()
+        dto.parameter = dto.parameter?.replace("administration.configuration.param.", "")
         dto.copyTo(configurationDO)
         if(dto.configurationType == ConfigurationType.BOOLEAN){
             configurationDO.stringValue = dto.booleanValue.toString()
+        }
+
+        if(dto.configurationType == ConfigurationType.CALENDAR){
+            configurationDO.intValue = dto.calendar?.id
+            configurationDO.stringValue = dto.calendar?.title
         }
         return configurationDO
     }
@@ -82,7 +88,6 @@ class ConfigurationPagesRest: AbstractDTOPagesRest<ConfigurationDO, Configuratio
         return LayoutUtils.processListPage(layout, this)
     }
 
-    // TODO: How to prevent adding more configs?
     // TODO: CALENDAR and TASK missing
     override fun createEditLayout(dto: Configuration, userAccess: UILayout.UserAccess): UILayout {
         val layout = super.createEditLayout(dto, userAccess)
@@ -95,7 +100,7 @@ class ConfigurationPagesRest: AbstractDTOPagesRest<ConfigurationDO, Configuratio
             ConfigurationType.FLOAT -> layout.add(UITextArea("floatValue", lc, label = dto.parameter))
             ConfigurationType.PERCENT -> layout.add(UITextArea("floatValue", lc, label = dto.parameter))
             ConfigurationType.TIME_ZONE -> layout.add(lc, "timeZone")
-            ConfigurationType.CALENDAR -> layout.add(lc, "calendar")
+            ConfigurationType.CALENDAR -> layout.add(UISelect.createCalendarSelect(lc, "calendar", false))
             ConfigurationType.TASK -> layout.add(lc, "task")
             else -> ""
         }

@@ -65,8 +65,8 @@ class Configuration(
             ConfigurationType.FLOAT -> displayValue = src.floatValue.toString()
             ConfigurationType.PERCENT -> displayValue = src.floatValue.toString()
             ConfigurationType.TIME_ZONE -> displayValue = src.timeZoneId
-            //ConfigurationType.CALENDAR -> layout.add()
-            //ConfigurationType.TASK -> layout.add()
+            ConfigurationType.CALENDAR -> displayValue = src.calendarId.toString()
+            ConfigurationType.TASK -> displayValue = src.taskId.toString()
             else -> ""
         }
     }

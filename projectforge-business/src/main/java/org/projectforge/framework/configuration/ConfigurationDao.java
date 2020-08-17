@@ -48,7 +48,7 @@ import java.util.Set;
 import java.util.TimeZone;
 
 /**
- * Configuration values persistet in the data base. Please access the configuration parameters via
+ * Configuration values persisted in the data base. Please access the configuration parameters via
  * {@link AbstractConfiguration}.
  *
  * @author Kai Reinhard (k.reinhard@micromata.de)
@@ -180,6 +180,9 @@ public class ConfigurationDao extends BaseDao<ConfigurationDO> {
   public boolean hasAccess(final PFUserDO user, final ConfigurationDO obj, final ConfigurationDO oldObj,
                            final OperationType operationType,
                            final boolean throwException) {
+    if(operationType.equals(OperationType.INSERT)){
+      return false;
+    }
     return accessChecker.isUserMemberOfAdminGroup(user, throwException);
   }
 
