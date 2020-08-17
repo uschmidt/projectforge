@@ -56,8 +56,12 @@ class ConfigurationPagesRest: AbstractDTOPagesRest<ConfigurationDO, Configuratio
 
         if(dto.configurationType == ConfigurationType.CALENDAR){
             configurationDO.intValue = dto.calendar?.id
-            configurationDO.stringValue = dto.calendar?.title
         }
+
+        if(dto.configurationType == ConfigurationType.TASK){
+            configurationDO.intValue = dto.task?.id
+        }
+
         return configurationDO
     }
 
@@ -88,7 +92,6 @@ class ConfigurationPagesRest: AbstractDTOPagesRest<ConfigurationDO, Configuratio
         return LayoutUtils.processListPage(layout, this)
     }
 
-    // TODO: CALENDAR and TASK missing
     override fun createEditLayout(dto: Configuration, userAccess: UILayout.UserAccess): UILayout {
         val layout = super.createEditLayout(dto, userAccess)
 
