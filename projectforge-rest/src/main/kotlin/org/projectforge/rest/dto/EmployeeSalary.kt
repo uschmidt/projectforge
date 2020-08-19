@@ -23,17 +23,32 @@
 
 package org.projectforge.rest.dto
 
-import org.projectforge.business.fibu.EmployeeDO
 import org.projectforge.business.fibu.EmployeeSalaryDO
 import org.projectforge.business.fibu.EmployeeSalaryType
 import java.math.BigDecimal
 
 class EmployeeSalary(
-        var employee: EmployeeDO? = null,
+        var employee: Employee? = Employee(),
         var firstName: String? = null,
         var year: Int? = null,
         var month: Int? = null,
         var bruttoMitAgAnteil: BigDecimal? = null,
         var comment: String? = null,
-        var type: EmployeeSalaryType? = null
-) : BaseDTO<EmployeeSalaryDO>()
+        var type: EmployeeSalaryType? = null,
+        var formattedYearAndMonth: String? = null
+) : BaseDTO<EmployeeSalaryDO>() {
+
+    override fun copyFrom(src: EmployeeSalaryDO) {
+        super.copyFrom(src)
+
+        if(src.employee != null){
+            employee!!.copyFrom(src.employee!!)
+        }
+
+        if(src.year != null && src.month != null){
+            formattedYearAndMonth = src.formattedYearAndMonth
+        }
+    }
+
+
+}

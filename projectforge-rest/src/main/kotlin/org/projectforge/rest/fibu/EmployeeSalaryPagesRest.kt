@@ -51,16 +51,18 @@ class EmployeeSalaryPagesRest
         return employeeSalaryDO
     }
 
+    override val classicsLinkListUrl: String? = "wa/employeeSalaryList"
+
     /**
      * LAYOUT List page
      */
     override fun createListLayout(): UILayout {
         val layout = super.createListLayout()
                 .add(UITable.createUIResultSetTable()
-                        .add(lc, "month")
-                        .add(UITableColumn("fibu.employee.user.lastname", "name"))
-                        .add(UITableColumn("fibu.employee.user.firstname", "firstName"))
-                        .add(UITableColumn("fibu.employee.staffNumber", "fibu.employee.staffNumber"))
+                        .add(UITableColumn("formattedYearAndMonth", title = "calendar.month"))
+                        .add(UITableColumn("employee.user.lastname", "name"))
+                        .add(UITableColumn("employee.user.firstname", "firstName"))
+                        .add(UITableColumn("employee.staffNumber", "fibu.employee.staffNumber"))
                         .add(lc, "type", "bruttoMitAgAnteil", "comment"))
         return LayoutUtils.processListPage(layout, this)
     }
@@ -72,9 +74,8 @@ class EmployeeSalaryPagesRest
         val layout = super.createEditLayout(dto, userAccess)
                 .add(UIRow()
                         .add(UICol()
-                                .add(lc, "fibu.employee.user.lastname", "fibu.employee.user.firstname")
-                                .add(UILabel("TODO: Implement selector for year/month"))
-                                .add(lc, "type", "bruttoMitAgAnteil", "comment")))
+                                .add(UISelect.createEmployeeSelect(lc, "employee", false))
+                                .add(lc, "year", "month", "type", "bruttoMitAgAnteil", "comment")))
         return LayoutUtils.processEditPage(layout, dto, this)
     }
 }

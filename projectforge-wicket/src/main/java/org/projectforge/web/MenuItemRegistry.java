@@ -98,7 +98,6 @@ public class MenuItemRegistry implements Serializable {
     register(MenuItemDefId.INCOMING_INVOICE_LIST, EingangsrechnungListPage.class);
     register(MenuItemDefId.PROJECT_LIST, ProjektListPage.class);
     register(MenuItemDefId.EMPLOYEE_LIST, EmployeeListPage.class);
-    register(MenuItemDefId.EMPLOYEE_SALARY_LIST, EmployeeSalaryListPage.class);
     register(MenuItemDefId.ORDER_LIST, AuftragListPage.class);
     register(MenuItemDefId.SCRIPT_LIST, ScriptListPage.class);
     register(MenuItemDefId.SCRIPTING, ScriptingPage.class);
