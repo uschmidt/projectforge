@@ -79,7 +79,7 @@ class ProjectPagesRest
                 .add(UITable.createUIResultSetTable()
                         .add(UITableColumn("kost", title = "fibu.projekt.nummer"))
                         .add(lc, "identifier")
-                        .add(UITableColumn("customer.name", title = "fibu.kunde.name"))
+                        .add(UITableColumn("customer.displayName", title = "fibu.kunde.name"))
                         .add(lc, "name", "kunde.division", "task", "konto", "status", "projektManagerGroup")
                         .add(UITableColumn("kost2ArtsAsString", title = "fibu.kost2art.kost2arten"))
                         .add(lc, "description"))
