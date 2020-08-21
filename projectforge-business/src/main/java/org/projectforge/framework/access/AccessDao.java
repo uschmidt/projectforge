@@ -238,6 +238,9 @@ public class AccessDao extends BaseDao<GroupTaskAccessDO> {
   @Override
   public boolean hasAccess(final PFUserDO user, final GroupTaskAccessDO obj, final GroupTaskAccessDO oldObj,
                            final OperationType operationType, final boolean throwException) {
+    if(obj == null && operationType == OperationType.INSERT){
+      return true;
+    }
     return accessChecker.hasPermission(user, obj.getTaskId(), AccessType.TASK_ACCESS_MANAGEMENT, operationType,
             throwException);
   }

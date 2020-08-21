@@ -27,6 +27,7 @@ import org.projectforge.framework.access.AccessDao
 import org.projectforge.framework.access.GroupTaskAccessDO
 import org.projectforge.rest.config.Rest
 import org.projectforge.rest.core.saveOrUpdate
+import org.projectforge.rest.dto.GroupTaskAccess
 import org.projectforge.rest.dto.PostData
 import org.projectforge.ui.ResponseAction
 import org.springframework.beans.factory.annotation.Autowired
@@ -51,8 +52,9 @@ class GroupAccessServicesRest {
      * This template clears all access entries.
      */
     @PostMapping("clear")
-    fun clear(request: HttpServletRequest, @RequestBody postData: PostData<GroupTaskAccessDO>): ResponseEntity<ResponseAction> {
-        val access = postData.data
+    fun clear(request: HttpServletRequest, @RequestBody postData: PostData<GroupTaskAccess>): ResponseEntity<ResponseAction> {
+        val access = GroupTaskAccessDO()
+        postData.data.copyTo(access)
         access.clear()
         return saveOrUpdate(request, this.accessDao, access, postData, groupAccessRest, groupAccessRest.validate(access))
     }
@@ -61,8 +63,9 @@ class GroupAccessServicesRest {
      * This template is used as default for guests (they have only read access to tasks).
      */
     @PostMapping("guest")
-    fun guest(request: HttpServletRequest, @RequestBody postData: PostData<GroupTaskAccessDO>): ResponseEntity<ResponseAction> {
-        val access = postData.data
+    fun guest(request: HttpServletRequest, @RequestBody postData: PostData<GroupTaskAccess>): ResponseEntity<ResponseAction> {
+        val access = GroupTaskAccessDO()
+        postData.data.copyTo(access)
         access.guest()
         return saveOrUpdate(request, this.accessDao, access, postData, groupAccessRest, groupAccessRest.validate(access))
     }
@@ -72,8 +75,9 @@ class GroupAccessServicesRest {
      * and own time sheets and only read-access to foreign time sheets.
      */
     @PostMapping("employee")
-    fun employee(request: HttpServletRequest, @RequestBody postData: PostData<GroupTaskAccessDO>): ResponseEntity<ResponseAction> {
-        val access = postData.data
+    fun employee(request: HttpServletRequest, @RequestBody postData: PostData<GroupTaskAccess>): ResponseEntity<ResponseAction> {
+        val access = GroupTaskAccessDO()
+        postData.data.copyTo(access)
         access.employee()
         return saveOrUpdate(request, this.accessDao, access, postData, groupAccessRest, groupAccessRest.validate(access))
     }
@@ -83,8 +87,9 @@ class GroupAccessServicesRest {
      * time-sheets.
      */
     @PostMapping("leader")
-    fun leader(request: HttpServletRequest, @RequestBody postData: PostData<GroupTaskAccessDO>): ResponseEntity<ResponseAction> {
-        val access = postData.data
+    fun leader(request: HttpServletRequest, @RequestBody postData: PostData<GroupTaskAccess>): ResponseEntity<ResponseAction> {
+        val access = GroupTaskAccessDO()
+        postData.data.copyTo(access)
         access.leader()
         return saveOrUpdate(request, this.accessDao, access, postData, groupAccessRest, groupAccessRest.validate(access))
     }
@@ -94,8 +99,9 @@ class GroupAccessServicesRest {
      * time-sheets.
      */
     @PostMapping("administrator")
-    fun administrator(request: HttpServletRequest, @RequestBody postData: PostData<GroupTaskAccessDO>): ResponseEntity<ResponseAction> {
-        val access = postData.data
+    fun administrator(request: HttpServletRequest, @RequestBody postData: PostData<GroupTaskAccess>): ResponseEntity<ResponseAction> {
+        val access = GroupTaskAccessDO()
+        postData.data.copyTo(access)
         access.administrator()
         return saveOrUpdate(request, this.accessDao, access, postData, groupAccessRest, groupAccessRest.validate(access))
     }

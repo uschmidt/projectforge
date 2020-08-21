@@ -40,7 +40,7 @@ enum class MenuItemDefId constructor(val i18nKey: String, val url: String? = nul
     GO_CLASSIC("goreact.menu.classics", "wa"), //
 
     // Sub menus in alphabetical order:
-    ACCESS_LIST("menu.accessList", "wa/accessList"), //
+    ACCESS_LIST("menu.accessList", getReactListUrl("access")), //
     ACCOUNT_LIST("menu.fibu.konten", getReactListUrl("account")), //
     ACCOUNTING_RECORD_LIST("menu.fibu.buchungssaetze", "wa/accountingRecordList"), //
     ADDRESSBOOK_LIST("menu.addressbookList", getReactListUrl("addressBook")), //
@@ -82,7 +82,7 @@ enum class MenuItemDefId constructor(val i18nKey: String, val url: String? = nul
     OUTGOING_INVOICE_LIST("menu.fibu.rechnungen", "wa/outgoingInvoiceList"), //
     PERSONAL_STATISTICS("menu.personalStatistics", "wa/personalStatistics"), //
     PHONE_CALL("menu.phoneCall", "wa/phoneCall"), //
-    PROJECT_LIST("menu.fibu.projekte", "wa/projectList"), //
+    PROJECT_LIST("menu.fibu.projekte", getReactListUrl("project")), //
     REPORT_OBJECTIVES("menu.fibu.reporting.reportObjectives", "wa/reportObjectives"), //
     SEND_SMS("menu.sendSms", "wa/sendSms"), //
     SCRIPT_LIST("menu.scriptList", "wa/scriptList"), //

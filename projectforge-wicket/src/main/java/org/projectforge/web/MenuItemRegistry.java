@@ -96,7 +96,6 @@ public class MenuItemRegistry implements Serializable {
     register(MenuItemDefId.GANTT, GanttChartListPage.class);
     register(MenuItemDefId.OUTGOING_INVOICE_LIST, RechnungListPage.class);
     register(MenuItemDefId.INCOMING_INVOICE_LIST, EingangsrechnungListPage.class);
-    register(MenuItemDefId.PROJECT_LIST, ProjektListPage.class);
     register(MenuItemDefId.EMPLOYEE_LIST, EmployeeListPage.class);
     register(MenuItemDefId.ORDER_LIST, AuftragListPage.class);
     register(MenuItemDefId.SCRIPT_LIST, ScriptListPage.class);
@@ -107,7 +106,6 @@ public class MenuItemRegistry implements Serializable {
     register(MenuItemDefId.VISITORBOOK, VisitorbookListPage.class);
     register(MenuItemDefId.MY_PREFERENCES, UserPrefListPage.class);
     register(MenuItemDefId.USER_LIST, UserListPage.class);
-    register(MenuItemDefId.ACCESS_LIST, AccessListPage.class);
     register(MenuItemDefId.SQL_CONSOLE, SqlConsolePage.class);
     register(MenuItemDefId.GROOVY_CONSOLE, GroovyConsolePage.class);
     register(MenuItemDefId.LUCENE_CONSOLE, LuceneConsolePage.class);
