@@ -75,7 +75,7 @@ function AccessTableComponent() {
             if (item.accessType === accessType) {
                 const updatedItem = {
                     ...item,
-                    accessUpdate: event.target.checked,
+                    accessDelete: event.target.checked,
                 };
 
                 return updatedItem;
