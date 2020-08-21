@@ -26,12 +26,14 @@ package org.projectforge.rest
 import org.projectforge.Const
 import org.projectforge.business.group.service.GroupService
 import org.projectforge.business.user.UserDao
+import org.projectforge.business.user.UserRightDao
 import org.projectforge.business.user.UserRightValue
 import org.projectforge.framework.configuration.Configuration
 import org.projectforge.framework.i18n.translate
 import org.projectforge.framework.persistence.api.BaseSearchFilter
 import org.projectforge.framework.persistence.api.UserRightService
 import org.projectforge.framework.persistence.user.entities.PFUserDO
+import org.projectforge.framework.persistence.user.entities.UserRightDO
 import org.projectforge.framework.time.TimeNotation
 import org.projectforge.rest.config.Rest
 import org.projectforge.rest.core.AbstractDTOPagesRest
@@ -57,6 +59,9 @@ class UserPagesRest
     private lateinit var userDao: UserDao
 
     @Autowired
+    private lateinit var userRightDao: UserRightDao
+
+    @Autowired
     private val userRightService: UserRightService? = null
 
     override fun transformFromDB(obj: PFUserDO, editMode: Boolean): User {
@@ -66,9 +71,10 @@ class UserPagesRest
             user.copyFrom(copy)
         }
 
-        if(obj.id != null){
-            user.groups = groupService?.getGroupnames(obj.id)
-            user.rights = getRightsAsString(obj.id)
+        if (obj.id != null) {
+            user.groupsAsString = groupService?.getGroupnames(obj.id)
+            user.rights = userDao.getUserRights(obj.id)
+            user.rightsAsString = getRightsAsString(user.rights)
         }
         return user
     }
@@ -89,8 +95,8 @@ class UserPagesRest
         val layout = super.createListLayout()
                 .add(UITable.createUIResultSetTable()
                         .add(lc, "username", "deactivated", "lastname", "firstname", "personalPhoneIdentifiers", "description")
-                        .add(UITableColumn("groups", title = "user.assignedGroups"))
-                        .add(UITableColumn("rights", title = "access.rights"))
+                        .add(UITableColumn("groupsAsString", title = "user.assignedGroups"))
+                        .add(UITableColumn("rightsAsString", title = "access.rights"))
                         .add(lc, "ldapValues"))
         return LayoutUtils.processListPage(layout, this)
     }
@@ -104,16 +110,22 @@ class UserPagesRest
                         .add(UICol()
                                 .add(lc, "username", "firstname", "lastname", "organization", "email",
                                         /*"authenticationToken",*/
-                                        "jiraUsername", "hrPlanning", "deactivated"/*, "password"*/))
+                                        "jiraUsername", "hrPlanning", "deactivated")
+                                .add(UIInput("password",
+                                        label = "user.changePassword.oldPassword",
+                                        required = true,
+                                        focus = true,
+                                        dataType = UIDataType.PASSWORD,
+                                        autoComplete = UIInput.AutoCompleteType.CURRENT_PASSWORD))
+                                .add(UIInput("newPassword",
+                                        label = "user.changePassword.newPassword",
+                                        required = true,
+                                        focus = true,
+                                        dataType = UIDataType.PASSWORD,
+                                        autoComplete = UIInput.AutoCompleteType.NEW_PASSWORD)))
                         .add(createUserSettingsCol(UILength(6))))
-                .add(UISelect.createGroupSelect(lc, "readonlyAccessUsers", true, "user.assignedGroups", "access.groups"))
-                .add(UISelect<Int>("readonlyAccessUsers", lc,
-                        multi = true,
-                        label = "multitenancy.assignedTenants",
-                        additionalLabel = "access.groups",
-                        autoCompletion = AutoCompletion<Int>(url = "group/aco"),
-                        labelProperty = "name",
-                        valueProperty = "id"))
+                .add(UISelect.createGroupSelect(lc, "groups", true, "user.assignedGroups", "access.groups"))
+                .add(UISelect.createTenantSelect(lc, "tenants", true, "multitenancy.assignedTenants", "access.groups"))
                 .add(lc, "description")
 
         return LayoutUtils.processEditPage(layout, dto, this)
@@ -130,8 +142,7 @@ class UserPagesRest
         return list
     }
 
-    fun getRightsAsString(srcId: Int): String {
-        val rights = userDao.getUserRights(srcId)
+    fun getRightsAsString(rights: List<UserRightDO>?): String {
         val buf = StringBuffer()
         if (rights != null) {
             var first = true
@@ -180,6 +191,10 @@ class UserPagesRest
                     .add(UISelect("excelDateFormat", userLC, required = false, values = excelDateFormats))
                     .add(UISelect("timeNotation", userLC, required = false, values = timeNotations))
                     .add(userLC, "sshPublicKey")
+        }
+
+        internal fun createUserRightCol(rights: List<UserRightDO>?) {
+
         }
 
         private fun createUISelectValue(pattern: String, today: LocalDate, excelDateFormat: Boolean = false): UISelectValue<String> {
