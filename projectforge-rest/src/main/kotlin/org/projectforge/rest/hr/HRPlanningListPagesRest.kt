@@ -69,7 +69,22 @@ class HRPlanningListPagesRest : AbstractDTOPagesRest<HRPlanningEntryDO, HRPlanni
      */
     override fun createEditLayout(dto: HRPlanningEntry, userAccess: UILayout.UserAccess): UILayout {
         val layout = super.createEditLayout(dto, userAccess)
-                .add(UILabel("TODO"))
+                .add(UISelect.createUserSelect(lc, "planning.user", false))
+                .add(lc, "planning.week")
+                .add(UIRow()
+                        .add(UICol()
+                                .add(lc, "status")
+                                .add(UISelect.createProjectSelect(lc, "projekt", multi = false))))
+                .add(UIRow()
+                        .add(UICol()
+                                .add(lc, "priority"))
+                        .add(UICol()
+                                .add(lc, "probability")))
+                .add(UIRow()
+                        .add(UICol()
+                                .add(lc, "unassignedHours", "mondayHours", "tuesdayHours", "wednesdayHours", "thursdayHours", "fridayHours", "weekendHours"))
+                        .add(UICol()
+                                .add(lc, "description")))
         return LayoutUtils.processEditPage(layout, dto, this)
     }
 }

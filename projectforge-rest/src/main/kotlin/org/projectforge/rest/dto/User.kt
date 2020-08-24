@@ -24,11 +24,12 @@
 package org.projectforge.rest.dto
 
 import org.projectforge.business.user.UserDao
-import org.projectforge.business.user.UserRightValue
 import org.projectforge.business.user.service.UserService
 import org.projectforge.common.StringHelper
 import org.projectforge.framework.configuration.ApplicationContextProvider
+import org.projectforge.framework.persistence.user.entities.GroupDO
 import org.projectforge.framework.persistence.user.entities.PFUserDO
+import org.projectforge.framework.persistence.user.entities.UserRightDO
 import org.projectforge.framework.time.TimeNotation
 import java.util.*
 
@@ -41,8 +42,10 @@ class User(id: Int? = null,
            var email: String? = null,
            var deactivated: Boolean = false,
            var timeZone: TimeZone? = null,
-           var groups: String? = "",
-           var rights: String? = "",
+           var groups: List<GroupDO>? = mutableListOf(),
+           var groupsAsString: String? = "",
+           var rights: List<UserRightDO>? = mutableListOf(),
+           var rightsAsString: String? = "",
            var locale: Locale? = null,
            var dateFormat: String? = null,
            var excelDateFormat: String? = null,

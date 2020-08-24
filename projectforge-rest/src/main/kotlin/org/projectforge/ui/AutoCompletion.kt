@@ -47,7 +47,7 @@ class AutoCompletion<T>(
     /**
      * Pre-defined types of autocompletion objects as information for the clients.
      */
-    enum class Type { USER, GROUP, CUSTOMER, EMPLOYEE, PROJECT }
+    enum class Type { USER, GROUP, CUSTOMER, PROJECT, ADDRESS, TENANT, ACCOUNT, CALENDAR, EMPLOYEE }
     class Entry<T>(val value: T,
                    /**
                     * The title to display.
@@ -118,7 +118,38 @@ class AutoCompletion<T>(
             return AutoCompletion(url = getAutoCompletionUrl("project"), type = Type.PROJECT.name)
         }
 
-        fun getAutoCompletion4Employees(): AutoCompletion<Int> {
+        /**
+         * @return category/autosearch?search=:search
+         */
+        fun getAutoCompletion4Addresses(): AutoCompletion<Int>? {
+            return AutoCompletion(url = getAutoCompletionUrl("address"), type = Type.ADDRESS.name)
+        }
+
+        /**
+         * @return category/autosearch?search=:search
+         */
+        fun getAutoCompletion4Tenants(): AutoCompletion<Int>? {
+            return AutoCompletion(url = getAutoCompletionUrl("tenant"), type = Type.TENANT.name)
+        }
+
+        /**
+         * @return category/autosearch?search=:search
+         */
+        fun getAutoCompletion4Accounts(): AutoCompletion<Int>? {
+            return AutoCompletion(url = getAutoCompletionUrl("account"), type = Type.ACCOUNT.name)
+        }
+
+        /**
+         * @return category/autosearch?search=:search
+         */
+        fun getAutoCompletion4Calendars(): AutoCompletion<Int>? {
+            return AutoCompletion(url = getAutoCompletionUrl("teamCal"), type = Type.CALENDAR.name)
+        }
+
+        /**
+         * @return category/autosearch?search=:search
+         */
+        fun getAutoCompletion4Employees(): AutoCompletion<Int>? {
             return AutoCompletion(url = getAutoCompletionUrl("employee"), type = Type.EMPLOYEE.name)
         }
     }

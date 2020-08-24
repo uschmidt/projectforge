@@ -39,9 +39,11 @@ class Project(id: Int? = null,
               var task: Task? = null,
               var projektManagerGroup: Group? = null,
               var projectManager: PFUserDO? = null,
+              var headOfBusinessManager: PFUserDO? = null,
+              var salesManager: PFUserDO? = null,
               var nummernkreis: Int? = null,
               var kost: String? = null,
-              var kost2Arts: MutableList<Kost2Art>? = ArrayList())
+              var kost2Arts: MutableList<Kost2Art>? = mutableListOf())
     : BaseDTODisplayObject<ProjektDO>(id, displayName = displayName) {
 
     var kost2ArtsAsString: String = ""
@@ -77,20 +79,27 @@ class Project(id: Int? = null,
 
 
     fun transformKost2(allKost2Arts: List<org.projectforge.reporting.Kost2Art>?) {
+        var existingKost2: MutableList<Kost2Art>? = ArrayList()
         for (kost2 in allKost2Arts!!) {
+            val kost2Art = Kost2Art()
+            kost2Art.id = kost2.id
+            kost2Art.name = kost2.formattedId + " " + kost2.name
+            kost2Art.description = kost2.description
+            kost2Art.fakturiert = kost2.isFakturiert
+            kost2Art.projektStandard = kost2.isProjektStandard
+            kost2Art.deleted = kost2.isDeleted
+            kost2Art.selected = kost2.isSelected
+            kost2Art.existsAlready = kost2.isExistsAlready
+            kost2Arts!!.add(kost2Art)
+
+            if(!kost2Art.fakturiert){
+                kost2Art.name += " (nf)"
+            }
+
             if(kost2.isExistsAlready){
-                val kost2Art = Kost2Art()
-                kost2Art.id = kost2.id
-                kost2Art.name = kost2.name
-                kost2Art.description = kost2.description
-                kost2Art.fakturiert = kost2.isFakturiert
-                kost2Art.projektStandard = kost2.isProjektStandard
-                kost2Art.deleted = kost2.isDeleted
-                kost2Art.selected = kost2.isSelected
-                kost2Art.existsAlready = kost2.isExistsAlready
-                kost2Arts!!.add(kost2Art)
+                existingKost2!!.add(kost2Art)
             }
         }
-        kost2ArtsAsString = kost2Arts?.joinToString { it.getFormattedId() } ?: ""
+        kost2ArtsAsString = existingKost2?.joinToString { it.getFormattedId() } ?: ""
     }
 }

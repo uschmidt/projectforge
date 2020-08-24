@@ -199,4 +199,6 @@ class TeamCalPagesRest : AbstractDTOPagesRest<TeamCalDO, TeamCal, TeamCalDao>(Te
                 "plugins.teamcal.export.reminder.checkbox.tooltip")
         return LayoutUtils.processEditPage(layout, dto, this)
     }
+
+    override val autoCompleteSearchFields = arrayOf("title", "description")
 }

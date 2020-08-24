@@ -145,8 +145,12 @@ class ContractPagesRest
         val signerA = UIInput("signerA", lc).enableAutoCompletion(this)
         val signerB = UIInput("signerB", lc).enableAutoCompletion(this)
         val number = UIReadOnlyField("number", lc)
-        val contractTypes = configurationService.contractTypes.map {
-            UISelectValue(it.value, it.label)
+        val contractTypes = if (configurationService.contractTypes != null){
+            configurationService.contractTypes.map {
+                UISelectValue(it.value, it.label)
+            }
+        } else {
+            ArrayList<UISelectValue<String>>()
         }
         val textFieldSet = UIFieldset(UILength(lg = 6))
         textFieldSet.add(lc, "text")

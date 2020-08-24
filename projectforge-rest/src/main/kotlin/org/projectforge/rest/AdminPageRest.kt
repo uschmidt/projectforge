@@ -53,7 +53,6 @@ import org.projectforge.framework.time.DateHelper
 import org.projectforge.framework.time.PFDateTime
 import org.projectforge.menu.MenuItem
 import org.projectforge.menu.MenuItemTargetType
-import org.projectforge.plugins.core.PluginAdminService
 import org.projectforge.rest.config.Rest
 import org.projectforge.rest.core.AbstractDynamicPageRest
 import org.projectforge.rest.core.RestResolver
@@ -113,7 +112,9 @@ class AdminPageRest : AbstractDynamicPageRest() {
     class AdminData(
             val alertMessage: String? = SystemAlertMessage.alertMessage,
             val reindexFromDate: LocalDate? = null,
-            val reindexNewestNEntries: Int = 1000
+            val reindexNewestNEntries: Int = 1000,
+            val logEntries: String? = null,
+            var formattedLogEntries: String? = null
     )
 
 
@@ -133,122 +134,147 @@ class AdminPageRest : AbstractDynamicPageRest() {
                 tooltip = translate("system.admin.reindex.fromDate.tooltip"),
                 dataType = UIDataType.DATE)
 
+        val logEntries = UITextArea("logEntries",
+                label = translate("system.admin.button.formatLogEntries"),
+                maxLength = 100000)
+
         val layout = UILayout("system.admin.title")
                 .add(UIRow()
                         .add(UICol()
                                 .add(alertMessage)
+                                .add(UIButton("setAlertMessage",
+                                        title = translate("system.admin.button.setAlertMessage"),
+                                        tooltip = translate("system.admin.button.setAlertMessage.tooltip"),
+                                        responseAction = ResponseAction(RestResolver.getReactUrl(this::class.java) + "/alertMessage", targetType = TargetType.POST)
+                                ))
                                 .add(copyPasteText)
                         )
                         .add(UICol()
                                 .add(newestEntries)
-                                .add(reindexDate))
-                )
-                .addAction(UIButton("setAlertMessage",
-                        title = translate("system.admin.button.setAlertMessage"),
-                        tooltip = translate("system.admin.button.setAlertMessage.tooltip"),
-                        responseAction = ResponseAction(RestResolver.getRestUrl(this::class.java) + "/alertMessage", targetType = TargetType.POST)
-                ))
-                .addAction(UIButton("reindex",
-                        title = translate("system.admin.button.reindex"),
-                        tooltip = translate("system.admin.button.reindex.tooltip"),
-                        responseAction = ResponseAction(RestResolver.getRestUrl(this::class.java) + "/reindex", targetType = TargetType.POST)
-                ))
+                                .add(reindexDate)
+                                .add(UIButton("reindex",
+                                        title = translate("system.admin.button.reindex"),
+                                        tooltip = translate("system.admin.button.reindex.tooltip"),
+                                        responseAction = ResponseAction(RestResolver.getReactUrl(this::class.java) + "/reindex", targetType = TargetType.POST)
+                                )))
 
-        val databaseActionsMenu = MenuItem("admin.databaseActions", i18nKey = "system.admin.group.title.databaseActions")
+                )
+                .add(UIRow()
+                        .add(UICol()
+                                .add(logEntries)
+                                .add(UIButton("formatLogEntries",
+                                        title = translate("system.admin.button.formatLogEntries"),
+                                        tooltip = translate("system.admin.button.formatLogEntries.tooltip"),
+                                        responseAction = ResponseAction(RestResolver.getReactUrl(this::class.java) + "/formatLogEntries", targetType = TargetType.POST)
+                                ))))
+
+        val databaseActionsMenu = MenuItem("admin.databaseActions", i18nKey = "system.admin.group.title.databaseActions", title = translate("system.admin.group.title.databaseActions"))
 
         databaseActionsMenu.add(MenuItem("admin.updateUserPrefs",
                 i18nKey = "system.admin.button.updateUserPrefs",
-                url = RestResolver.getRestUrl(this::class.java) + "/updateUserPrefs",
-                tooltip = "system.admin.button.updateUserPrefs.tooltip",
+                title = translate("system.admin.button.updateUserPrefs"),
+                url = RestResolver.getReactUrl(this::class.java) + "/updateUserPrefs",
+                tooltip = translate("system.admin.button.updateUserPrefs.tooltip"),
                 type = MenuItemTargetType.DOWNLOAD))
 
         databaseActionsMenu.add(MenuItem("admin.createMissingDatabaseIndices",
                 i18nKey = "system.admin.button.createMissingDatabaseIndices",
-                url = RestResolver.getRestUrl(this::class.java) + "/createMissingDatabaseIndices",
-                tooltip = "system.admin.button.createMissingDatabaseIndices.tooltip",
-                type = MenuItemTargetType.RESTCALL))
+                title = translate("system.admin.button.createMissingDatabaseIndices"),
+                tooltip = translate("system.admin.button.createMissingDatabaseIndices.tooltip"),
+                type = MenuItemTargetType.RESTCALL,
+                url = RestResolver.getReactUrl(this::class.java) + "/createMissingDatabaseIndices"))
 
         // TODO: ConfirmMessage
         databaseActionsMenu.add(MenuItem("admin.dump",
                 i18nKey = "system.admin.button.dump",
-                url = RestResolver.getRestUrl(this::class.java) + "/dump",
-                tooltip = "system.admin.button.dump.tooltip",
-                type = MenuItemTargetType.DOWNLOAD))
+                title = translate("system.admin.button.dump"),
+                tooltip = translate("system.admin.button.dump.tooltip"),
+                type = MenuItemTargetType.DOWNLOAD,
+                url = RestResolver.getReactUrl(this::class.java) + "/dump"))
 
         databaseActionsMenu.add(MenuItem("admin.schemaExport",
                 i18nKey = "system.admin.button.schemaExport",
-                url = RestResolver.getRestUrl(this::class.java) + "/schemaExport",
-                tooltip = "system.admin.button.schemaExport.tooltip",
+                title = translate("system.admin.button.schemaExport"),
+                url = RestResolver.getReactUrl(this::class.java) + "/schemaExport",
+                tooltip = translate("system.admin.button.schemaExport.tooltip"),
                 type = MenuItemTargetType.DOWNLOAD))
 
         layout.add(databaseActionsMenu, menuIndex++)
 
-        val cachesMenu = MenuItem("admin.caches", i18nKey = "system.admin.group.title.systemChecksAndFunctionality.caches")
+        val cachesMenu = MenuItem("admin.caches", i18nKey = "system.admin.group.title.systemChecksAndFunctionality.caches", title = translate("system.admin.group.title.systemChecksAndFunctionality.caches"))
 
         cachesMenu.add(MenuItem("admin.refreshCaches",
                 i18nKey = "system.admin.button.refreshCaches",
-                url = RestResolver.getRestUrl(this::class.java) + "/refreshCaches",
-                tooltip = "system.admin.button.refreshCaches.tooltip",
+                title = translate("system.admin.button.refreshCaches"),
+                url = RestResolver.getReactUrl(this::class.java) + "/refreshCaches",
+                tooltip = translate("system.admin.button.refreshCaches.tooltip"),
                 type = MenuItemTargetType.DOWNLOAD))
 
         layout.add(cachesMenu, menuIndex++)
 
-        val configurationMenu = MenuItem("admin.configuration", i18nKey = "system.admin.group.title.systemChecksAndFunctionality.configuration")
+        val configurationMenu = MenuItem("admin.configuration", i18nKey = "system.admin.group.title.systemChecksAndFunctionality.configuration", title = translate("system.admin.group.title.systemChecksAndFunctionality.configuration"))
 
         configurationMenu.add(MenuItem("admin.rereadConfiguration",
                 i18nKey = "system.admin.button.rereadConfiguration",
-                url = RestResolver.getRestUrl(this::class.java) + "/rereadConfiguration",
-                tooltip = "system.admin.button.rereadConfiguration.tooltip",
+                title = translate("system.admin.button.rereadConfiguration"),
+                url = RestResolver.getReactUrl(this::class.java) + "/rereadConfiguration",
+                tooltip = translate("system.admin.button.rereadConfiguration.tooltip"),
                 type = MenuItemTargetType.RESTCALL))
 
         configurationMenu.add(MenuItem("admin.exportConfiguration",
                 i18nKey = "system.admin.button.exportConfiguration",
-                url = RestResolver.getRestUrl(this::class.java) + "/exportConfiguration",
-                tooltip = "system.admin.button.exportConfiguration.tooltip",
+                title = translate("system.admin.button.exportConfiguration"),
+                url = RestResolver.getReactUrl(this::class.java) + "/exportConfiguration",
+                tooltip = translate("system.admin.button.exportConfiguration.tooltip"),
                 type = MenuItemTargetType.DOWNLOAD))
 
         layout.add(configurationMenu, menuIndex++)
 
-        val miscMenu = MenuItem("admin.miscChecks", i18nKey = "system.admin.group.title.systemChecksAndFunctionality.miscChecks")
+        val miscMenu = MenuItem("admin.miscChecks", i18nKey = "system.admin.group.title.systemChecksAndFunctionality.miscChecks", title = translate("system.admin.group.title.systemChecksAndFunctionality.miscChecks"))
 
         miscMenu.add(MenuItem("admin.checkSystemIntegrity",
                 i18nKey = "system.admin.button.checkSystemIntegrity",
-                url = RestResolver.getRestUrl(this::class.java) + "/checkSystemIntegrity",
-                tooltip = "system.admin.button.checkSystemIntegrity.tooltip",
+                title = translate("system.admin.button.checkSystemIntegrity"),
+                url = RestResolver.getReactUrl(this::class.java) + "/checkSystemIntegrity",
+                tooltip = translate("system.admin.button.checkSystemIntegrity.tooltip"),
                 type = MenuItemTargetType.DOWNLOAD))
 
         layout.add(miscMenu, menuIndex++)
 
         if (Configuration.getInstance().isMebConfigured) {
-            val mebMenu = MenuItem("admin.databaseActions", i18nKey = "meb.title.heading")
+            val mebMenu = MenuItem("admin.databaseActions", i18nKey = "meb.title.heading", title = translate("meb.title.heading"))
 
             mebMenu.add(MenuItem("admin.checkUnseenMebMails",
                     i18nKey = "system.admin.button.checkUnseenMebMails",
-                    url = RestResolver.getRestUrl(this::class.java) + "/checkUnseenMebMails",
-                    tooltip = "system.admin.button.checkUnseenMebMails.tooltip",
+                    title = translate("system.admin.button.checkUnseenMebMails"),
+                    url = RestResolver.getReactUrl(this::class.java) + "/checkUnseenMebMails",
+                    tooltip = translate("system.admin.button.checkUnseenMebMails.tooltip"),
                     type = MenuItemTargetType.RESTCALL))
 
             mebMenu.add(MenuItem("admin.importAllMebMails",
                     i18nKey = "system.admin.button.importAllMebMails",
-                    url = RestResolver.getRestUrl(this::class.java) + "/importAllMebMails",
-                    tooltip = "system.admin.button.importAllMebMails.tooltip",
+                    title = translate("system.admin.button.importAllMebMails"),
+                    url = RestResolver.getReactUrl(this::class.java) + "/importAllMebMails",
+                    tooltip = translate("system.admin.button.importAllMebMails.tooltip"),
                     type = MenuItemTargetType.RESTCALL))
 
             layout.add(mebMenu, menuIndex++)
         }
 
         if(SystemStatus.isDevelopmentMode()){
-            val developmentMenu = MenuItem("admin.development", i18nKey = "")
+            val developmentMenu = MenuItem("admin.development", i18nKey = "", title = "")
 
             developmentMenu.add(MenuItem("admin.checkI18nProperties",
                     i18nKey = "system.admin.button.checkI18nProperties",
-                    url = RestResolver.getRestUrl(this::class.java) + "/checkI18nProperties",
-                    tooltip = "system.admin.button.checkI18nProperties.tooltip",
+                    title = translate("system.admin.button.checkI18nProperties"),
+                    url = RestResolver.getReactUrl(this::class.java) + "/checkI18nProperties",
+                    tooltip = translate("system.admin.button.checkI18nProperties.tooltip"),
                     type = MenuItemTargetType.DOWNLOAD))
 
             developmentMenu.add(MenuItem("admin.createTestBooks",
                     i18nKey = "system.admin.button.createTestBooks",
-                    url = RestResolver.getRestUrl(this::class.java) + "/createTestBooks",
+                    title = translate("system.admin.button.createTestBooks"),
+                    url = RestResolver.getReactUrl(this::class.java) + "/createTestBooks",
                     tooltip = "Creates 100 books of type BookDO for testing.",
                     type = MenuItemTargetType.RESTCALL))
 
@@ -266,16 +292,12 @@ class AdminPageRest : AbstractDynamicPageRest() {
     }
 
     @PostMapping("reindex")
-    fun reindex(request: HttpServletRequest, @RequestBody postData: PostData<AdminData>): ResponseEntity<ResponseAction> {
+    fun reindex(request: HttpServletRequest, @RequestBody postData: PostData<AdminData>) {
         log.info("Administration: re-index.")
         checkAccess()
         val fromDate = PFDateTime.from(postData.data.reindexFromDate!!).sqlDate
         val settings = ReindexSettings(fromDate, postData.data.reindexNewestNEntries)
         val tables = hibernateSearchReindexer!!.rebuildDatabaseSearchIndices(settings)
-        return ResponseEntity(ResponseAction("/dynamic",
-                message = ResponseAction.Message("administration.databaseSearchIndicesRebuild", tables),
-                targetType = TargetType.REDIRECT
-        ), HttpStatus.OK)
     }
 
     @GetMapping("updateUserPrefs")
@@ -297,7 +319,7 @@ class AdminPageRest : AbstractDynamicPageRest() {
         log.info("Administration: create missing data base indices.")
         accessChecker!!.checkRestrictedOrDemoUser()
         val counter = databaseService!!.createMissingIndices()
-        return ResponseEntity(ResponseAction("/dynamic",
+        return ResponseEntity(ResponseAction("dynamic",
                 message = ResponseAction.Message("administration.missingDatabaseIndicesCreated", messageParams = *arrayOf(counter.toString())),
                 targetType = TargetType.REDIRECT
         ), HttpStatus.OK)
@@ -355,7 +377,7 @@ class AdminPageRest : AbstractDynamicPageRest() {
         var refreshedCaches = systemService!!.refreshCaches()
         userXmlPreferencesCache!!.forceReload()
         refreshedCaches += ", UserXmlPreferencesCache"
-        return ResponseEntity(ResponseAction("/dynamic",
+        return ResponseEntity(ResponseAction("dynamic",
                 message = ResponseAction.Message("administration.refreshCachesDone", messageParams = *arrayOf(refreshedCaches)),
                 targetType = TargetType.REDIRECT
         ), HttpStatus.OK)
@@ -374,7 +396,7 @@ class AdminPageRest : AbstractDynamicPageRest() {
         if (result != null) {
             result = result.replace("\n".toRegex(), "<br/>\n")
         }
-        return ResponseEntity(ResponseAction("/dynamic",
+        return ResponseEntity(ResponseAction("dynamic",
                 message = ResponseAction.Message("administration.rereadConfiguration", messageParams = *arrayOf(result!!)),
                 targetType = TargetType.REDIRECT
         ), HttpStatus.OK)
@@ -398,7 +420,7 @@ class AdminPageRest : AbstractDynamicPageRest() {
         log.info("Administration: check for new MEB mails.")
         checkAccess()
         val counter = mebMailClient!!.getNewMessages(true, true)
-        return ResponseEntity(ResponseAction("/dynamic",
+        return ResponseEntity(ResponseAction("dynamic",
                 message = ResponseAction.Message("message.successfullCompleted", messageParams = *arrayOf("check for new MEB mails, $counter new messages imported.")),
                 targetType = TargetType.REDIRECT
         ), HttpStatus.OK)
@@ -409,7 +431,7 @@ class AdminPageRest : AbstractDynamicPageRest() {
         log.info("Administration: import all MEB mails.")
         checkAccess()
         val counter = mebMailClient!!.getNewMessages(false, false)
-        return ResponseEntity(ResponseAction("/dynamic",
+        return ResponseEntity(ResponseAction("dynamic",
                 message = ResponseAction.Message("message.successfullCompleted", messageParams = *arrayOf("import all MEB mails, $counter new messages imported.")),
                 targetType = TargetType.REDIRECT
         ), HttpStatus.OK)
@@ -563,10 +585,46 @@ class AdminPageRest : AbstractDynamicPageRest() {
             list.add(book)
         }
         bookDao!!.save(list)
-        return ResponseEntity(ResponseAction("/dynamic",
+        return ResponseEntity(ResponseAction("dynamic",
                 message = ResponseAction.Message("system.admin.development.testObjectsCreated", "$NUMBER_OF_TEST_OBJECTS_TO_CREATE BookDO"),
                 targetType = TargetType.REDIRECT
         ), HttpStatus.OK)
+    }
+
+    @PostMapping("formatLogEntries")
+    fun formatLogEntries(request: HttpServletRequest, @RequestBody postData: PostData<AdminData>) {
+        log.info("Administration: formatLogEntries")
+        checkAccess()
+        if (postData.data.logEntries == null) {
+            postData.data.formattedLogEntries = ""
+            return
+        }
+        var indent = 0
+        val buf = StringBuffer()
+        for (i in postData.data.logEntries!!.indices) {
+            val c = postData.data.logEntries!![i]
+            buf.append(c)
+            when (c) {
+                ',' -> {
+                    buf.append("<br/>")
+                    for (j in 0 until indent) {
+                        buf.append("&nbsp;&nbsp;&nbsp;&nbsp;")
+                    }
+                }
+                '[' -> {
+                    indent++
+                    buf.append("<br/>")
+                    for (j in 0 until indent) {
+                        buf.append("&nbsp;&nbsp;&nbsp;&nbsp;")
+                    }
+                }
+                ']' -> {
+                    indent--
+                    buf.append("<br/>")
+                }
+            }
+        }
+        postData.data.formattedLogEntries = buf.toString()
     }
 
     private operator fun get(basename: String, number: Int, counter: Int): String {

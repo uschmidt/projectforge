@@ -23,10 +23,11 @@
 
 package org.projectforge.rest.fibu
 
-import org.projectforge.business.fibu.KundeDO
 import org.projectforge.business.fibu.KundeDao
 import org.projectforge.business.fibu.ProjektDO
 import org.projectforge.business.fibu.ProjektDao
+import org.projectforge.business.fibu.kost.Kost2DO
+import org.projectforge.business.fibu.kost.Kost2Dao
 import org.projectforge.business.fibu.kost.KostCache
 import org.projectforge.rest.config.Rest
 import org.projectforge.rest.core.AbstractDTOPagesRest
@@ -61,7 +62,7 @@ class ProjectPagesRest
         val projektDO = ProjektDO()
         dto.copyTo(projektDO)
         projektDO.internKost2_4 = dto.bereich
-        if(dto.customer != null){
+        if (dto.customer != null) {
             projektDO.kunde = kundeDao!!.getById(dto.customer!!.id)
         }
         return projektDO
@@ -78,10 +79,10 @@ class ProjectPagesRest
                 .add(UITable.createUIResultSetTable()
                         .add(UITableColumn("kost", title = "fibu.projekt.nummer"))
                         .add(lc, "identifier")
-                        .add(UITableColumn("customer.name", title = "fibu.kunde.name"))
+                        .add(UITableColumn("customer.displayName", title = "fibu.kunde.name"))
                         .add(lc, "name", "kunde.division", "task", "konto", "status", "projektManagerGroup")
                         .add(UITableColumn("kost2ArtsAsString", title = "fibu.kost2art.kost2arten"))
-                        .add(lc,"description"))
+                        .add(lc, "description"))
         layout.getTableColumnById("konto").formatter = Formatter.KONTO
         layout.getTableColumnById("task").formatter = Formatter.TASK_PATH
         layout.getTableColumnById("projektManagerGroup").formatter = Formatter.GROUP
@@ -95,27 +96,20 @@ class ProjectPagesRest
         val costNumber = UICustomized("cost.number24")
                 .add("nummer", dto.nummer)
                 .add("bereich", dto.bereich)
+
+        val cost2Selector = UICustomized("cost2.art.select")
+
         val konto = UIInput("konto", lc, tooltip = "fibu.projekt.konto.tooltip")
 
         val layout = super.createEditLayout(dto, userAccess)
-                .add(UIRow()
-                        .add(UICol()
-                                .add(costNumber)
-                                .add(UISelect.createCustomerSelect(lc, "customer", false, "fibu.kunde"))
-                                .add(konto)
-                                .add(lc, "name", "identifier", "task")
-                                .add(UISelect.createGroupSelect(lc, "projektManagerGroup", false, "fibu.projekt.projektManagerGroup"))
-                                .add(lc, "projectManager", "headOfBusinessManager", "description")))
+                .add(costNumber)
+                .add(UISelect.createCustomerSelect(lc, "customer", false, "fibu.kunde"))
+                .add(konto)
+                .add(lc, "name", "identifier", "task")
+                .add(UISelect.createGroupSelect(lc, "projektManagerGroup", false, "fibu.projekt.projektManagerGroup"))
+                .add(lc, "projectManager", "headOfBusinessManager", "description")
 
-        dto.kost2Arts?.forEach {
-            var label = it.getFormattedId() + " " + it.name
-            if(!it.fakturiert){
-                label += " (nf)"
-            }
-            val uiCheckbox = UICheckbox("" + it.getFormattedId(), label = label)
-
-            layout.add(UIRow().add(UICol().add(uiCheckbox)))
-        }
+        layout.add(cost2Selector)
 
         return LayoutUtils.processEditPage(layout, dto, this)
     }

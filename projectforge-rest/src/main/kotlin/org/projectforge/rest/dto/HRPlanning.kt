@@ -24,6 +24,7 @@
 package org.projectforge.rest.dto
 
 import org.projectforge.business.humanresources.HRPlanningDO
+import org.projectforge.business.humanresources.HRPlanningEntryDO
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -33,7 +34,8 @@ class HRPlanning(
         var formattedWeekOfYear: String? = null,
         var totalHours: BigDecimal? = null,
         var totalUnassignedHours: BigDecimal? = null,
-        var user: User? = null
+        var user: User? = null,
+        var entries: MutableList<HRPlanningEntryDO>? = mutableListOf()
 ) : BaseDTO<HRPlanningDO>() {
 
     /**

@@ -55,7 +55,7 @@ object TimesheetUtils {
      * @return
      */
     fun getStats(timesheets: Collection<TimesheetDO>?, from: Date?, to: Date?, userId: Int?): TimesheetStats? {
-        if (timesheets == null || timesheets.size == 0) {
+        if (timesheets == null || timesheets.isEmpty()) {
             return null
         }
         val stats = TimesheetStats(from, to)

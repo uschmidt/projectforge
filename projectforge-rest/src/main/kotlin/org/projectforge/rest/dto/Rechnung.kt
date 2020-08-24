@@ -29,9 +29,9 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 class Rechnung(var nummer: Int? = null,
-               var customer: Customer? = null,
+               var customer: Customer? = Customer(),
                var kundeText: String? = null,
-               var project: Project? = null,
+               var project: Project? = Project(),
                var status: RechnungStatus? = null,
                var typ: RechnungTyp? = null,
                var customerref1: String? = null,
@@ -48,10 +48,13 @@ class Rechnung(var nummer: Int? = null,
                var discountZahlungsZielInTagen: Int? = null,
                var bezahlDatum: LocalDate? = null,
                override var zahlBetrag: BigDecimal? = null,
-               var konto: Konto? = null,
+               var konto: Konto? = Konto(),
                var discountPercent: BigDecimal? = null,
                var discountMaturity: LocalDate? = null
 ) : BaseDTO<RechnungDO>(), IRechnung {
+
+
+
     override var positionen: MutableList<RechnungsPosition>? = null
 
     override val netSum: BigDecimal
@@ -81,6 +84,7 @@ class Rechnung(var nummer: Int? = null,
 
     override fun copyFrom(src: RechnungDO) {
         super.copyFrom(src)
+
         val list = positionen ?: mutableListOf()
         src.positionen?.forEach {
             list.add(RechnungsPosition(it))

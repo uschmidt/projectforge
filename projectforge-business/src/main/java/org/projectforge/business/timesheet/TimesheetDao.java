@@ -494,9 +494,14 @@ public class TimesheetDao extends BaseDao<TimesheetDO> {
 
   @Override
   public boolean hasInsertAccess(final PFUserDO user, final TimesheetDO obj, final boolean throwException) {
+    if(obj == null){
+      return true;
+    }
+
     if (!hasAccess(user, obj, null, OperationType.INSERT, throwException)) {
       return false;
     }
+
     if (hasTimeOverlap(obj, throwException)) {
       return false;
     }

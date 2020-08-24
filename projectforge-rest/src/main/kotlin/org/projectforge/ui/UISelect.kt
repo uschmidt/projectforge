@@ -84,6 +84,16 @@ class UISelect<T>(val id: String,
         return this
     }
 
+    fun buildFromList(list: Collection<String>): UISelect<T> {
+        val newvalues = mutableListOf<UISelectValue<T>>()
+        list.forEach { value ->
+            @Suppress("UNCHECKED_CAST")
+            newvalues.add(UISelectValue(value as T, value))
+        }
+        values = newvalues
+        return this
+    }
+
     // fun getEnumValues(enumClass: KClass<out Enum<*>>): Array<out Enum<*>> = enumClass.java.enumConstants
     private fun getEnumValues(enumClass: Class<out Enum<*>>): Array<out Enum<*>> = enumClass.enumConstants
 
@@ -136,6 +146,57 @@ class UISelect<T>(val id: String,
                     label = label ?: ElementsRegistry.getElementInfo(lc, id)?.i18nKey,
                     additionalLabel = additionalLabel ?: ElementsRegistry.getElementInfo(lc, id)?.additionalI18nKey,
                     autoCompletion = AutoCompletion.getAutoCompletion4Projects(),
+                    tooltip = tooltip ?: ElementsRegistry.getElementInfo(lc, id)?.tooltipI18nKey)
+        }
+
+        fun createAddressSelect(lc: LayoutContext,id:String, multi: Boolean, label: String? = null, additionalLabel: String? = null, tooltip: String? = null): UISelect<Int> {
+            return UISelect<Int>(id,
+                    lc,
+                    multi = multi,
+                    label = label ?: ElementsRegistry.getElementInfo(lc, id)?.i18nKey,
+                    additionalLabel = additionalLabel ?: ElementsRegistry.getElementInfo(lc, id)?.additionalI18nKey,
+                    autoCompletion = AutoCompletion.getAutoCompletion4Addresses(),
+                    tooltip = tooltip ?: ElementsRegistry.getElementInfo(lc, id)?.tooltipI18nKey)
+        }
+
+
+        fun createTenantSelect(lc: LayoutContext,id:String, multi: Boolean, label: String? = null, additionalLabel: String? = null, tooltip: String? = null): UISelect<Int> {
+            return UISelect<Int>(id,
+                    lc,
+                    multi = multi,
+                    label = label ?: ElementsRegistry.getElementInfo(lc, id)?.i18nKey,
+                    additionalLabel = additionalLabel ?: ElementsRegistry.getElementInfo(lc, id)?.additionalI18nKey,
+                    autoCompletion = AutoCompletion.getAutoCompletion4Tenants(),
+                    tooltip = tooltip ?: ElementsRegistry.getElementInfo(lc, id)?.tooltipI18nKey)
+        }
+
+        fun createAccountSelect(lc: LayoutContext,id:String, multi: Boolean, label: String? = null, additionalLabel: String? = null, tooltip: String? = null): UISelect<Int> {
+            return UISelect<Int>(id,
+                    lc,
+                    multi = multi,
+                    label = label ?: ElementsRegistry.getElementInfo(lc, id)?.i18nKey,
+                    additionalLabel = additionalLabel ?: ElementsRegistry.getElementInfo(lc, id)?.additionalI18nKey,
+                    autoCompletion = AutoCompletion.getAutoCompletion4Accounts(),
+                    tooltip = tooltip ?: ElementsRegistry.getElementInfo(lc, id)?.tooltipI18nKey)
+        }
+
+        fun createCalendarSelect(lc: LayoutContext,id:String, multi: Boolean, label: String? = null, additionalLabel: String? = null, tooltip: String? = null): UISelect<Int> {
+            return UISelect<Int>(id,
+                    lc,
+                    multi = multi,
+                    label = label ?: ElementsRegistry.getElementInfo(lc, id)?.i18nKey,
+                    additionalLabel = additionalLabel ?: ElementsRegistry.getElementInfo(lc, id)?.additionalI18nKey,
+                    autoCompletion = AutoCompletion.getAutoCompletion4Calendars(),
+                    tooltip = tooltip ?: ElementsRegistry.getElementInfo(lc, id)?.tooltipI18nKey)
+        }
+
+        fun createEmployeeSelect(lc: LayoutContext,id:String, multi: Boolean, label: String? = null, additionalLabel: String? = null, tooltip: String? = null): UISelect<Int> {
+            return UISelect<Int>(id,
+                    lc,
+                    multi = multi,
+                    label = label ?: ElementsRegistry.getElementInfo(lc, id)?.i18nKey,
+                    additionalLabel = additionalLabel ?: ElementsRegistry.getElementInfo(lc, id)?.additionalI18nKey,
+                    autoCompletion = AutoCompletion.getAutoCompletion4Employees(),
                     tooltip = tooltip ?: ElementsRegistry.getElementInfo(lc, id)?.tooltipI18nKey)
         }
     }

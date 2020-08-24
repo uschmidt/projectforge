@@ -40,6 +40,7 @@ import org.projectforge.framework.jcr.AttachmentsDaoAccessChecker
 import org.projectforge.framework.jcr.AttachmentsService
 import org.projectforge.framework.persistence.api.*
 import org.projectforge.framework.persistence.api.impl.CustomResultFilter
+import org.projectforge.framework.persistence.user.api.ThreadLocalUserContext
 import org.projectforge.menu.MenuItem
 import org.projectforge.menu.MenuItemTargetType
 import org.projectforge.model.rest.RestPaths
@@ -351,7 +352,10 @@ constructor(private val baseDaoClazz: Class<B>,
         if (classicsLinkListUrl != null) {
             ui.add(MenuItem(CLASSIC_VERSION_MENU, title = "*", url = classicsLinkListUrl, tooltip = translate("goreact.menu.classics")), 0)
         }
-        ui.add(MenuItem(CREATE_MENU, title = translate("add"), url = "${Const.REACT_APP_PATH}$category/edit"))
+
+        if(baseDao.hasInsertAccess(ThreadLocalUserContext.getUser(), null, true)){
+            ui.add(MenuItem(CREATE_MENU, title = translate("add"), url = "${Const.REACT_APP_PATH}$category/edit"))
+        }
 
         return InitialListData(ui = ui,
                 standardEditPage = getStandardEditPage(),

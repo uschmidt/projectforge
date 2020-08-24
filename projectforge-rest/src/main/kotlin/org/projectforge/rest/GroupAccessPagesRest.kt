@@ -26,7 +26,8 @@ package org.projectforge.rest
 import org.projectforge.framework.access.AccessDao
 import org.projectforge.framework.access.GroupTaskAccessDO
 import org.projectforge.rest.config.Rest
-import org.projectforge.rest.core.AbstractDOPagesRest
+import org.projectforge.rest.core.AbstractDTOPagesRest
+import org.projectforge.rest.dto.GroupTaskAccess
 import org.projectforge.ui.*
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -34,14 +35,31 @@ import javax.servlet.http.HttpServletRequest
 
 @RestController
 @RequestMapping("${Rest.URL}/access")
-class GroupAccessPagesRest : AbstractDOPagesRest<GroupTaskAccessDO, AccessDao>(AccessDao::class.java, "access.title") {
+class GroupAccessPagesRest : AbstractDTOPagesRest<GroupTaskAccessDO, GroupTaskAccess, AccessDao>(AccessDao::class.java, "access.title") {
+
+    override fun transformForDB(dto: GroupTaskAccess): GroupTaskAccessDO {
+        val groupTaskAccessDO = GroupTaskAccessDO()
+        dto.copyTo(groupTaskAccessDO)
+        return groupTaskAccessDO
+    }
+
+    override fun transformFromDB(obj: GroupTaskAccessDO, editMode: Boolean): GroupTaskAccess {
+        val groupTaskAccess = GroupTaskAccess()
+        groupTaskAccess.copyFrom(obj)
+        groupTaskAccess.formatAccessEntries()
+        return groupTaskAccess
+    }
+
     /**
      * Initializes new memos for adding.
      */
     override fun newBaseDO(request: HttpServletRequest?): GroupTaskAccessDO {
         val groupTaskAccess = super.newBaseDO(request)
+        groupTaskAccess.clear()
         return groupTaskAccess
     }
+
+    override val classicsLinkListUrl: String? = "wa/accessList"
 
     /**
      * LAYOUT List page
@@ -51,6 +69,7 @@ class GroupAccessPagesRest : AbstractDOPagesRest<GroupTaskAccessDO, AccessDao>(A
                 .add(UITable.createUIResultSetTable()
                         .add(UITableColumn("task.title", title = "task"))
                         .add(UITableColumn("group.name", title = "group"))
+                        .add(UITableColumn("formattedAccessEntries", title = "access.type"))
                         .add(lc, "isRecursive", "description"))
         return LayoutUtils.processListPage(layout, this)
     }
@@ -58,7 +77,7 @@ class GroupAccessPagesRest : AbstractDOPagesRest<GroupTaskAccessDO, AccessDao>(A
     /**
      * LAYOUT Edit page
      */
-    override fun createEditLayout(dto: GroupTaskAccessDO, userAccess: UILayout.UserAccess): UILayout {
+    override fun createEditLayout(dto: GroupTaskAccess, userAccess: UILayout.UserAccess): UILayout {
         val layout = super.createEditLayout(dto, userAccess)
                 .add(lc, "task")
                 .add(UISelect.createGroupSelect(lc, "readonlyAccessUsers", false, "user.assignedGroups"))

@@ -53,7 +53,6 @@ open class EmployeeSalaryDO : DefaultBaseDO() {
     /**
      * @return Zugehöriger Mitarbeiter.
      */
-    // TODO: Support this type on the edit page
     @PropertyInfo(i18nKey = "fibu.employee")
     @IndexedEmbedded(depth = 2)
     @get:ManyToOne(fetch = FetchType.LAZY)

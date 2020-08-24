@@ -23,7 +23,6 @@
 
 package org.projectforge.web.rest
 
-import org.projectforge.business.login.LoginProtection
 import org.projectforge.business.user.UserAuthenticationsService
 import org.projectforge.business.user.UserTokenType
 import org.projectforge.business.user.filter.UserFilter
@@ -56,7 +55,7 @@ abstract class AbstractRestUserFilter(val userTokenType: UserTokenType) : Filter
     @Throws(ServletException::class)
     override fun init(filterConfig: FilterConfig) {
         springContext = WebApplicationContextUtils.getRequiredWebApplicationContext(filterConfig.servletContext)
-        val beanFactory = springContext.getAutowireCapableBeanFactory()
+        val beanFactory = springContext.autowireCapableBeanFactory
         beanFactory.autowireBean(this)
     }
 
@@ -74,7 +73,7 @@ abstract class AbstractRestUserFilter(val userTokenType: UserTokenType) : Filter
                 response,
                 userTokenType,
                 authenticate = { authInfo -> authenticate(authInfo) },
-                doFilter = { -> chain.doFilter(request, response) }
+                doFilter = { chain.doFilter(request, response) }
         )
     }
 

@@ -33,7 +33,10 @@ import java.time.LocalDate
 class Employee(id: Int? = null,
                displayName: String? = null,
                var user: User? = User(),
-               var kost1: Kost1? = null,
+               var nummernkreis: Int = 0,
+               var bereich: Int = 0,
+               var teilbereich: Int = 0,
+               var endziffer: Int = 0,
                var status: EmployeeStatus? = null,
                var position: String? = null,
                var eintrittsDatum: LocalDate? = null,
@@ -61,5 +64,11 @@ class Employee(id: Int? = null,
         if(src.user != null){
             this.user!!.copyFrom(src.user!!)
         }
+
+        val kost1 = src.kost1
+        nummernkreis = kost1?.nummernkreis ?: 0
+        bereich = kost1?.bereich ?: 0
+        teilbereich = kost1?.teilbereich ?: 0
+        endziffer = kost1?.endziffer ?: 0
     }
 }

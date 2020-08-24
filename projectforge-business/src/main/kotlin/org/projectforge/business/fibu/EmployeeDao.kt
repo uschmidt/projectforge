@@ -57,6 +57,7 @@ open class EmployeeDao : BaseDao<EmployeeDO>(EmployeeDO::class.java) {
 
     @Autowired
     private lateinit var userDao: UserDao
+
     @Autowired
     private lateinit var kost1Dao: Kost1Dao
 

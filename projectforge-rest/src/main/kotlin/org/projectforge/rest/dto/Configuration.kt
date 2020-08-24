@@ -23,6 +23,8 @@
 
 package org.projectforge.rest.dto
 
+import org.projectforge.business.task.TaskDO
+import org.projectforge.business.teamcal.admin.model.TeamCalDO
 import org.projectforge.framework.configuration.ConfigurationType
 import org.projectforge.framework.configuration.entities.ConfigurationDO
 import org.projectforge.framework.i18n.translate
@@ -31,9 +33,12 @@ import java.util.*
 
 class Configuration(
         var parameter: String? = null,
+        var translatedParameter: String? = null,
         var stringValue: String? = null,
         var configurationType: ConfigurationType? = null,
         var intValue: Int? = null,
+        var calendar: TeamCalDO? = null,
+        var task: TaskDO? = null,
         var booleanValue: Boolean? = null,
         var floatValue: BigDecimal? = null,
         var timeZone: TimeZone? = null,
@@ -48,6 +53,10 @@ class Configuration(
         this.descriptionI18nKey = src.descriptionI18nKey
         this.description = translate(src.descriptionI18nKey)
 
+        this.parameter = "administration.configuration.param.$parameter"
+
+        this.translatedParameter = translate(parameter)
+
         when (src.configurationType) {
             ConfigurationType.BOOLEAN -> displayValue = src.booleanValue.toString()
             ConfigurationType.INTEGER -> displayValue = src.intValue.toString()
@@ -56,8 +65,8 @@ class Configuration(
             ConfigurationType.FLOAT -> displayValue = src.floatValue.toString()
             ConfigurationType.PERCENT -> displayValue = src.floatValue.toString()
             ConfigurationType.TIME_ZONE -> displayValue = src.timeZoneId
-            //ConfigurationType.CALENDAR -> layout.add()
-            //ConfigurationType.TASK -> layout.add()
+            ConfigurationType.CALENDAR -> displayValue = src.calendarId.toString()
+            ConfigurationType.TASK -> displayValue = src.taskId.toString()
             else -> ""
         }
     }

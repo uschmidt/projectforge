@@ -23,14 +23,16 @@
 
 package org.projectforge.rest
 
+import org.projectforge.business.task.TaskDao
+import org.projectforge.business.teamcal.admin.TeamCalDao
 import org.projectforge.framework.configuration.ConfigurationDao
 import org.projectforge.framework.configuration.ConfigurationType
 import org.projectforge.framework.configuration.entities.ConfigurationDO
-import org.projectforge.framework.i18n.translate
 import org.projectforge.rest.config.Rest
 import org.projectforge.rest.core.AbstractDTOPagesRest
 import org.projectforge.rest.dto.Configuration
 import org.projectforge.ui.*
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -38,12 +40,28 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("${Rest.URL}/configuration")
 class ConfigurationPagesRest: AbstractDTOPagesRest<ConfigurationDO, Configuration,  ConfigurationDao>(ConfigurationDao::class.java, "administration.configuration.title") {
 
+    @Autowired
+    private lateinit var teamCalDao: TeamCalDao
+
+    @Autowired
+    private lateinit var taskDao: TaskDao
+
     override fun transformForDB(dto: Configuration): ConfigurationDO {
         val configurationDO = ConfigurationDO()
+        dto.parameter = dto.parameter?.replace("administration.configuration.param.", "")
         dto.copyTo(configurationDO)
         if(dto.configurationType == ConfigurationType.BOOLEAN){
             configurationDO.stringValue = dto.booleanValue.toString()
         }
+
+        if(dto.configurationType == ConfigurationType.CALENDAR){
+            configurationDO.intValue = dto.calendar?.id
+        }
+
+        if(dto.configurationType == ConfigurationType.TASK){
+            configurationDO.intValue = dto.task?.id
+        }
+
         return configurationDO
     }
 
@@ -54,6 +72,12 @@ class ConfigurationPagesRest: AbstractDTOPagesRest<ConfigurationDO, Configuratio
         if(obj.configurationType == ConfigurationType.TIME_ZONE){
             configuration.timeZone = obj.timeZone
         }
+        if(obj.configurationType == ConfigurationType.CALENDAR){
+            configuration.calendar = teamCalDao.getById(obj.intValue)
+        }
+        if(obj.configurationType == ConfigurationType.TASK){
+            configuration.task = taskDao.getById(obj.intValue)
+        }
         return configuration
     }
 
@@ -62,33 +86,29 @@ class ConfigurationPagesRest: AbstractDTOPagesRest<ConfigurationDO, Configuratio
     override fun createListLayout(): UILayout {
         val layout = super.createListLayout()
                 .add(UITable.createUIResultSetTable()
-                        .add(lc, "parameter")
+                        .add(UITableColumn("translatedParameter", title = "administration.configuration.parameter"))
                         .add(UITableColumn("displayValue", title = "administration.configuration.value"))
                         .add(UITableColumn("description", title = "description")))
         return LayoutUtils.processListPage(layout, this)
     }
 
-    // TODO: How to prevent adding more configs?
-    // TODO: CALENDAR and TASK missing
     override fun createEditLayout(dto: Configuration, userAccess: UILayout.UserAccess): UILayout {
         val layout = super.createEditLayout(dto, userAccess)
 
         when (dto.configurationType) {
-            ConfigurationType.BOOLEAN -> layout.add(UICheckbox("booleanValue", lc, label = "administration.configuration.value"))
-            ConfigurationType.INTEGER -> layout.add(lc, "intValue")
-            ConfigurationType.STRING -> layout.add(lc, "stringValue")
-            ConfigurationType.TEXT -> layout.add(lc, "stringValue")
-            ConfigurationType.FLOAT -> layout.add(lc, "floatValue")
-            ConfigurationType.PERCENT -> layout.add(lc, "floatValue")
+            ConfigurationType.BOOLEAN -> layout.add(UICheckbox("booleanValue", lc, label = dto.parameter))
+            ConfigurationType.INTEGER -> layout.add(UITextArea("intValue", lc, label = dto.parameter))
+            ConfigurationType.STRING -> layout.add(UITextArea("stringValue", lc, label = dto.parameter))
+            ConfigurationType.TEXT -> layout.add(UITextArea("stringValue", lc, label = dto.parameter))
+            ConfigurationType.FLOAT -> layout.add(UITextArea("floatValue", lc, label = dto.parameter))
+            ConfigurationType.PERCENT -> layout.add(UITextArea("floatValue", lc, label = dto.parameter))
             ConfigurationType.TIME_ZONE -> layout.add(lc, "timeZone")
-            //ConfigurationType.CALENDAR -> layout.add()
-            //ConfigurationType.TASK -> layout.add()
+            ConfigurationType.CALENDAR -> layout.add(UISelect.createCalendarSelect(lc, "calendar", false))
+            ConfigurationType.TASK -> layout.add(lc, "task")
             else -> ""
         }
 
         return LayoutUtils.processEditPage(layout, dto, this)
     }
-
-
 
 }

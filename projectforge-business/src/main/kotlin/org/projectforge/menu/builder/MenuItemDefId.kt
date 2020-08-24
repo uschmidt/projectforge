@@ -40,7 +40,7 @@ enum class MenuItemDefId constructor(val i18nKey: String, val url: String? = nul
     GO_CLASSIC("goreact.menu.classics", "wa"), //
 
     // Sub menus in alphabetical order:
-    ACCESS_LIST("menu.accessList", "wa/accessList"), //
+    ACCESS_LIST("menu.accessList", getReactListUrl("access")), //
     ACCOUNT_LIST("menu.fibu.konten", getReactListUrl("account")), //
     ACCOUNTING_RECORD_LIST("menu.fibu.buchungssaetze", "wa/accountingRecordList"), //
     ADDRESSBOOK_LIST("menu.addressbookList", getReactListUrl("addressBook")), //
@@ -51,23 +51,22 @@ enum class MenuItemDefId constructor(val i18nKey: String, val url: String? = nul
     TEAMCALENDAR("menu.plugins.teamcal", getReactListUrl("teamCal")), //
     CHANGE_PASSWORD("menu.changePassword", getReactDynamicPageUrl("changePassword")), //
     CHANGE_WLAN_PASSWORD("menu.changeWlanPassword", getReactDynamicPageUrl("changeWlanPassword")), //
-    CONFIGURATION("menu.configuration", "wa/configuration"), //
+    CONFIGURATION("menu.configuration", getReactListUrl("configuration")), //
     CONTACT_LIST("menu.contactList"), //
     CONTRACTS("menu.contracts", getReactListUrl("contract")), //
     COST1_LIST("menu.fibu.kost1", getReactListUrl("cost1")), //
-    COST2_LIST("menu.fibu.kost2", "wa/cost2List"), //
-    COST2_TYPE_LIST("menu.fibu.kost2arten", "wa/cost2TypeList"), //
-    CUSTOMER_LIST("menu.fibu.kunden", "wa/customerList"), //
-    //CUSTOMER_LIST("menu.fibu.kunden", getReactListUrl("customer")), // Doesn't work yet
+    COST2_LIST("menu.fibu.kost2", getReactListUrl("cost2")), //
+    COST2_TYPE_LIST("menu.fibu.kost2arten", getReactListUrl("cost2Type")), //
+    CUSTOMER_LIST("menu.fibu.kunden", getReactListUrl("customer")),
 
     DATEV_IMPORT("menu.fibu.datevImport", "wa/datevImport"), //
     DOCUMENTATION("menu.documentation"), //
     EMPLOYEE_LIST("menu.fibu.employees", "wa/employeeList"), //
-    EMPLOYEE_SALARY_LIST("menu.fibu.employeeSalaries", "wa/employeeSalaryList"), //
+    EMPLOYEE_SALARY_LIST("menu.fibu.employeeSalaries", getReactListUrl("employeeSalary")), //
     EMPLOYEE_LEAVE_ACCOUNT_ENTRIES("menu.vacation.leaveAccountEntry", getReactListUrl("leaveAccountEntry")), //
     FEEDBACK("menu.gear.feedback", url = "wa/feedback"), //
     GANTT("menu.gantt", "wa/ganttList"), //
-    GROUP_LIST("menu.groupList", "wa/groupList"), //
+    GROUP_LIST("menu.groupList", getReactListUrl("group")), //
     HR_PLANNING_LIST("menu.hrPlanningList", "wa/hrPlanningList"), //
     HR_VIEW("menu.hrList", "wa/hrList"), //
     IMAGE_CROPPER("menu.imageCropper"), //
@@ -83,14 +82,14 @@ enum class MenuItemDefId constructor(val i18nKey: String, val url: String? = nul
     OUTGOING_INVOICE_LIST("menu.fibu.rechnungen", "wa/outgoingInvoiceList"), //
     PERSONAL_STATISTICS("menu.personalStatistics", "wa/personalStatistics"), //
     PHONE_CALL("menu.phoneCall", "wa/phoneCall"), //
-    PROJECT_LIST("menu.fibu.projekte", "wa/projectList"), //
+    PROJECT_LIST("menu.fibu.projekte", getReactListUrl("project")), //
     REPORT_OBJECTIVES("menu.fibu.reporting.reportObjectives", "wa/reportObjectives"), //
     SEND_SMS("menu.sendSms", "wa/sendSms"), //
     SCRIPT_LIST("menu.scriptList", "wa/scriptList"), //
     SCRIPTING("menu.scripting", "wa/scripting"), //
     SEARCH("menu.search", "wa/search"), //
     TASK_TREE("menu.taskTree", "wa/taskTree"), //
-    TIMESHEET_LIST("menu.timesheetList", "wa/timesheetList"), //
+    TIMESHEET_LIST("menu.timesheetList", getReactListUrl("timesheet")), //
     USER_LIST("menu.userList", "wa/userList"), //
     VACATION("menu.vacation", getReactListUrl("vacation")), //
     VACATION_ACCOUNT("menu.vacation.leaveaccount", getReactDynamicPageUrl("vacationAccount")), //
@@ -101,7 +100,7 @@ enum class MenuItemDefId constructor(val i18nKey: String, val url: String? = nul
     GROOVY_CONSOLE("menu.groovyConsole", "wa/wicket/bookmarkable/org.projectforge.web.admin.GroovyConsolePage"), //
     LUCENE_CONSOLE("menu.luceneConsole", "wa/wicket/bookmarkable/org.projectforge.web.admin.LuceneConsolePage"), //
     PLUGIN_ADMIN("menu.pluginAdmin", "wa/wicket/bookmarkable/org.projectforge.web.admin.PluginListPage"), //
-    SYSTEM("menu.system", "wa/admin"), //
+    SYSTEM("menu.system", getReactDynamicPageUrl("admin")), //
     SYSTEM_STATISTICS("menu.systemStatistics", getReactDynamicPageUrl("systemStatistics")), //
     TENANT_LIST("menu.multiTenancy");
 

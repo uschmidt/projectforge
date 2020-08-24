@@ -25,6 +25,7 @@ import VacationStatistics from './components/vacation/VacationStatistics';
 import VacationTable from './components/vacation/VacationTable';
 import CostNumber24Component from './components/CostNumber24Component';
 import CateringDayComponent from './components/CateringDayComponent';
+import Kost2ArtSelector from './components/Kost2ArtSelector';
 
 function DynamicCustomized({ id, ...props }) {
     let Tag;
@@ -74,6 +75,9 @@ function DynamicCustomized({ id, ...props }) {
             break;
         case 'cost.number24':
             Tag = CostNumber24Component;
+            break;
+        case 'cost2.art.select':
+            Tag = Kost2ArtSelector;
             break;
         case 'dayRange':
             Tag = DayRange;
