@@ -29,10 +29,7 @@ import org.projectforge.framework.utils.NumberFormatter
 import org.projectforge.plugins.travel.CateringDay
 import org.projectforge.plugins.travel.TravelCostDO
 import org.projectforge.plugins.travel.TravelLocation
-import org.projectforge.rest.dto.AttachmentsSupport
-import org.projectforge.rest.dto.BaseDTO
-import org.projectforge.rest.dto.BaseDTODisplayObject
-import org.projectforge.rest.dto.Employee
+import org.projectforge.rest.dto.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.HashSet
 import kotlin.math.abs
@@ -43,14 +40,11 @@ import kotlin.math.abs
 class TravelCost(id: Int? = null,
                  displayName: String? = null,
                  var employee: Employee? = Employee(),
+                 var projekt: Project? = Project(),
                  var reasonOfTravel: String? = null,
                  var startLocation: TravelLocation? = null,
                  var returnLocation: TravelLocation? = null,
                  var destination: String? = null,
-                 var nummernkreis: Int? = 0,
-                 var bereich: Int? = 0,
-                 var teilbereich: Int? = 0,
-                 var endziffer: Int? = 0,
                  var beginOfTravel: java.util.Date? = null,
                  var endOfTravel: java.util.Date? = null,
                  var catering: MutableSet<CateringDay> = HashSet(),
@@ -76,13 +70,8 @@ class TravelCost(id: Int? = null,
     override fun copyFrom(src: TravelCostDO) {
         super.copyFrom(src)
 
-        if(src.kost2 != null){
-            nummernkreis = src.kost2!!.nummernkreis
-            bereich = src.kost2!!.bereich
-            teilbereich = src.kost2!!.teilbereich
-            if(src.kost2!!.kost2Art != null){
-                endziffer = src.kost2!!.kost2Art!!.id
-            }
+        if(src.projekt != null){
+            projekt!!.copyFrom(src.projekt!!)
         }
 
         if(src.employee != null){

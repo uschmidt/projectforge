@@ -25,6 +25,7 @@ package org.projectforge.plugins.travel.rest
 
 import org.projectforge.business.fibu.EmployeeDO
 import org.projectforge.business.fibu.EmployeeDao
+import org.projectforge.business.fibu.ProjektDao
 import org.projectforge.business.fibu.kost.Kost2Dao
 import org.projectforge.framework.jcr.AttachmentsService
 import org.projectforge.plugins.travel.CateringDay
@@ -42,7 +43,6 @@ import org.springframework.web.bind.annotation.RestController
 import javax.annotation.PostConstruct
 import javax.servlet.http.HttpServletRequest
 
-// TODO: Add jcr support (see ContractPagesRest/jcr and attachment*)
 /**
  * @author Jan Brümmer (j.bruemmer@micromata.de)
  */
@@ -60,7 +60,7 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
     private lateinit var employeeDao: EmployeeDao
 
     @Autowired
-    private lateinit var kost2Dao: Kost2Dao
+    private lateinit var projektDao: ProjektDao
 
     override fun transformFromDB(obj: TravelCostDO, editMode: Boolean): TravelCost {
         val travelCost = TravelCost()
@@ -86,11 +86,13 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
             travelCostDO.employee = employeeDao.findByName(name[1] + "," + name[0])
         }
 
-        travelCostDO.kost2 = kost2Dao.getKost2(dto.nummernkreis!!, dto.bereich!!, dto.teilbereich!!, dto.endziffer!!)
-
         dto.catering = HashSet()
         dto.catering.addAll(dto.cateringToLoad)
         travelCostDO.cateringValueObject = dto.catering
+
+        if(dto.projekt != null){
+            travelCostDO.projekt = projektDao.getById(dto.projekt!!.id)
+        }
 
         return travelCostDO
     }
@@ -136,7 +138,9 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
         val layout = super.createListLayout()
                 .add(UITable.createUIResultSetTable()
                         .add(UITableColumn("employee.user.displayName", "plugins.travel.entry.user"))
-                        .add(lc, "employee.staffNumber", "beginOfTravel", "endOfTravel", "destination", "kilometers")
+                        .add(lc, "employee.staffNumber")
+                        .add(UITableColumn("projekt.kost", title = "fibu.kost2"))
+                        .add(lc, "projekt.kunde.displayName", "beginOfTravel", "endOfTravel", "destination", "kilometers")
                         .add(UITableColumn("formattedRefundByKilometer",
                                 "TODO"))
                         .add(UITableColumn("formattedRefundByKilometerPassenger",
@@ -156,17 +160,10 @@ class TravelCostPagesRest : AbstractDTOPagesRest<TravelCostDO, TravelCost, Trave
      * LAYOUT Edit page
      */
     override fun createEditLayout(dto: TravelCost, userAccess: UILayout.UserAccess): UILayout {
-        val costNumber = UICustomized("cost.number")
-            costNumber.add("nummernkreis", dto.nummernkreis!!)
-                    .add("bereich", dto.bereich!!)
-                    .add("teilbereich", dto.teilbereich!!)
-                    .add("endziffer", dto.endziffer!!)
-
-        //val location = UIInput("location", lc).enableAutoCompletion(this)
         val layout = super.createEditLayout(dto, userAccess)
                 .add(UISelect.createEmployeeSelect(lc, "employee", false, "plugins.travel.entry.user"))
                 .add(lc, "reasonOfTravel", "destination")
-                .add(costNumber)
+                .add(UISelect.createProjectSelect(lc, "projekt", false))
                 .add(lc, "beginOfTravel", "startLocation", "endOfTravel", "returnLocation")
                 .add(UICustomized("catering.day"))
                 .add(UIFieldset(title = "attachment.list")

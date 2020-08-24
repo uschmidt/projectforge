@@ -29,6 +29,7 @@ import org.hibernate.search.annotations.Field
 import org.hibernate.search.annotations.Indexed
 import org.hibernate.search.annotations.IndexedEmbedded
 import org.projectforge.business.fibu.EmployeeDO
+import org.projectforge.business.fibu.ProjektDO
 import org.projectforge.business.fibu.kost.Kost2DO
 import org.projectforge.common.anots.PropertyInfo
 import org.projectforge.framework.jcr.AttachmentsInfo
@@ -46,7 +47,7 @@ import javax.persistence.*
 @Table(name = "t_plugin_travel",
         uniqueConstraints = [UniqueConstraint(columnNames = ["employee_id"])],
         indexes = [
-            javax.persistence.Index(name = "idx_fk_t_plugin_travel_kost2_id", columnList = "kost2_id"),
+            javax.persistence.Index(name = "idx_fk_t_plugin_travel_projekt_id", columnList = "projekt_id"),
             javax.persistence.Index(name = "idx_fk_t_plugin_travel_employee_id", columnList = "employee_id")
         ])
 open class TravelCostDO: DefaultBaseDO(), AttachmentsInfo {
@@ -75,11 +76,11 @@ open class TravelCostDO: DefaultBaseDO(), AttachmentsInfo {
     @get:Column(name = "destination")
     open var destination: String? = null
 
-    @PropertyInfo(i18nKey = "fibu.kost2")
+    @PropertyInfo(i18nKey = "fibu.projekt")
     @IndexedEmbedded(depth = 1)
     @get:ManyToOne(fetch = FetchType.EAGER, cascade = [CascadeType.MERGE])
-    @get:JoinColumn(name = "kost2_id", nullable = true)
-    open var kost2: Kost2DO? = null
+    @get:JoinColumn(name = "projekt_id", nullable = true)
+    open var projekt: ProjektDO? = null
 
     @PropertyInfo(i18nKey = "plugins.travel.entry.beginOfTravel")
     @get:Column(name = "begin_of_travel")

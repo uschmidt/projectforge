@@ -11,7 +11,7 @@ CREATE TABLE t_plugin_travel (
   start_location                CHARACTER VARYING(30),
   return_location               CHARACTER VARYING(30),
   destination                   CHARACTER VARYING(255),
-  kost2_id                      INTEGER,
+  projekt_id                    INTEGER,
   begin_of_travel               TIMESTAMP,
   end_of_travel                 TIMESTAMP,
   hotel                         BOOLEAN NOT NULL,
@@ -33,8 +33,8 @@ CREATE TABLE t_plugin_travel (
 ALTER TABLE t_plugin_travel
   ADD CONSTRAINT t_plugin_travel_pkey PRIMARY KEY (pk);
 
-CREATE INDEX idx_fk_t_plugin_travel_kost2_id
-  ON t_plugin_travel (kost2_id);
+CREATE INDEX idx_fk_t_plugin_travel_projekt_id
+  ON t_plugin_travel (projekt_id);
 
 CREATE INDEX idx_fk_t_plugin_travel_employee_id
   ON t_plugin_travel (employee_id);
@@ -46,7 +46,7 @@ ALTER TABLE t_plugin_travel
   ADD CONSTRAINT fkklvgq7lo4uhtnew1bttn FOREIGN KEY (employee_id) REFERENCES t_fibu_employee (pk);
 
 ALTER TABLE t_plugin_travel
-  ADD CONSTRAINT fkknf08hlcvgzcgvfupohm FOREIGN KEY (kost2_id) REFERENCES t_fibu_kost2 (pk);
+  ADD CONSTRAINT fkknf08hlcvgzcgvfupohm FOREIGN KEY (projekt_id) REFERENCES t_fibu_projekt (pk);
 
 ALTER TABLE t_plugin_travel
   ADD CONSTRAINT fkt86thxrdu1i5r0f906a8 FOREIGN KEY (tenant_id) REFERENCES t_tenant (pk);
