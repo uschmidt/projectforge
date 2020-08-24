@@ -93,6 +93,11 @@ class Kost2PagesRest : AbstractDTOPagesRest<Kost2DO, Kost2, Kost2Dao>(Kost2Dao::
                         .add(UITableColumn("project.customer.name", title = "fibu.kunde.name"))
                         .add(UITableColumn("project.name", title = "fibu.projekt.name"))
                         .add(lc,  "kostentraegerStatus", "description", "comment"))
+
+        layout.getTableColumnById("kost2Art.fakturiert").set(
+                sortable = false,
+                title = "fibu.fakturiert")
+                .valueIconMap = mapOf(true to UIIconType.CHECKED)
         return LayoutUtils.processListPage(layout, this)
     }
 

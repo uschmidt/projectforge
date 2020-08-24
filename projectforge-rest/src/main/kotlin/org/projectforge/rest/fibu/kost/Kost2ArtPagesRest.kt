@@ -58,6 +58,12 @@ class Kost2ArtPagesRest : AbstractDTOPagesRest<Kost2ArtDO, Kost2Art, Kost2ArtDao
                 .add(UITable.createUIResultSetTable()
                         .add(lc, "id", "name", "fakturiert", "workFraction",
                                 "projektStandard", "description"))
+
+        layout.getTableColumnById("fakturiert").set(
+                sortable = false,
+                title = "fibu.fakturiert")
+                .valueIconMap = mapOf(true to UIIconType.CHECKED)
+
         return LayoutUtils.processListPage(layout, this)
     }
 

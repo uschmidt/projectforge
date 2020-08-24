@@ -98,6 +98,12 @@ class UserPagesRest
                         .add(UITableColumn("groupsAsString", title = "user.assignedGroups"))
                         .add(UITableColumn("rightsAsString", title = "access.rights"))
                         .add(lc, "ldapValues"))
+
+        layout.getTableColumnById("deactivated").set(
+                sortable = false,
+                title = "user.activated")
+                .valueIconMap = mapOf(false to UIIconType.CHECKED)
+
         return LayoutUtils.processListPage(layout, this)
     }
 

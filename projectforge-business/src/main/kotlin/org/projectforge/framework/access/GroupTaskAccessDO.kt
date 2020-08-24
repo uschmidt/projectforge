@@ -69,7 +69,8 @@ open class GroupTaskAccessDO : DefaultBaseDO() {
      * If true then the group rights are also valid for all sub tasks. If false, then each sub task needs its own definition.
      */
     @PropertyInfo(i18nKey = "recursive")
-    @get:Column
+    @Field
+    @get:Column(name = "recursive")
     open var isRecursive = true
 
     @PropertyInfo(i18nKey = "description")

@@ -30,6 +30,7 @@ import org.projectforge.framework.access.GroupTaskAccessDO
 class GroupTaskAccess(
         var group: Group? = Group(),
         var task: Task? = Task(),
+        var isRecursive: Boolean = true,
         var description: String? = null,
         var accessEntries: MutableSet<AccessEntryDO>? = mutableSetOf(),
         var formattedAccessEntries: String? = null
@@ -47,7 +48,7 @@ class GroupTaskAccess(
         }
 
         if(src.accessEntries != null){
-            accessEntries = src.accessEntries
+            accessEntries!!.addAll(src.accessEntries!!)
         }
     }
 

@@ -40,6 +40,8 @@ class GroupAccessPagesRest : AbstractDTOPagesRest<GroupTaskAccessDO, GroupTaskAc
     override fun transformForDB(dto: GroupTaskAccess): GroupTaskAccessDO {
         val groupTaskAccessDO = GroupTaskAccessDO()
         dto.copyTo(groupTaskAccessDO)
+        groupTaskAccessDO.accessEntries = mutableSetOf()
+        groupTaskAccessDO.accessEntries!!.addAll(dto.accessEntries!!)
         return groupTaskAccessDO
     }
 
@@ -71,6 +73,11 @@ class GroupAccessPagesRest : AbstractDTOPagesRest<GroupTaskAccessDO, GroupTaskAc
                         .add(UITableColumn("group.name", title = "group"))
                         .add(UITableColumn("formattedAccessEntries", title = "access.type"))
                         .add(lc, "isRecursive", "description"))
+
+        layout.getTableColumnById("isRecursive").set(
+                sortable = false,
+                title = "recursive")
+                .valueIconMap = mapOf(true to UIIconType.CHECKED)
         return LayoutUtils.processListPage(layout, this)
     }
 
