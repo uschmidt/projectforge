@@ -42,6 +42,11 @@ class HRPlanningPagesRest : AbstractDTOPagesRest<HRPlanningDO, HRPlanning, HRPla
     override fun transformForDB(dto: HRPlanning): HRPlanningDO {
         val hrPlanningDO = HRPlanningDO()
         dto.copyTo(hrPlanningDO)
+        hrPlanningDO.entries = mutableListOf()
+        hrPlanningDO.entries!!.addAll(dto.entries!!)
+        hrPlanningDO.entries!!.forEach {
+            it.planning = hrPlanningDO
+        }
         return hrPlanningDO
     }
 
@@ -67,6 +72,17 @@ class HRPlanningPagesRest : AbstractDTOPagesRest<HRPlanningDO, HRPlanning, HRPla
      * LAYOUT Edit page
      */
     override fun createEditLayout(dto: HRPlanning, userAccess: UILayout.UserAccess): UILayout {
+        val select: UISelect<Int> = UISelect("entry.probability",
+                label = "hr.planning.probability.short")
+
+        val selectValues = mutableSetOf<UISelectValue<Int>>()
+        selectValues.add(UISelectValue(25, "25%"))
+        selectValues.add(UISelectValue(50, "50%"))
+        selectValues.add(UISelectValue(75, "75%"))
+        selectValues.add(UISelectValue(95, "95%"))
+        selectValues.add(UISelectValue(100, "100%"))
+
+
         val layout = super.createEditLayout(dto, userAccess)
                 .add(UISelect.createUserSelect(lc, "user", false))
                 .add(lc, "week")
@@ -79,10 +95,10 @@ class HRPlanningPagesRest : AbstractDTOPagesRest<HRPlanningDO, HRPlanning, HRPla
                                 .add(UICol()
                                         .add(lc, "entry.priority"))
                                 .add(UICol()
-                                        .add(lc, "entry.probability")))
+                                        .add(select.buildFromList(selectValues))))
                         .add(UIRow()
                                 .add(UICol()
-                                        .add(lc, "entry.unassignedHours", "entry.mondayHours", "entry.tuesdayHours", "entry.wednesdayHours", "entry.thursdayHours", "entry.fridayHours", "weekendHours"))
+                                        .add(lc, "entry.unassignedHours", "entry.mondayHours", "entry.tuesdayHours", "entry.wednesdayHours", "entry.thursdayHours", "entry.fridayHours", "entry.weekendHours"))
                                 .add(UICol()
                                         .add(lc, "entry.description"))))
         return LayoutUtils.processEditPage(layout, dto, this)

@@ -84,18 +84,17 @@ class UISelect<T>(val id: String,
         return this
     }
 
-    fun buildFromList(list: Collection<String>): UISelect<T> {
+    // fun getEnumValues(enumClass: KClass<out Enum<*>>): Array<out Enum<*>> = enumClass.java.enumConstants
+    private fun getEnumValues(enumClass: Class<out Enum<*>>): Array<out Enum<*>> = enumClass.enumConstants
+
+    fun buildFromList(list: MutableCollection<UISelectValue<T>>): UISelect<T> {
         val newvalues = mutableListOf<UISelectValue<T>>()
         list.forEach { value ->
-            @Suppress("UNCHECKED_CAST")
-            newvalues.add(UISelectValue(value as T, value))
+            newvalues.add(value)
         }
         values = newvalues
         return this
     }
-
-    // fun getEnumValues(enumClass: KClass<out Enum<*>>): Array<out Enum<*>> = enumClass.java.enumConstants
-    private fun getEnumValues(enumClass: Class<out Enum<*>>): Array<out Enum<*>> = enumClass.enumConstants
 
     companion object {
         fun createUserSelect(lc: LayoutContext, id:String, multi: Boolean, label: String? = null, additionalLabel: String? = null, tooltip: String? = null,

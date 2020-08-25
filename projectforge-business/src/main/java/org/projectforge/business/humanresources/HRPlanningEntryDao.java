@@ -214,6 +214,9 @@ public class HRPlanningEntryDao extends BaseDao<HRPlanningEntryDO> {
   @Override
   public boolean hasAccess(final PFUserDO user, final HRPlanningEntryDO obj, final HRPlanningEntryDO oldObj,
                            final OperationType operationType, final boolean throwException) {
+    if(operationType == OperationType.INSERT){
+      return false;
+    }
     final HRPlanningDO old = oldObj != null ? oldObj.getPlanning() : null;
     return hrPlanningDao.hasAccess(user, obj.getPlanning(), old, operationType, throwException);
   }

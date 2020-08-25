@@ -53,5 +53,12 @@ class HRPlanning(
         this.user = src.user?.let {
             User(it)
         }
+
+        if(src.entries == null || src.entries!!.isEmpty()){
+            val entry = HRPlanningEntryDO()
+            entries!!.add(entry)
+        } else {
+            entries!!.addAll(src.entries!!)
+        }
     }
 }
