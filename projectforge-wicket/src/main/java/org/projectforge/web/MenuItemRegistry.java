@@ -104,7 +104,6 @@ public class MenuItemRegistry implements Serializable {
     register(MenuItemDefId.ACCOUNTING_RECORD_LIST, AccountingRecordListPage.class);
     register(MenuItemDefId.DATEV_IMPORT, DatevImportPage.class);
     register(MenuItemDefId.VISITORBOOK, VisitorbookListPage.class);
-    register(MenuItemDefId.MY_PREFERENCES, UserPrefListPage.class);
     register(MenuItemDefId.USER_LIST, UserListPage.class);
     register(MenuItemDefId.SQL_CONSOLE, SqlConsolePage.class);
     register(MenuItemDefId.GROOVY_CONSOLE, GroovyConsolePage.class);

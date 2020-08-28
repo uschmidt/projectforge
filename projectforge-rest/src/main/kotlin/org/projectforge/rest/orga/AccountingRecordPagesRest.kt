@@ -41,6 +41,8 @@ class AccountingRecordPagesRest: AbstractDTOPagesRest<BuchungssatzDO, Buchungssa
     override fun transformForDB(dto: Buchungssatz): BuchungssatzDO {
         val buchungssatzDO = BuchungssatzDO()
         dto.copyTo(buchungssatzDO)
+        buchungssatzDO.year = dto.datum?.year
+        buchungssatzDO.month = dto.datum?.monthValue
         return buchungssatzDO
     }
 
@@ -56,7 +58,7 @@ class AccountingRecordPagesRest: AbstractDTOPagesRest<BuchungssatzDO, Buchungssa
     override fun createListLayout(): UILayout {
         val layout = super.createListLayout()
                 .add(UITable.createUIResultSetTable()
-                        .add(UITableColumn("satzNr", title = "fibu.buchungssatz.satznr"))
+                        .add(UITableColumn("formattedSatzNummer", title = "fibu.buchungssatz.satznr"))
                         .add(lc, "betrag", "beleg", "kost1", "kost2", "konto", "gegenKonto",
                                 "sh", "text", "comment"))
         layout.getTableColumnById("kost1").formatter = Formatter.COST1
@@ -73,9 +75,12 @@ class AccountingRecordPagesRest: AbstractDTOPagesRest<BuchungssatzDO, Buchungssa
         val layout = super.createEditLayout(dto, userAccess)
                 .add(UIRow()
                         .add(UICol()
-                                .add(lc, "datum", "year", "month", "satznr", "betrag", "sh", "beleg"))
+                                .add(lc, "datum", "satznr", "betrag", "sh", "beleg"))
                         .add(UICol()
-                                .add(lc, "kost1", "kost2", "konto", "gegenKonto", "text", "menge")))
+                                .add(lc, "kost1", "kost2")
+                                .add(UISelect.createAccountSelect(lc, "konto", false))
+                                .add(UISelect.createAccountSelect(lc, "gegenKonto", false))
+                                .add(lc, "text", "menge")))
                 .add(UIRow()
                         .add(UICol()
                                 .add(lc, "comment")))

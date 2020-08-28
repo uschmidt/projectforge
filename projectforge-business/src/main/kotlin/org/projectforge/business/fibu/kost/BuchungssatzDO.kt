@@ -54,6 +54,7 @@ open class BuchungssatzDO : DefaultBaseDO(), Comparable<BuchungssatzDO> {
      *
      * @return
      */
+    @PropertyInfo(i18nKey = "calendar.year")
     @Field(analyze = Analyze.NO)
     @get:Column(nullable = false)
     open var year: Int? = null
@@ -64,6 +65,7 @@ open class BuchungssatzDO : DefaultBaseDO(), Comparable<BuchungssatzDO> {
      *
      * @return
      */
+    @PropertyInfo(i18nKey = "calendar.month")
     @Field(analyze = Analyze.NO)
     @get:Column(nullable = false)
     open var month: Int? = null
@@ -104,6 +106,7 @@ open class BuchungssatzDO : DefaultBaseDO(), Comparable<BuchungssatzDO> {
     @get:JoinColumn(name = "gegenkonto_id", nullable = false)
     open var gegenKonto: KontoDO? = null
 
+    @PropertyInfo(i18nKey = "date")
     @Field(analyze = Analyze.NO)
     @get:Column(nullable = false)
     open var datum: LocalDate? = null

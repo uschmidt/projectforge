@@ -25,11 +25,17 @@ package org.projectforge.rest.dto
 
 import org.projectforge.business.fibu.kost.BuchungssatzDO
 import org.projectforge.business.fibu.kost.SHType
+import java.math.BigDecimal
+import java.time.LocalDate
 
 class Buchungssatz(
-        var satznr: String? = null,
+        var satznr: Int? = null,
         var menge: String? = null,
         var beleg: String? = null,
+        var datum: LocalDate? = null,
+        var betrag: BigDecimal? = null,
+        var year: Int? = null,
+        var month: Int? = null,
         var sh: SHType? = null,
         var text: String? = null,
         var comment: String? = null,
@@ -39,10 +45,12 @@ class Buchungssatz(
         var gegenKonto: Konto? = null
 ) : BaseDTO<BuchungssatzDO>() {
 
+    private var formattedSatzNummer: String = ""
+
     override fun copyFrom(src: BuchungssatzDO) {
         super.copyFrom(src)
         if (src.year != null && src.month != null) {
-            this.satznr = src.formattedSatzNummer
+            this.formattedSatzNummer = src.formattedSatzNummer
         }
         this.kost1 = src.kost1?.let {
             Kost1(it)

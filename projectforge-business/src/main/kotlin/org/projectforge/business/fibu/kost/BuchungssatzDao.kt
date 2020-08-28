@@ -99,7 +99,7 @@ open class BuchungssatzDao : BaseDao<BuchungssatzDO>(BuchungssatzDO::class.java)
         // No year or one year is given.
     }
 
-    open override fun getList(filter: BaseSearchFilter): List<BuchungssatzDO> {
+    override fun getList(filter: BaseSearchFilter): List<BuchungssatzDO> {
         accessChecker.checkIsLoggedInUserMemberOfGroup(ProjectForgeGroup.FINANCE_GROUP,
                 ProjectForgeGroup.CONTROLLING_GROUP)
         val myFilter: BuchungssatzFilter
@@ -121,7 +121,7 @@ open class BuchungssatzDao : BaseDao<BuchungssatzDO>(BuchungssatzDO::class.java)
         if (fromYear != null && toYear != null) {
             // Both years are given
             if (fromMonth != null || toMonth != null) {
-                val or = DBPredicate.Or();
+                val or = DBPredicate.Or()
                 queryFilter.add(or)
                 // At least one month is given, check same year:
                 if (fromMonth != null) {
@@ -160,7 +160,7 @@ open class BuchungssatzDao : BaseDao<BuchungssatzDO>(BuchungssatzDO::class.java)
                 // No month given:
                 queryFilter.add(and(
                         ge("year", fromYear),
-                        le("year", toYear)));
+                        le("year", toYear)))
 
             }
         } else if (fromYear != null) {
@@ -191,7 +191,7 @@ open class BuchungssatzDao : BaseDao<BuchungssatzDO>(BuchungssatzDO::class.java)
     /**
      * User must member of group finance or controlling.
      */
-    open override fun hasUserSelectAccess(user: PFUserDO, throwException: Boolean): Boolean {
+    override fun hasUserSelectAccess(user: PFUserDO, throwException: Boolean): Boolean {
         return accessChecker.isUserMemberOfGroup(user, throwException, ProjectForgeGroup.FINANCE_GROUP,
                 ProjectForgeGroup.CONTROLLING_GROUP)
     }
@@ -199,19 +199,22 @@ open class BuchungssatzDao : BaseDao<BuchungssatzDO>(BuchungssatzDO::class.java)
     /**
      * @see .hasUserSelectAccess
      */
-    open override fun hasUserSelectAccess(user: PFUserDO, obj: BuchungssatzDO, throwException: Boolean): Boolean {
+    override fun hasUserSelectAccess(user: PFUserDO, obj: BuchungssatzDO, throwException: Boolean): Boolean {
         return hasUserSelectAccess(user, throwException)
     }
 
     /**
      * User must member of group finance.
      */
-    open override fun hasAccess(user: PFUserDO, obj: BuchungssatzDO, oldObj: BuchungssatzDO,
+    override fun hasAccess(user: PFUserDO, obj: BuchungssatzDO?, oldObj: BuchungssatzDO?,
                                 operationType: OperationType, throwException: Boolean): Boolean {
+        if(operationType == OperationType.INSERT){
+            return true
+        }
         return accessChecker.isUserMemberOfGroup(user, throwException, ProjectForgeGroup.FINANCE_GROUP)
     }
 
-    open override fun newInstance(): BuchungssatzDO {
+    override fun newInstance(): BuchungssatzDO {
         return BuchungssatzDO()
     }
 
