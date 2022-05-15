@@ -47,9 +47,10 @@ import org.projectforge.menu.builder.MenuCreator;
 import org.projectforge.menu.builder.MenuItemDef;
 import org.projectforge.menu.builder.MenuItemDefId;
 import org.projectforge.rest.ChangePasswordPageRest;
-import org.projectforge.rest.my2fa.My2FASetupPageRest;
 import org.projectforge.rest.MyAccountPageRest;
+import org.projectforge.rest.MyMenuPageRest;
 import org.projectforge.rest.core.PagesResolver;
+import org.projectforge.rest.my2fa.My2FASetupPageRest;
 import org.projectforge.web.WicketLoginService;
 import org.projectforge.web.WicketMenuBuilder;
 import org.projectforge.web.WicketMenuEntry;
@@ -137,6 +138,8 @@ public class NavTopPanel extends NavAbstractPanel {
       } else {
         final ExternalLink myAccountLink = new ExternalLink("myAccountLink", PagesResolver.getDynamicPageUrl(MyAccountPageRest.class, null, null, true));
         add(myAccountLink);
+        final ExternalLink myMenuLink = new ExternalLink("myMenuLink", PagesResolver.getDynamicPageUrl(MyMenuPageRest.class, null, null, true));
+        add(myMenuLink);
         final ExternalLink my2FactorAuthentificationLink = new ExternalLink("my2FactorAuthentificationLink", PagesResolver.getDynamicPageUrl(My2FASetupPageRest.class, null, null, true));
         add(my2FactorAuthentificationLink);
         addVacationViewLink();

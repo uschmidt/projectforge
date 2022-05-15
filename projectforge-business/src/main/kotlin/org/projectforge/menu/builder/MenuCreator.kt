@@ -448,6 +448,7 @@ open class MenuCreator {
     val adminMenu = menuItemDefHolder.add(MenuItemDef(MenuItemDefId.ADMINISTRATION, visibleForRestrictedUsers = true))
     adminMenu
       .add(MenuItemDef(MenuItemDefId.MY_ACCOUNT))
+      .add(MenuItemDef(MenuItemDefId.MY_MENU))
       .add(MenuItemDef(MenuItemDefId.MY_2FA_SETUP))
       .add(MenuItemDef(MenuItemDefId.MY_PREFERENCES))
       .add(

@@ -26,6 +26,7 @@ import VacationTable from './components/vacation/VacationTable';
 import WebAuthnAuthenticate from './components/WebAuthnAuthenticate';
 import WebAuthnRegister from './components/WebAuthnRegister';
 import CostNumber24Component from './components/CostNumber24Component';
+import MenuCustomizationComponent from './components/menuCustomization/MenuCustomizationComponent';
 
 function DynamicCustomized({ id, ...props }) {
     let Tag;
@@ -108,6 +109,9 @@ function DynamicCustomized({ id, ...props }) {
             break;
         case 'webauthn.register':
             Tag = WebAuthnRegister;
+            break;
+        case 'menu.customization':
+            Tag = MenuCustomizationComponent;
             break;
         default:
             return <span>{`Customized field '${id}' not found!`}</span>;
