@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
-import { Card, CardBody, CardHeader, CardText, CardTitle, Col, Container, Row } from 'reactstrap';
 import { loadUserStatus } from '../../actions';
 import { getServiceURL } from '../../utilities/rest';
+import DynamicAlert from '../../components/base/dynamicLayout/components/DynamicAlert';
 
 class IndexPage extends React.Component {
     constructor(props) {
@@ -65,63 +65,11 @@ class IndexPage extends React.Component {
             return (<div>{' '}</div>);
         }
         return (
-            <Container>
-                <Row>
-                    <Col>
-                        <a href="/wa/">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>
-                                        {translations['goreact.index.classics.header']}
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardBody>
-                                    <CardText>
-                                        {translations['goreact.index.classics.body1']}
-                                    </CardText>
-                                    <CardText>
-                                        {translations['goreact.index.classics.body2']}
-                                    </CardText>
-                                </CardBody>
-                            </Card>
-                        </a>
-                    </Col>
-                    <Col>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>
-                                    {translations['goreact.index.react.header']}
-                                </CardTitle>
-                            </CardHeader>
-                            <CardBody>
-                                <CardText>
-                                    {translations['goreact.index.react.body1']}
-                                </CardText>
-                                <CardText>
-                                    {translations['goreact.index.react.body2']}
-                                </CardText>
-                            </CardBody>
-                        </Card>
-                    </Col>
-                    <Col>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>
-                                    {translations['goreact.index.both.header']}
-                                </CardTitle>
-                            </CardHeader>
-                            <CardBody>
-                                <CardText>
-                                    {translations['goreact.index.both.body1']}
-                                </CardText>
-                                <CardText>
-                                    {translations['goreact.index.both.body2']}
-                                </CardText>
-                            </CardBody>
-                        </Card>
-                    </Col>
-                </Row>
-            </Container>
+            <DynamicAlert
+                title={translations['indexPage.title']}
+                message={translations.motd}
+                color="success"
+            />
         );
     }
 }
