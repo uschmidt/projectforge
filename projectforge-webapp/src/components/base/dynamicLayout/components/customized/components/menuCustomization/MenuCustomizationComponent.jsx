@@ -1,27 +1,46 @@
-import React from 'react';
-import { DndContext } from '@dnd-kit/core';
-import MenuDraggable from './MenuDraggable';
-import MenuDroppable from './MenuDroppable';
+import React, { useState } from 'react';
+import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { MenuSortable } from './MenuSortable';
+// import { DynamicLayoutContext } from '../../../../context';
 
 function MenuCustomizationComponent() {
-    const [isDropped, setIsDropped] = React.useState(false);
-    const draggableMarkup = (
-        <MenuDraggable>Drag me</MenuDraggable>
+    // const { data, setData } = React.useContext(DynamicLayoutContext);
+    const [items, setItems] = useState(['1', '2', '3']);
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        }),
     );
 
     function handleDragEnd(event) {
-        if (event.over && event.over.id === 'droppable') {
-            setIsDropped(true);
+        const { active, over } = event;
+
+        if (active.id !== over.id) {
+            setItems((newItems) => {
+                const oldIndex = newItems.indexOf(active.id);
+                const newIndex = newItems.indexOf(over.id);
+
+                return arrayMove(newItems, oldIndex, newIndex);
+            });
         }
     }
 
     return (
         // eslint-disable-next-line react/jsx-no-bind
-        <DndContext onDragEnd={handleDragEnd}>
-            {!isDropped ? draggableMarkup : null}
-            <MenuDroppable>
-                {isDropped ? draggableMarkup : 'Drop here'}
-            </MenuDroppable>
+        <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            /* eslint-disable-next-line react/jsx-no-bind */
+            onDragEnd={handleDragEnd}
+        >
+            <SortableContext
+                items={items}
+                strategy={verticalListSortingStrategy}
+            >
+                {items.map((id) => <MenuSortable key={id} id={id} />)}
+            </SortableContext>
         </DndContext>
     );
 }
