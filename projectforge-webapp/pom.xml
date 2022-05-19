@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.projectforge</groupId>
         <artifactId>projectforge-parent</artifactId>
-        <version>7.3.1-SNAPSHOT</version><!-- projectforge.version -->
+        <version>7.4.1-SNAPSHOT</version><!-- projectforge.version -->
     </parent>
 
     <licenses>
@@ -48,18 +48,12 @@
                         <goals>
                             <goal>npm</goal>
                         </goals>
-                        <configuration>
-                            <arguments>install</arguments>
-                        </configuration>
                     </execution>
                     <execution>
                         <id>npm run build</id>
                         <goals>
                             <goal>npm</goal>
                         </goals>
-                        <configuration>
-                            <arguments>run build</arguments>
-                        </configuration>
                     </execution>
                 </executions>
                 <!-- YARN: -->
